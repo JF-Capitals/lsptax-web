@@ -54,9 +54,9 @@ const Testimonials = () => {
   const [activeIndex, setActiveIndex] = useState(1); // Default to the first testimonial
 
   return (
-    <div className="bg-[#F7FAFF] flex flex-col justify-center items-center p-4 m-4">
+    <div className="bg-[#F7FAFF] flex flex-col justify-center items-center p-8 m-4">
       {/* Render the active testimonial */}
-      <div>
+      <div className="w-full max-w-lg">
         <TestimonialItem
           avatar={testimonials[activeIndex].avatar}
           starRating={testimonials[activeIndex].starRating}
@@ -65,7 +65,7 @@ const Testimonials = () => {
       </div>
 
       {/* Render the buttons */}
-      <div className="flex m-8 gap-4">
+      <div className="flex flex-wrap justify-center gap-4 m-8">
         {testimonialButtons.map((item, index) => (
           <TestimonialButton
             key={index}
@@ -86,11 +86,15 @@ const TestimonialItem: React.FC<TestimonialItemProps> = ({
   comment,
 }) => {
   return (
-    <div className="flex flex-col justify-center items-center m-8">
-      <img src={avatar} alt="avatar" className="m-8" />
-      <div className="bg-white w-1/2 p-8">
+    <div className="flex flex-col justify-center items-center m-8 p-4">
+      <img
+        src={avatar}
+        alt="avatar"
+        className="w-24 h-24 rounded-full border-2 border-blue-500 mb-4"
+      />
+      <div className="bg-white w-full p-8 shadow-lg rounded-lg">
         <StarRating rating={starRating} />
-        <p className="text-4xl text-center">{comment}</p>
+        <p className="text-2xl text-center italic">{comment}</p>
       </div>
     </div>
   );
@@ -105,13 +109,13 @@ const TestimonialButton: React.FC<TestimonialButtonProps> = ({
   return (
     <div
       onClick={onClick} // Trigger the click handler
-      className={`p-4 rounded w-96 text-center cursor-pointer transition-all duration-300 ${
+      className={`p-4 w-64 text-center cursor-pointer transition-all duration-300 rounded-xl ${
         isActive
           ? "bg-blue-500 text-white"
           : "bg-[#0093FF1A] hover:bg-blue-500 hover:text-white"
       }`}
     >
-      <h2 className="text-lg">{name}</h2>
+      <h2 className="text-lg font-semibold">{name}</h2>
       <h3 className="text-sm">{position}</h3>
     </div>
   );
@@ -125,7 +129,7 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
       {[...Array(maxStars)].map((_, index) => (
         <span
           key={index}
-          className={`text-xl ${
+          className={`text-2xl ${
             index < rating ? "text-blue-500" : "text-gray-300"
           }`}
         >

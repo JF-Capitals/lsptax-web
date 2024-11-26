@@ -1,5 +1,5 @@
 import React from "react";
-import s1 from "@/assets/services/s1.svg"
+import s1 from "@/assets/services/s1.svg";
 
 interface ServiceBoxProps {
   logo: string;
@@ -18,13 +18,13 @@ const services = [
   {
     logo: s1,
     label: "Client-Focused Service",
-    desc: "We bring our members high quality commercial investment opportunities that are normally hidden away in country clubs or investment firms.",
+    desc: "We bring our members high-quality commercial investment opportunities that are normally hidden away in country clubs or investment firms.",
     ctaLink: "",
   },
   {
     logo: s1,
-    label: "Risk-Free Savings ",
-    desc: "Our “No Savings, No Fee” policy means you only pay if we reduce your taxes. If we can’t lower your property tax bill, there’s no cost to you. ",
+    label: "Risk-Free Savings",
+    desc: "Our “No Savings, No Fee” policy means you only pay if we reduce your taxes. If we can’t lower your property tax bill, there’s no cost to you.",
     ctaLink: "",
   },
   {
@@ -36,13 +36,13 @@ const services = [
   {
     logo: s1,
     label: "Client-Focused Service",
-    desc: "We bring our members high quality commercial investment opportunities that are normally hidden away in country clubs or investment firms.",
+    desc: "We bring our members high-quality commercial investment opportunities that are normally hidden away in country clubs or investment firms.",
     ctaLink: "",
   },
   {
     logo: s1,
-    label: "Risk-Free Savings ",
-    desc: "Our “No Savings, No Fee” policy means you only pay if we reduce your taxes. If we can’t lower your property tax bill, there’s no cost to you. ",
+    label: "Risk-Free Savings",
+    desc: "Our “No Savings, No Fee” policy means you only pay if we reduce your taxes. If we can’t lower your property tax bill, there’s no cost to you.",
     ctaLink: "",
   },
 ];
@@ -50,7 +50,7 @@ const services = [
 const Services = () => {
   return (
     <div className="flex flex-col items-center">
-      <h2 className="font-bold text-2xl p-8">Our Core Services</h2>
+      <h2 className="font-bold text-2xl p-8 text-center">Our Core Services</h2>
       {/* Add a grid layout to control the number of items in a row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 m-8 mb-16">
         {services.map((item, index) => (
@@ -67,7 +67,6 @@ const Services = () => {
   );
 };
 
-
 const ServiceBox: React.FC<ServiceBoxProps> = ({
   logo,
   label,
@@ -75,12 +74,18 @@ const ServiceBox: React.FC<ServiceBoxProps> = ({
   ctaLink,
 }) => {
   return (
-    <div className="flex flex-col border w-64 h-96  items-center  p-4 rounded-xl shadow">
-      <img src={logo} alt="" />
-      <h2 className="font-semibold text-lg">{label}</h2>
-      <p className="text-center">{desc}</p>
-      <a href={ctaLink} className="bg-red-400 text-white text-xs rounded-3xl p-2 px-4 my-4">Get Started Now -</a>
+    <div className="flex flex-col border w-full sm:w-64 h-auto items-center p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <img src={logo} alt={label} className="w-16 h-16 mb-4" />
+      <h2 className="font-semibold text-lg mb-4">{label}</h2>
+      <p className="text-center mb-4">{desc}</p>
+      <a
+        href={ctaLink}
+        className="bg-red-400 text-white text-xs rounded-3xl p-2 px-4 my-4 hover:bg-red-500 transition-colors duration-300"
+      >
+        Get Started Now
+      </a>
     </div>
   );
 };
+
 export default Services;

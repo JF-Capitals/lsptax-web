@@ -4,73 +4,34 @@ const footerListItems = [
   {
     title: "Company Registration",
     items: [
-      {
-        label: "Private Limited",
-        link: "",
-      },
-      {
-        label: "Public Limited",
-        link: "",
-      },
-      {
-        label: "Private Limited",
-        link: "",
-      },
-      {
-        label: "Private Limited",
-        link: "",
-      },
+      { label: "Private Limited", link: "#" },
+      { label: "Public Limited", link: "#" },
+      { label: "Private Limited", link: "#" },
+      { label: "Private Limited", link: "#" },
     ],
   },
   {
     title: "Licences & Registrations",
     items: [
-      {
-        label: "GST Registration",
-        link: "",
-      },
-      {
-        label: "MSME Registration",
-        link: "",
-      },
-      {
-        label: "FSSAI Registration",
-        link: "",
-      },
-      {
-        label: "ISO Registration",
-        link: "",
-      },
+      { label: "GST Registration", link: "#" },
+      { label: "MSME Registration", link: "#" },
+      { label: "FSSAI Registration", link: "#" },
+      { label: "ISO Registration", link: "#" },
     ],
   },
   {
-    title: "Intellectual Propert Rights",
+    title: "Intellectual Property Rights",
     items: [
-      {
-        label: "Trademark Registration",
-        link: "",
-      },
-      {
-        label: "Copyright Registration",
-        link: "",
-      },
-      {
-        label: "Patent Registration",
-        link: "",
-      },
-      {
-        label: "Design Registration",
-        link: "",
-      },
+      { label: "Trademark Registration", link: "#" },
+      { label: "Copyright Registration", link: "#" },
+      { label: "Patent Registration", link: "#" },
+      { label: "Design Registration", link: "#" },
     ],
   },
   {
-    title: "Company Registration",
+    title: "Company Address",
     items: [
-      {
-        label: "16107 Kensington Dr. #194, Sugar Land, TX 77479",
-        link: "",
-      },
+      { label: "16107 Kensington Dr. #194, Sugar Land, TX 77479", link: "#" },
     ],
   },
 ];
@@ -84,26 +45,30 @@ interface FooterListProps {
   title: string;
   items: FooterListItemsProps[];
 }
+
 const Footer = () => {
   return (
     <div className="flex flex-col justify-center items-center">
-      <div className="flex w-full justify-around gap-4 p-16 bg-[#14212A]">
-        {footerListItems.map((item) => (
-          <FooterList title={item.title} items={item.items} />
+      {/* Footer Main Section */}
+      <div className="flex flex-col md:flex-wrap md:flex-row p-4 w-full justify-around md:gap-8 md:p-16 bg-[#14212A]">
+        {footerListItems.map((item, index) => (
+          <FooterList key={index} title={item.title} items={item.items} />
         ))}
       </div>
-      <div className="bg-blue-500 text-black flex w-full justify-between p-8">
-        <div className="flex w-full justify-around">
-          <h2>Terms & Conditions </h2>
-          <h2>Refund Policy</h2>
-          <h2>Privacy Policy</h2>
-          <h2>Sitemap</h2>
+
+      {/* Footer Bottom Section */}
+      <div className="bg-blue-500 text-black flex flex-col md:flex-row w-full justify-between p-8">
+        <div className="flex flex-col md:flex-row w-full justify-around gap-2 md:gap-8">
+          <h2 className="hover:underline cursor-pointer">Terms & Conditions</h2>
+          <h2 className="hover:underline cursor-pointer">Refund Policy</h2>
+          <h2 className="hover:underline cursor-pointer">Privacy Policy</h2>
+          <h2 className="hover:underline cursor-pointer">Sitemap</h2>
         </div>
-        <div className="flex w-1/2 gap-8">
+        <div className="flex w-full md:w-1/2 justify-between md:gap-8 md:mt-4 md:mt-0 mt-2">
           <h2>Contact:</h2>
-          <h2>info@lsptax.com </h2>
+          <h2 className="font-bold">info@lsptax.com</h2>
           <h2>|</h2>
-          <h2>+1-833-577-8291</h2>
+          <h2 className="font-bold">+1-833-577-8291</h2>
         </div>
       </div>
     </div>
@@ -114,9 +79,15 @@ const FooterList: React.FC<FooterListProps> = ({ title, items }) => {
   return (
     <div className="flex flex-col text-white">
       <h1 className="font-bold py-4 text-[#E84F5A]">{title}</h1>
-      <div className="flex flex-col py-2">
-        {items.map((list) => (
-          <a href={list.link}>{list.label}</a>
+      <div className="flex flex-col gap-2 py-2">
+        {items.map((list, index) => (
+          <a
+            key={index}
+            href={list.link}
+            className="hover:text-[#E84F5A] transition-colors"
+          >
+            {list.label}
+          </a>
         ))}
       </div>
     </div>
@@ -124,5 +95,3 @@ const FooterList: React.FC<FooterListProps> = ({ title, items }) => {
 };
 
 export default Footer;
-
-

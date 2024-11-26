@@ -1,4 +1,4 @@
-import keyDateLogo from "@/assets/keyDates.png"
+import keyDateLogo from "@/assets/keyDates.png";
 
 const keyDateData = [
   {
@@ -30,12 +30,17 @@ interface KeyDateData {
 
 const KeyDates = () => {
   return (
-      <div id="keydates" className="flex justify-center items-center align-center p-8 my-8 ">
-      <div className="text-4xl"><img src={keyDateLogo} alt="" /></div>
-      <div className="w-2/3">
-        {keyDateData.map((item) => {
-          return <KeyDateItem date={item.date} desc={item.desc} />;
-        })}
+    <div
+      id="keydates"
+      className="flex flex-col md:flex-row justify-center items-center align-center p-8 gap-16 my-8"
+    >
+      <div className="">
+        <img src={keyDateLogo} alt="Key Dates" />
+      </div>
+      <div className="w-full md:w-2/3">
+        {keyDateData.map((item, index) => (
+          <KeyDateItem key={index} date={item.date} desc={item.desc} />
+        ))}
       </div>
     </div>
   );
@@ -43,11 +48,11 @@ const KeyDates = () => {
 
 const KeyDateItem: React.FC<KeyDateData> = ({ date, desc }) => {
   return (
-    <div className="flex justify-center items-center w-full border-b-2 p-8 hover:bg-[#F7FAFF] h-32">
-      <div className="text-center w-1/3 text-xl text-blue-400 font-bold">
-        {date}{" "}
+    <div className="flex flex-col md:flex-row justify-center items-center w-full border-b-2 p-8 hover:bg-[#F7FAFF] h-auto">
+      <div className="text-center w-full md:w-1/3 text-xl text-blue-400 font-bold mb-4 md:mb-0">
+        {date}
       </div>
-      <div className="w-2/3 text-left leading-loose">{desc}</div>
+      <div className="w-full md:w-2/3 text-left leading-loose">{desc}</div>
     </div>
   );
 };
