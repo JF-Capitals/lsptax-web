@@ -1,59 +1,70 @@
 import circleImage from "@/assets/work/circle.svg";
 import mainWorkImage from "@/assets/work/main.svg";
+import w1 from "@/assets/work/w1.svg";
+import w2 from "@/assets/work/w2.svg";
+import w3 from "@/assets/work/w3.svg";
+import { ArrowDown } from "lucide-react";
+
+const workProcessCopy = [
+  {
+    image: w1,
+    title: "We submit your protest",
+    desc: "We handle your property tax protest from start to finish, ensuring all paperwork is filed accurately and on time for a better chance at reduction.",
+  },
+  {
+    image: w2,
+    title: "We gather the evidence",
+    desc: "We collect key evidence like market trends and property data to build a strong case for lowering your taxes.",
+  },
+  {
+    image: w3,
+    title: "We fight your case",
+    desc: "We negotiate with tax authorities on your behalf to secure a fair property tax reduction.",
+  },
+];
 
 const WorkProcess = () => {
   return (
     <div
       id="how"
-      className="bg-[#14212A] h-screen flex items-center flex-col text-white relative"
+      className="bg-[#14212A] md:h-screen w-full flex items-center flex-col text-white relative px-8"
     >
-      <h2 className="text-blue-600 my-4 relative z-10">Work Process</h2>
+      <h2 className="text-blue-600 md:my-4 relative z-10 underline decoration-white">
+        Work Process
+      </h2>
       <h1 className="text-4xl text-white my-4 relative z-10">How it Works</h1>
-      <div className="p-8 mt-8 flex flex-col items-center relative z-10">
-        <div className="flex justify-center mb-8">
+      <div className="md:p-8 md:mt-8 flex flex-col items-center relative z-10">
+        <div className="flex justify-center mb-8 md:block hidden">
           <img
             src={mainWorkImage}
             alt="Main Work Process"
             className="max-w-full h-auto"
           />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full relative z-10">
-          <div className="w-full max-w-xs">
-            <h2 className="text-lg font-semibold">We submit your protest</h2>
-            <p className="text-xs">
-              We take the hassle out of the property tax protest process by
-              managing everything from start to finish. Our team carefully
-              reviews your assessment, identifies potential inaccuracies, and
-              files a formal protest on your behalf. By handling all paperwork
-              and deadlines, we ensure your protest is submitted correctly and
-              on time, maximizing your chance for a successful tax reduction.
-            </p>
-          </div>
-          <div className="w-full max-w-xs">
-            <h2 className="text-lg font-semibold">We gather the evidence</h2>
-            <p className="text-xs">
-              Our team collects all necessary evidence to support your tax
-              protest, including comparable property data, market trends, and
-              valuation discrepancies. This thorough approach strengthens your
-              case, providing compelling proof to challenge over-assessments and
-              achieve the best possible reduction.
-            </p>
-          </div>
-          <div className="w-full max-w-xs">
-            <h2 className="text-lg font-semibold">We fight your case</h2>
-            <p className="text-xs">
-              We advocate vigorously on your behalf, presenting evidence and
-              negotiating directly with tax authorities to ensure a fair
-              reduction. Our expertise and dedication drive us to secure the
-              best possible outcome, so you pay only what’s fair on your
-              property taxes.
-            </p>
-          </div>
+        <div className=" md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full relative z-10 hidden">
+          {workProcessCopy.map((item) => (
+            <div className="w-full max-w-xs border border-slate-500 rounded-full p-16 bg-[#203442]">
+              <h2 className="text-2xl font-semibold py-4">{item.title}</h2>
+              <p className="text-lg leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+        <div className="md:hidden">
+          {workProcessCopy.map((item, index) => (
+            <div key={index} className="flex flex-col items-center">
+              <div className="border border-slate-500 rounded-full p-16 m-8 flex flex-col items-center bg-[#203442]">
+                <img src={item.image} alt="" className="w-32" />
+                <h2 className="text-lg font-semibold">{item.title}</h2>
+                <p className="text-xs w-64">{item.desc}</p>
+              </div>
+              {index !== workProcessCopy.length - 1 && <ArrowDown />}
+            </div>
+          ))}
         </div>
       </div>
       <img
         src={circleImage}
-        className="absolute bottom-0 left-0 w- md:w-auto z-0"
+        className="absolute bottom-0 left-0 w-24 md:w-64 md:w-auto z-0"
         alt="Circle Decoration"
       />
     </div>
