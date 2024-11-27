@@ -57,7 +57,9 @@ const WorkProcess = () => {
                 <h2 className="text-lg font-semibold">{item.title}</h2>
                 <p className="text-xs w-64">{item.desc}</p>
               </div>
-              {index !== workProcessCopy.length - 1 && <ArrowDown />}
+              {index !== workProcessCopy.length - 1 && (
+                <ArrowDown className="animate-bounce" />
+              )}
             </div>
           ))}
         </div>
