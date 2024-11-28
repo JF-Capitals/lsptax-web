@@ -1,31 +1,20 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
-import Header from "./components/Header";
-import Hero from "./components/Hero";
-import About from "./components/About";
-import Services from "./components/Services";
-import FeatureStrip from "./components/FeatureStrip";
-import WhyUs from "./components/WhyUs";
-import Testimonials from "./components/Testimonials";
-import Footer from "./components/Footer";
-import KeyDates from "./components/KeyDates";
-import FeatureArray from "./components/FeatureArray";
-import WorkProcess from "./components/WorkProcess";
+import AdminPortal from "./page/AdminPortal"
+import LandingPage from "./page/LandingPage"
+
 
 function App() {
-
-  return <>
-    <Header />
-    <Hero />
-    <FeatureArray/>
-    <About />
-    <WorkProcess />
-    <Services />
-    <FeatureStrip />
-    <WhyUs />
-    <KeyDates/>
-    <Testimonials />
-    <Footer/>
-  </>;
+  return (
+    <Router>
+      {/* <Header /> */}
+      <Routes>
+        <Route path="/portal" element={<AdminPortal />} />
+        <Route path="/" element={<LandingPage />} />
+      </Routes>
+      {/* <Footer /> */}
+    </Router>
+  );
 }
 
 export default App;
