@@ -57,14 +57,14 @@ const Footer = () => {
       </div>
 
       {/* Footer Bottom Section */}
-      <div className="bg-blue-500 text-black flex flex-col md:flex-row w-full justify-between p-8">
-        <div className="flex flex-col md:flex-row w-full justify-around gap-2 md:gap-8">
+      <div className="bg-[#0093FF] text-black flex flex-col md:flex-row w-full justify-between items-center p-8">
+        <div className="flex flex-col md:flex-row w-full justify-around gap-2 md:gap-8 items-center">
           <h2 className="hover:underline cursor-pointer">Terms & Conditions</h2>
           <h2 className="hover:underline cursor-pointer">Refund Policy</h2>
           <h2 className="hover:underline cursor-pointer">Privacy Policy</h2>
           <h2 className="hover:underline cursor-pointer">Sitemap</h2>
         </div>
-        <div className="flex w-full md:w-1/2 justify-between md:gap-8 md:mt-4 md:mt-0 mt-2">
+        <div className="flex w-full md:w-1/3 justify-between md:gap-8 md:mt-0 mt-2 items-center">
           <h2>Contact:</h2>
           <h2 className="font-bold">info@lsptax.com</h2>
           <h2>|</h2>
@@ -78,7 +78,7 @@ const Footer = () => {
 const FooterList: React.FC<FooterListProps> = ({ title, items }) => {
   return (
     <div className="flex flex-col text-white">
-      <h1 className="font-bold py-4 text-[#E84F5A]">{title}</h1>
+      <h1 className="font-bold py-4 text-[#0093FF]">{title}</h1>
       <div className="flex flex-col gap-2 py-2">
         {items.map((list, index) => (
           <a

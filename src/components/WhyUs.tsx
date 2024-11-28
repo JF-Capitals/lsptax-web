@@ -59,13 +59,13 @@ const WhyUs = () => {
 
 const WhyUsBox: React.FC<WhyUsBoxProps> = ({ logo, label, desc }) => {
   return (
-    <div className="flex flex-col border w-64 h-64 m-8 justify-center items-center rounded-xl shadow transition-all duration-300 hover:bg-[#14212A] hover:text-white">
+    <div className="flex flex-col border w-64 h-full m-8 justify-center items-center rounded-2xl shadow transition-all duration-300 hover:bg-[#14212A] hover:text-white group">
       <img
         src={logo}
         alt=""
-        className="mb-4 transition-transform duration-300 hover:scale-110"
+        className="p-4 pt-8 transition-transform duration-300 hover:scale-110"
       />
-      <h2 className="font-semibold text-lg py-4 hover:text-red-400">{label}</h2>
+      <h2 className="font-semibold text-lg py-4 group-hover:text-red-400">{label}</h2>
       <p className="text-center text-sm md:text-base p-4">{desc}</p>
     </div>
   );

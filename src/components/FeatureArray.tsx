@@ -30,7 +30,7 @@ const features = [
 
 const FeatureArray = () => {
   return (
-    <div className="flex flex-col md:flex-row md:mx-8 gap-6 justify-center relative -top-14 z-10">
+    <div className="flex flex-col md:flex-row md:mx-8 m-4 md:m-0 gap-6 justify-center relative -top-14 z-10">
       {features.map((item, index) => (
         <FeatureBox key={index} label={item.label} logo={item.logo} />
       ))}

@@ -3,7 +3,7 @@ import mainWorkImage from "@/assets/work/main.svg";
 import w1 from "@/assets/work/w1.svg";
 import w2 from "@/assets/work/w2.svg";
 import w3 from "@/assets/work/w3.svg";
-import { ArrowDown } from "lucide-react";
+import linkArrow1 from "@/assets/work/linkarrow-1.svg"
 
 const workProcessCopy = [
   {
@@ -52,13 +52,13 @@ const WorkProcess = () => {
         <div className="md:hidden">
           {workProcessCopy.map((item, index) => (
             <div key={index} className="flex flex-col items-center">
-              <div className="border border-slate-500 rounded-full p-16 m-8 flex flex-col items-center bg-[#203442]">
-                <img src={item.image} alt="" className="w-32" />
+              <div className="border border-slate-500 rounded-full p-14 mb-4 flex flex-col items-center bg-[#203442]">
+                <img src={item.image} alt="" className="" />
                 <h2 className="text-lg font-semibold">{item.title}</h2>
-                <p className="text-xs w-64">{item.desc}</p>
+                <p className="text-xs">{item.desc}</p>
               </div>
               {index !== workProcessCopy.length - 1 && (
-                <ArrowDown className="animate-bounce" />
+                <img src={linkArrow1} alt="" />
               )}
             </div>
           ))}
@@ -66,7 +66,7 @@ const WorkProcess = () => {
       </div>
       <img
         src={circleImage}
-        className="absolute bottom-0 left-0 w-24 md:w-64 md:w-auto z-0"
+        className="md:block absolute bottom-0 left-0 w-24 md:w-64 md:w-auto z-0 hidden"
         alt="Circle Decoration"
       />
     </div>
