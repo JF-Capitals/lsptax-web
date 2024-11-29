@@ -10,7 +10,7 @@ const points = [
 
 const About = () => {
   return (
-    <div className="flex flex-col md:flex-row h-screen py-8 mb-16" id="about">
+    <div className="flex flex-col md:flex-row md:h-screen py-8 mb-16" id="about">
       {/* Left Section - Image */}
       <div
         className="w-full md:w-1/2 flex justify-center items-center mb-8 md:mb-0"
