@@ -10,7 +10,7 @@ const points = [
 
 const About = () => {
   return (
-    <div className="flex flex-col md:flex-row h-screen py-8" id="about">
+    <div className="flex flex-col md:flex-row h-screen py-8 mb-16" id="about">
       {/* Left Section - Image */}
       <div
         className="w-full md:w-1/2 flex justify-center items-center mb-8 md:mb-0"
@@ -42,16 +42,19 @@ const About = () => {
         </p>
 
         {/* Points */}
+        <div className="h-full">
+
         {points.map((item, index) => (
           <div
-            key={index}
-            className="flex items-center py-2"
-            data-aos="fade-up"
+          key={index}
+          className="flex items-center py-2"
+          data-aos="fade-up"
           >
             <img src={checkboxIcon} className="w-6 h-6 mr-4" alt="Checkbox" />
             <h2 className="text-sm md:text-base">{item.title}</h2>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

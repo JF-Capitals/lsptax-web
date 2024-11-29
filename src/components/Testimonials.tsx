@@ -119,7 +119,6 @@ const TestimonialButton: React.FC<TestimonialButtonProps> = ({
           ? "bg-blue-500 text-white"
           : "bg-[#0093FF1A] hover:bg-blue-500 hover:text-white"
       }`}
-      data-aos="flip-right"
     >
       <h2 className="text-lg font-semibold">{name}</h2>
       <h3 className="text-sm">{position}</h3>
