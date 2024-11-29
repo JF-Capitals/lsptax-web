@@ -65,7 +65,10 @@ const Testimonials = () => {
       </div>
 
       {/* Render the buttons */}
-      <div className="flex flex-wrap justify-center gap-4 m-8">
+      <div
+        className="flex flex-wrap justify-center gap-4 m-8"
+        data-aos="fade-up"
+      >
         {testimonialButtons.map((item, index) => (
           <TestimonialButton
             key={index}
@@ -94,7 +97,9 @@ const TestimonialItem: React.FC<TestimonialItemProps> = ({
       />
       <div className="bg-white w-full p-8 shadow-lg rounded-lg">
         <StarRating rating={starRating} />
-        <p className="text-2xl text-center italic">{comment}</p>
+        <p className="text-2xl text-center italic" data-aos="fade-up">
+          {comment}
+        </p>
       </div>
     </div>
   );
@@ -114,6 +119,7 @@ const TestimonialButton: React.FC<TestimonialButtonProps> = ({
           ? "bg-blue-500 text-white"
           : "bg-[#0093FF1A] hover:bg-blue-500 hover:text-white"
       }`}
+      data-aos="flip-right"
     >
       <h2 className="text-lg font-semibold">{name}</h2>
       <h3 className="text-sm">{position}</h3>

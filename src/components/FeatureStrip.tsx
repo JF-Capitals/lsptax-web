@@ -34,7 +34,10 @@ const FeatureStrip = () => {
 
 const FeatureEle: React.FC<FeatureEleProps> = ({ logo, figure, label }) => {
   return (
-    <div className="flex flex-col items-center md:flex-row gap-4 md:gap-8 p-4 text-[#E84F5ABF]">
+    <div
+      className="flex flex-col items-center md:flex-row gap-4 md:gap-8 p-4 text-[#E84F5ABF]"
+      data-aos="zoom-in"
+    >
       <img
         src={logo}
         alt={label}

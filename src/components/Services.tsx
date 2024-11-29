@@ -6,6 +6,7 @@ interface ServiceBoxProps {
   label: string;
   desc: string;
   ctaLink: string;
+  delay: number; // Delay prop to stagger animations
 }
 
 const services = [
@@ -51,7 +52,6 @@ const Services = () => {
   return (
     <div className="flex flex-col items-center">
       <h2 className="font-bold text-2xl p-8 text-center">Our Core Services</h2>
-      {/* Add a grid layout to control the number of items in a row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 m-8 mb-16">
         {services.map((item, index) => (
           <ServiceBox
@@ -60,6 +60,7 @@ const Services = () => {
             label={item.label}
             desc={item.desc}
             ctaLink={item.ctaLink}
+            delay={index * 100} // Adding delay based on index
           />
         ))}
       </div>
@@ -72,9 +73,14 @@ const ServiceBox: React.FC<ServiceBoxProps> = ({
   label,
   desc,
   ctaLink,
+  delay,
 }) => {
   return (
-    <div className="flex flex-col border w-full sm:w-64 h-auto items-center p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <div
+      className="flex flex-col border w-full sm:w-64 h-auto items-center p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+      data-aos="fade-down"
+      data-aos-delay={delay} // Stagger animation
+    >
       <img src={logo} alt={label} className="w-16 h-16 mb-4" />
       <h2 className="font-semibold text-lg mb-4">{label}</h2>
       <p className="text-center mb-4">{desc}</p>

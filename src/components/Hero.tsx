@@ -41,11 +41,11 @@ const Hero = () => {
       </div>
 
       {/* Right Section */}
-      <div className="w-full md:w-1/2 flex justify-center md:mr-16">
+      <div className="w-full md:w-1/2 flex justify-center md:mr-16 shadow-lg h-full md:h-1/2 rounded-full">
         <img
           src={heroImage}
           alt="Hero Image"
-          className="relative z-10 w-full max-w-md md:max-w-full animate-"
+          className="relative z-10 w-full max-w-md md:max-w-full rounded-full "
         />
       </div>
     </div>

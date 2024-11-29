@@ -34,8 +34,8 @@ const KeyDates = () => {
       id="keydates"
       className="flex flex-col md:flex-row justify-center items-center align-center p-8 gap-16 my-8"
     >
-      <div className="">
-        <img src={keyDateLogo} alt="Key Dates" />
+      <div className="" data-aos="zoom-in-right">
+        <img src={keyDateLogo} alt="Key Dates" className="w-32" />
       </div>
       <div className="w-full md:w-2/3">
         {keyDateData.map((item, index) => (
@@ -48,7 +48,10 @@ const KeyDates = () => {
 
 const KeyDateItem: React.FC<KeyDateData> = ({ date, desc }) => {
   return (
-    <div className="flex flex-col md:flex-row justify-center items-center w-full border-b-2 p-8 hover:bg-[#F7FAFF] h-auto">
+    <div
+      className="flex flex-col md:flex-row justify-center items-center w-full border-b-2 p-8 hover:bg-[#F7FAFF] h-auto"
+      data-aos="zoom-in-right"
+    >
       <div className="text-center w-full md:w-1/3 text-xl text-blue-400 font-bold mb-4 md:mb-0">
         {date}
       </div>
