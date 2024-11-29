@@ -1,11 +1,6 @@
-import circleImage from "@/assets/work/circle.svg";
-import mainWorkImage from "@/assets/work/main.svg";
 import w1 from "@/assets/work/w1.svg";
 import w2 from "@/assets/work/w2.svg";
 import w3 from "@/assets/work/w3.svg";
-import linkArrow1 from "@/assets/work/linkarrow-1.svg";
-import linkArrow2 from "@/assets/work/linkarrow-2.svg";
-import wave from "@/assets/work/wave.svg"
 
 const workProcessCopy = [
   {
