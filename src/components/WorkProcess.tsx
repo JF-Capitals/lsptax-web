@@ -27,7 +27,7 @@ const WorkProcess = () => {
   return (
     <div
       id="how"
-      className="bg-blue-50 bg-opacity-90 md:h-screen flex items-center flex-col text-white relative p-8  mt-8"
+      className="bg-blue-50 bg-opacity-90 h-screen flex items-center justify-center flex-col text-white relative p-8  mt-8"
     >
       <h2 className="text-[#02A6DC] md:my-4 relative z-10 font-bold text-lg">
         Work Process
@@ -45,8 +45,8 @@ const WorkProcess = () => {
           >
             <h2 className="md:text-8xl text-4xl font-bold">{index + 1}.</h2>
             <div className="flex flex-col md:gap-4 m-4">
-              <h2 className="md:text-2xl text-xl ">{item.title}</h2>
-              <p>{item.desc}</p>
+              <h2 className="md:text-2xl text-lg ">{item.title}</h2>
+              <p className="text-xs">{item.desc}</p>
             </div>
           </div>
         ))}
