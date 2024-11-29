@@ -29,10 +29,10 @@ const WorkProcess = () => {
       id="how"
       className="bg-blue-50 bg-opacity-90 h-screen flex items-center justify-center flex-col text-white relative p-8  mt-8"
     >
-      <h2 className="text-[#02A6DC] md:my-4 relative z-10 font-bold text-lg">
+      <h2 className="text-[#02A6DC] md:my-4 relative font-bold text-lg">
         Work Process
       </h2>
-      <h1 className="text-4xl text-black my-4 relative z-10 font-bold">
+      <h1 className="text-4xl text-black my-4 relative font-bold">
         How it Works
       </h1>
       <div className="flex flex-col md:gap-12 my-4 ">
