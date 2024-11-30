@@ -1,37 +1,21 @@
-import { useState } from "react";
+import { Routes, Route } from "react-router-dom"; // Import Routes and Route
 import SideMenu from "@/components/portal/SideMenu";
-import ClientTable from "@/components/portal/Clients/ClientTable";
-import Forms from "@/components/portal/Forms";
-import Invoices from "@/components/portal/Invoices";
-import Properties from "@/components/portal/Properties";
-import Prospects from "@/components/portal/Prospects";
-import { columns } from "../components/portal/Clients/columns";
-
+import PortalHeader from "@/components/portal/PortalHeader";
+import AdminRoutes from "@/routes/adminRoutes"; // Import the AdminRoutes
 
 const AdminPortal = () => {
-  const [selectedOption, setSelectedOption] = useState("overview"); // Default page
-
-  const renderContent = async () => {
-    switch (selectedOption) {
-      case "clients":
-        return <ClientTable columns={columns} data={[]} />;
-      case "forms":
-        return <Forms />;
-      case "invoices":
-        return <Invoices />;
-      case "properties":
-        return <Properties />;
-      case "prospects":
-        return <Prospects />;
-      default:
-        return <h1>Select an option</h1>;
-    }
-  };
-
   return (
-    <div className="flex ">
-      <SideMenu onSelectOption={setSelectedOption} />
-      <div style={{ flex: 1, padding: "20px" }}>{renderContent()}</div>
+    <div className="h-screen">
+      <PortalHeader />
+      <div className="flex">
+        <SideMenu />
+        {/* Add Routes here to render AdminRoutes */}
+        <div className="flex-1 border p-4 m-4 rounded-xl">
+          <Routes>
+            <Route path="/*" element={<AdminRoutes />} />
+          </Routes>
+        </div>
+      </div>
     </div>
   );
 };

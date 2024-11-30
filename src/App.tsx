@@ -1,18 +1,19 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
-import AdminPortal from "./page/AdminPortal"
-import LandingPage from "./page/LandingPage"
 
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import AdminPortal from "./page/AdminPortal";
+import LandingPage from "./page/LandingPage";
+import LoginPage from "./components/portal/LoginPage";
 
 function App() {
   return (
     <Router>
-      {/* <Header /> */}
       <Routes>
-        <Route path="/portal" element={<AdminPortal />} />
         <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        {/* Private Routes */}
+        <Route path="/portal/*" element={<AdminPortal />} />
       </Routes>
-      {/* <Footer /> */}
     </Router>
   );
 }
