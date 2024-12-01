@@ -1,14 +1,14 @@
 // adminRoutes.tsx
 import { Routes, Route } from "react-router-dom";
 // import PrivateRoute from "./PrivateRoute";
-import PropertiesTable from "@/components/portal/properties/PropertiesTable";
+// import PropertiesTable from "@/components/portal/properties/PropertiesTable";
 import InvoicesTable from "@/components/portal/invoices/InvoicesTable";
 import ContractTable from "@/components/portal/forms/contracts/ContractsTable";
 import ClientTable from "@/components/portal/clients/list/ClientTable";
 import AgentTable from "@/components/portal/forms/agent/AgentsTable";
 import ProspectTable from "@/components/portal/prospects/list/ProspectsTable";
 import Dashboard from "@/components/portal/Dashboard";
-import { propertiesColumn } from "@/components/portal/properties/columns";
+// import { propertiesColumn } from "@/components/portal/properties/columns";
 import { invoicesColumn } from "@/components/portal/invoices/columns";
 import { contractsColumn } from "@/components/portal/forms/contracts/columns";
 import { clientsColumn } from "@/components/portal/clients/list/columns";
@@ -31,7 +31,8 @@ const AdminRoutes = () => {
       <Route
         path="/properties"
         element={
-          <PropertiesTable columns={propertiesColumn}/>
+          <>No Data Here.</>
+          // <PropertiesTable columns={propertiesColumn}/>
         }
       />
       <Route

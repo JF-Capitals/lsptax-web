@@ -1,5 +1,4 @@
 import logo from "@/assets/logo.svg";
-import phoneLogo from "@/assets/icons/phone.svg";
 
 const PortalHeader = () => {
   return (
