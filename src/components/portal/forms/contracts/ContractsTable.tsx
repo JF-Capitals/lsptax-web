@@ -2,192 +2,118 @@
 
 import {
   ColumnDef,
-  SortingState,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
-  getPaginationRowModel,
-  ColumnFiltersState,
-  getFilteredRowModel,
-  VisibilityState,
+  // SortingState,
+  // getCoreRowModel,
+  // useReactTable,
+  // getSortedRowModel,
+  // getPaginationRowModel,
+  // ColumnFiltersState,
+  // getFilteredRowModel,
+  // VisibilityState,
 } from "@tanstack/react-table";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import React, { useState } from "react";
+
+import { useEffect, useState } from "react";
+import { getContracts } from "@/store/data";
+import TableBuilder from "../../TableBuilder";
 
 interface ContractTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
-  data: TData[];
 }
 
 const ContractTable = <TData, TValue>({
-  columns,
-  data,
+  columns
 }: ContractTableProps<TData, TValue>) => {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+    const [contracts, setContracts] = useState<TData[]>([]);
+  // const [sorting, setSorting] = useState<SortingState>([]);
+  // const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  // const [columnVisibility, setColumnVisibility] =
+  //   React.useState<VisibilityState>({});
+  // const [rowSelection, setRowSelection] = React.useState({});
 
-  const table = useReactTable({
-    data,
-    columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
+   useEffect(() => {
+     // Fetch properties data when the component mounts
+     const fetchContracts = async () => {
+       const data = await getContracts(); // Call your data-fetching function
+       setContracts(data); // Set the fetched data into the state
+     };
+
+     fetchContracts();
+   }, []);
+
+
+  // const table = useReactTable({
+  //   data:contracts,
+  //   columns,
+  //   onSortingChange: setSorting,
+  //   getCoreRowModel: getCoreRowModel(),
+  //   getSortedRowModel: getSortedRowModel(),
+  //   getPaginationRowModel: getPaginationRowModel(),
+  //   onColumnFiltersChange: setColumnFilters,
+  //   getFilteredRowModel: getFilteredRowModel(),
+  //   onColumnVisibilityChange: setColumnVisibility,
+  //   onRowSelectionChange: setRowSelection,
+  //   state: {
+  //     sorting,
+  //     columnFilters,
+  //     columnVisibility,
+  //     rowSelection,
+  //   },
+  // });
 
   return (
-    <div className="">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+    <div>
+      <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
+        {/* <div className="flex flex-col p-4 w-full">
+          <h1>Quick search a Client</h1>
+
+          <Input
+            placeholder="Search Client Name..."
+            value={
+              (table.getColumn("clientName")?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn("clientName")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+        </div> */}
+
+        <div className="w-full">
+          <h2 className="text-2xl font-bold ">{contracts.length}</h2>
+          <h3>Total number of Contracts</h3>
+        </div>
+        {/* <div className="w-full">
+          <h2>Filter Clients</h2>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                {position} <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuRadioGroup
+                value={position}
+                onValueChange={setPosition}
+              >
+                <DropdownMenuRadioItem value="All Clients">
+                  All Clients
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="Filter 2">
+                  Filter 2
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="Filter 3">
+                  Filter 3
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div> */}
+        {/* <NavLink to={`/portal/clients/add-client`}>
+          <Button className="w-full">Add New Client</Button>
+        </NavLink> */}
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="ml-auto">
-            Columns
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {table
-            .getAllColumns()
-            .filter((column) => column.getCanHide())
-            .map((column) => {
-              return (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  className="capitalize"
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                >
-                  {column.id}
-                </DropdownMenuCheckboxItem>
-              );
-            })}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <div className="rounded-md border">
-        <Table className="table-fixed">
-          {" "}
-          {/* Apply table-fixed class */}
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className={
-                      header.id === "select" ? "" : "cursor-pointer select-none"
-                    }
-                    onClick={
-                      header.id === "select"
-                        ? undefined
-                        : header.column.getToggleSortingHandler()
-                    }
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                    {header.id !== "select" &&
-                      ({
-                        asc: " 🔼",
-                        desc: " 🔽",
-                      }[header.column.getIsSorted() as string] ??
-                        null)}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className={`min-h-[48px] ${
-                    row.getIsSelected() ? "bg-muted" : ""
-                  }`}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+      <TableBuilder data={contracts} columns={columns} label="Contracts" />
     </div>
   );
 };

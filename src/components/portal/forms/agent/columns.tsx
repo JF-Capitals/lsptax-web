@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import formatDate from "@/utils/formatDate";
 
 export type Owner = {
     name: string;
@@ -27,28 +28,6 @@ export type Agents = {
 };
 
 export const agentsColumn: ColumnDef<Agents>[] = [
-  // {
-  //   id: "select",
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={
-  //         table.getIsAllPageRowsSelected() ||
-  //         (table.getIsSomePageRowsSelected() && "indeterminate")
-  //       }
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
   {
     accessorKey: "owner",
     header: "Owner",
@@ -56,14 +35,34 @@ export const agentsColumn: ColumnDef<Agents>[] = [
   {
     accessorKey: "propertyAccNumber",
     header: "Property Account Number",
+    cell: ({ row }) => {
+      const propertyAccNumber = row.original.propertyAccNumber;
+      return (
+        <div className="flex flex-wrap ">
+          {propertyAccNumber.map((accNum) => (
+            <h2 className="text-green-600 font-bold text-xs bg-green-100 m-1 w-max p-1 rounded">
+              #{accNum}
+            </h2>
+          ))}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "generatedOn",
     header: "Generated On",
+    cell: ({ row }) => {
+      const generatedOn = row.original.generatedOn;
+      return <div>{formatDate(generatedOn)}</div>;
+    },
   },
   {
     accessorKey: "signedOn",
     header: "Signed On",
+    cell: ({ row }) => {
+      const signedOn = row.original.signedOn;
+      return <div>{formatDate(signedOn)}</div>;
+    },
   },
   {
     header: "Actions",
