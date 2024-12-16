@@ -14,63 +14,48 @@ import { contractsColumn } from "@/components/portal/forms/contracts/columns";
 import { clientsColumn } from "@/components/portal/clients/list/columns";
 import { agentsColumn } from "@/components/portal/forms/agent/columns";
 import { prospectColumn } from "@/components/portal/prospects/list/columns";
-import { sampleInvoices } from "@/components/portal/invoices/dummy";
-import { sampleAgents } from "@/components/portal/forms/agent/dummy";
-import { sampleProspects } from "@/components/portal/prospects/list/dummy";
 import AddClient from "@/components/portal/clients/add/AddClient";
 import ContractOwnerTable from "@/components/portal/contract-owner/ContractOwnersTable";
 import { contractOwnerColumns } from "@/components/portal/contract-owner/columns";
-import { sampleContractOwners } from "@/components/portal/contract-owner/dummy";
 import AddProspect from "@/components/portal/prospects/add/AddProspects";
+import PropertiesTable from "@/components/portal/properties/PropertiesTable";
+import { propertiesColumn } from "@/components/portal/properties/columns";
 
 const AdminRoutes = () => {
   return (
     <Routes>
       {/* <Route element={<PrivateRoute />}> */}
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/portal" element={<Dashboard />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route
         path="/properties"
-        element={
-          <>No Data Here.</>
-          // <PropertiesTable columns={propertiesColumn}/>
-        }
+        element={<PropertiesTable columns={propertiesColumn} />}
       />
       <Route
         path="/invoices"
-        element={
-          <InvoicesTable columns={invoicesColumn} data={sampleInvoices} />
-        }
+        element={<InvoicesTable columns={invoicesColumn} />}
       />
       <Route
         path="/contract-owner"
-        element={
-          <ContractOwnerTable
-            columns={contractOwnerColumns}
-            data={sampleContractOwners}
-          />
-        }
+        element={<ContractOwnerTable columns={contractOwnerColumns} />}
       />
       <Route
         path="/forms/contract"
-        element={
-          <ContractTable columns={contractsColumn} data={sampleAgents} />
-        }
+        element={<ContractTable columns={contractsColumn} />}
       />
       <Route
         path="/clients/list-client"
-        element={<ClientTable columns={clientsColumn}/>}
+        element={<ClientTable columns={clientsColumn} />}
       />
       <Route path="/clients/add-client" element={<AddClient />} />
       <Route path="/prospects/add-prospect" element={<AddProspect />} />
       <Route
         path="/forms/agent"
-        element={<AgentTable columns={agentsColumn} data={sampleAgents} />}
+        element={<AgentTable columns={agentsColumn} />}
       />
       <Route
         path="/prospects/list-prospect"
-        element={
-          <ProspectTable columns={prospectColumn} data={sampleProspects} />
-        }
+        element={<ProspectTable columns={prospectColumn} />}
       />
 
       {/* </Route> */}

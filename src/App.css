@@ -3,6 +3,40 @@
 @tailwind utilities;
 
 
+@layer utilities {
+  .scrollbar-custom {
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: #14ADD6 #edf2f7; /* For Firefox */
+  }
+
+  /* Webkit scrollbar styles */
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 10px; /* Scrollbar width */
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: #edf2f7; /* Track color */
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #14ADD6, #384295); /* Gradient for thumb */
+    border-radius: 4px; /* Rounded corners */
+    border: 2px solid #edf2f7; /* Border around thumb */
+     min-height: 3px; /* Set a minimum height for the thumb */
+    max-height: 8px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #14ADD6, #384295); /* Hover effect with the same gradient */
+  }
+}
+
+/* Add this to your global CSS */
+[data-state="closed"] .dialog-overlay {
+  pointer-events: none;
+  display: none; /* Ensure it's fully removed */
+}
+
 #root {
   margin: 0 auto;
   overflow-x:hidden

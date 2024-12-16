@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import formatDate from "@/utils/formatDate";
 
 export type PropertyDetails = {
   type: string;
@@ -103,10 +104,18 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
   {
     accessorKey: "aoaSigned",
     header: "AOA Signed",
+    cell: ({ row }) => {
+      const aoaSigned = row.original.aoaSigned;
+      return <div>{formatDate(aoaSigned)}</div>;
+    },
   },
   {
     accessorKey: "addedOn",
     header: "Added On",
+    cell: ({ row }) => {
+      const addedOn = row.original.addedOn;
+      return <div>{formatDate(addedOn)}</div>;
+    },
   },
   {
     header: "Actions",

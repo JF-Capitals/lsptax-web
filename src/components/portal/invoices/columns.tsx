@@ -12,11 +12,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import formatDate from "@/utils/formatDate";
 
 export type Property = {
-    account: string;
-    cadOwners: string;
-}
+  account: string;
+  cadOwners: string;
+};
 
 export type Invoices = {
   id: string;
@@ -25,32 +26,10 @@ export type Invoices = {
   amount: string;
   status: string;
   addedOn: string;
-  reminders: string[];
+  reminders: string;
 };
 
 export const invoicesColumn: ColumnDef<Invoices>[] = [
-  // {
-  //   id: "select",
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={
-  //         table.getIsAllPageRowsSelected() ||
-  //         (table.getIsSomePageRowsSelected() && "indeterminate")
-  //       }
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
   {
     accessorKey: "id",
     header: "Invoice #",
@@ -79,15 +58,51 @@ export const invoicesColumn: ColumnDef<Invoices>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    cell: ({ row }) => {
+      const status = row.original.status;
+      const statusLabel = status === "1" ? "Pending" : "Completed";
+      const statusColor = status === "1" ? "text-red-500" : "text-green-500";
+
+      return <span className={statusColor}>{statusLabel}</span>;
+    },
   },
   {
     accessorKey: "addedOn",
     header: "Added/Sent On",
+    cell: ({ row }) => {
+      const addedOn = row.original.addedOn;
+      return <div>{formatDate(addedOn)}</div>;
+    },
   },
   {
     accessorKey: "reminders",
     header: "Reminders",
+    cell: ({ row }) => {
+      const reminders = row.original.reminders;
+
+      if (!reminders) {
+        return <div>N/A</div>;
+      }
+
+      // Ensure reminders are split and formatted
+      const formattedReminders = reminders
+        .split("|") // Split the string by "|"
+        .filter((reminder) => reminder.trim() !== "") // Filter out empty entries
+        .map((reminder) => formatDate(reminder)); // Use the existing formatDate function
+
+      // Debug output
+      console.log("Formatted Reminders:", formattedReminders);
+
+      return (
+        <ul>
+          {formattedReminders.map((reminder, index) => (
+            <li key={index}>{reminder}</li>
+          ))}
+        </ul>
+      );
+    },
   },
+
   {
     header: "Actions",
     id: "actions",
