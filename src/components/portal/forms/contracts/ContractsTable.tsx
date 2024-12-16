@@ -2,19 +2,18 @@
 
 import {
   ColumnDef,
-  SortingState,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
-  getPaginationRowModel,
-  ColumnFiltersState,
-  getFilteredRowModel,
-  VisibilityState,
+  // SortingState,
+  // getCoreRowModel,
+  // useReactTable,
+  // getSortedRowModel,
+  // getPaginationRowModel,
+  // ColumnFiltersState,
+  // getFilteredRowModel,
+  // VisibilityState,
 } from "@tanstack/react-table";
 
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getContracts } from "@/store/data";
 import TableBuilder from "../../TableBuilder";
 
@@ -26,11 +25,11 @@ const ContractTable = <TData, TValue>({
   columns
 }: ContractTableProps<TData, TValue>) => {
     const [contracts, setContracts] = useState<TData[]>([]);
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+  // const [sorting, setSorting] = useState<SortingState>([]);
+  // const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  // const [columnVisibility, setColumnVisibility] =
+  //   React.useState<VisibilityState>({});
+  // const [rowSelection, setRowSelection] = React.useState({});
 
    useEffect(() => {
      // Fetch properties data when the component mounts
@@ -43,24 +42,24 @@ const ContractTable = <TData, TValue>({
    }, []);
 
 
-  const table = useReactTable({
-    data:contracts,
-    columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
+  // const table = useReactTable({
+  //   data:contracts,
+  //   columns,
+  //   onSortingChange: setSorting,
+  //   getCoreRowModel: getCoreRowModel(),
+  //   getSortedRowModel: getSortedRowModel(),
+  //   getPaginationRowModel: getPaginationRowModel(),
+  //   onColumnFiltersChange: setColumnFilters,
+  //   getFilteredRowModel: getFilteredRowModel(),
+  //   onColumnVisibilityChange: setColumnVisibility,
+  //   onRowSelectionChange: setRowSelection,
+  //   state: {
+  //     sorting,
+  //     columnFilters,
+  //     columnVisibility,
+  //     rowSelection,
+  //   },
+  // });
 
   return (
     <div>

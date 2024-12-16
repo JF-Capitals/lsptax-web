@@ -9,7 +9,6 @@ const Pagination = ({ table }: PaginationProps) => {
 
   // Generate an array of page numbers to display, including the current page and a few around it
   const pageNumbers: number[] = [];
-  const maxPageNumbersToShow = 5; // How many page numbers you want to show
   const startPage = Math.max(pageIndex - 2, 0); // Show 2 pages before the current page
   const endPage = Math.min(pageIndex + 2, pageCount - 1); // Show 2 pages after the current page
 

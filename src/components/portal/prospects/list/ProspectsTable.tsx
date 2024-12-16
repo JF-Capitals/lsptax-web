@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import {
   ColumnDef,
-  SortingState,
-  getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
-  getPaginationRowModel,
-  ColumnFiltersState,
-  getFilteredRowModel,
-  VisibilityState,
+  // SortingState,
+  // getCoreRowModel,
+  // useReactTable,
+  // getSortedRowModel,
+  // getPaginationRowModel,
+  // ColumnFiltersState,
+  // getFilteredRowModel,
+  // VisibilityState,
 } from "@tanstack/react-table";
 
 import { getProspects } from "@/store/data";
@@ -22,10 +22,10 @@ const ProspectTable = <TData, TValue>({
   columns,
 }: ProspectTableProps<TData, TValue>) => {
   const [prospects, setProspects] = useState<TData[]>([]); // Data state for properties
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
+  // const [sorting, setSorting] = useState<SortingState>([]);
+  // const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  // const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  // const [rowSelection, setRowSelection] = useState({});
   const [loading, setLoading] = useState(true); // Track loading state
   const [error, setError] = useState<string | null>(null); // Track error state
   useEffect(() => {
@@ -44,24 +44,24 @@ const ProspectTable = <TData, TValue>({
 
     fetchProspects();
   }, []);
-  const table = useReactTable({
-    data: prospects,
-    columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
+  // const table = useReactTable({
+  //   data: prospects,
+  //   columns,
+  //   onSortingChange: setSorting,
+  //   getCoreRowModel: getCoreRowModel(),
+  //   getSortedRowModel: getSortedRowModel(),
+  //   getPaginationRowModel: getPaginationRowModel(),
+  //   onColumnFiltersChange: setColumnFilters,
+  //   getFilteredRowModel: getFilteredRowModel(),
+  //   onColumnVisibilityChange: setColumnVisibility,
+  //   onRowSelectionChange: setRowSelection,
+  //   state: {
+  //     sorting,
+  //     columnFilters,
+  //     columnVisibility,
+  //     rowSelection,
+  //   },
+  // });
   // Render loading state
   if (loading) {
     return (

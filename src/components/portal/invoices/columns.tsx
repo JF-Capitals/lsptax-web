@@ -59,7 +59,7 @@ export const invoicesColumn: ColumnDef<Invoices>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.original.status;
+      const status = (row.original as Invoices).status;
       const statusLabel = status === "1" ? "Pending" : "Completed";
       const statusColor = status === "1" ? "text-red-500" : "text-green-500";
 

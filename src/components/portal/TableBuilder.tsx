@@ -31,7 +31,6 @@ const TableBuilder = ({ data, columns,label }: TableBuilderProps) => {
        {}
      );
      const [rowSelection, setRowSelection] = useState({});
-     const [position, setPosition] = useState("bottom");
      const [pageSize, setPageSize] = useState(10);
 
      const table = useReactTable({

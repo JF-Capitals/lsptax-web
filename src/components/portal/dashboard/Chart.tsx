@@ -9,9 +9,9 @@ interface DataItem {
 
 // Example data
 const data: DataItem[] = [
-  { name: "Category 1", value: 30 },
-  { name: "Category 2", value: 50 },
-  { name: "Category 3", value: 20 },
+  { name: "Pending", value: 30 },
+  { name: "Completed", value: 50 },
+  { name: "Submitted", value: 20 },
 ];
 
 const COLORS = ["#FF6384", "#36A2EB", "#FFCE56"]; // Colors for each slice
@@ -28,7 +28,7 @@ const DonutChart: React.FC = () => (
       outerRadius={100} // Outer radius of the pie
       fill="#8884d8"
     >
-      {data.map((entry, index) => (
+      {data.map((_,index) => (
         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
       ))}
     </Pie>

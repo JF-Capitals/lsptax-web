@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import {
   ColumnDef,
   SortingState,
-  flexRender,
   getCoreRowModel,
   useReactTable,
   getSortedRowModel,
@@ -11,14 +10,7 @@ import {
   getFilteredRowModel,
   VisibilityState,
 } from "@tanstack/react-table";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +23,6 @@ import { Button } from "@/components/ui/button";
 import { getProperties } from "@/store/data"; // Import your data-fetching function
 import { NavLink } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import DaddyTable from "../DaddyTable";
 import TableBuilder from "../TableBuilder";
 import { ChevronDown } from "lucide-react";
 
