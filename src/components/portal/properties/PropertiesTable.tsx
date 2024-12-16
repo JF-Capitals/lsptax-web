@@ -24,7 +24,7 @@ import { getProperties } from "@/store/data"; // Import your data-fetching funct
 import { NavLink } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import TableBuilder from "../TableBuilder";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, LoaderCircle } from "lucide-react";
 
 interface PropertiesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -40,6 +40,7 @@ const PropertiesTable = <TData, TValue>({
   const [rowSelection, setRowSelection] = useState({});
   const [loading, setLoading] = useState(true); // Track loading state
   const [error, setError] = useState<string | null>(null); // Track error state
+  
   const [position, setPosition] = useState("bottom");
 
   useEffect(() => {
@@ -48,8 +49,8 @@ const PropertiesTable = <TData, TValue>({
         setLoading(true); // Set loading to true while fetching
         const data = await getProperties(); // Call your data-fetching function
         setProperties(data); // Set the fetched data into the state
-      } catch (err) {
-        console.error("Error fetching properties:", err);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
         setError("Failed to load properties. Please try again later."); // Set the error state
       } finally {
         setLoading(false); // Set loading to false once fetching is done
@@ -80,8 +81,8 @@ const PropertiesTable = <TData, TValue>({
   // Render loading state
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-20">
-        <span>Loading...</span>
+      <div className="flex justify-center h-full items-center py-20">
+        <LoaderCircle className="animate-spin w-16 h-16" />
       </div>
     );
   }
