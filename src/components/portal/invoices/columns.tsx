@@ -116,6 +116,7 @@ export const invoicesColumn: ColumnDef<Invoices>[] = [
     id: "actions",
     cell: ({ row }) => {
       const client = row.original;
+      console.log(client.id)
 
       return (
         <TooltipProvider>

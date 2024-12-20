@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Form,
-  FormControl,
+  // FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -358,7 +358,7 @@ export default function AddPropertyForm() {
                   <PopoverContent className="w-auto p-0">
                     <Calendar
                       selected={field.value}
-                      onChange={field.onChange}
+                      // onChange={field.onChange}
                     />
                   </PopoverContent>
                 </Popover>

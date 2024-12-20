@@ -181,7 +181,7 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
                             {/* Map through selectedRow details */}
                             {selectedRow &&
                               Object.entries(selectedRow).map(
-                                ([key, value]) => (
+                                ([key]) => (
                                   <div
                                     key={key}
                                     className="flex justify-between py-2"

@@ -42,6 +42,7 @@ export const prospectColumn: ColumnDef<Prospects>[] = [
     id: "actions",
     cell: ({ row }) => {
       const client = row.original;
+      console.log(client.id)
 
       return (
         <TooltipProvider>

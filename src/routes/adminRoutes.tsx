@@ -31,8 +31,8 @@ const AdminRoutes = () => {
         path="/properties"
         element={<PropertiesTable columns={propertiesColumn} />}
       />
-      <Route path="/add-properties" element={<PropertyForm isEdit={false} />} />
-      <Route path="/edit-propertie" element={<PropertyForm isEdit={true} />} />
+      <Route path="/add-properties" element={<PropertyForm />} />
+      <Route path="/edit-propertie" element={<PropertyForm  />} />
       <Route
         path="/invoices"
         element={<InvoicesTable columns={invoicesColumn} />}
