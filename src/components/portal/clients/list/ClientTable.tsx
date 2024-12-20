@@ -12,18 +12,12 @@ import {
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 
 import { Input } from "@/components/ui/input";
 import { getClients } from "@/store/data";
 import { getArchiveClients } from "@/store/data"; // Import the function
-import { ChevronDown, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import TableBuilder from "../../TableBuilder";
 

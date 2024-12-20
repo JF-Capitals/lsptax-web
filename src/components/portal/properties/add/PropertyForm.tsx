@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Form,
-  // FormControl,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -23,43 +23,42 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 
 const formSchema = z.object({
-  ls_client_number: z.string().nonempty("Client number is required"),
-  ls_client_is_prospect: z.number().int(),
-  ls_client_co_id: z.number().optional(),
-  ls_client_subco_id: z.number().optional(),
-  ls_client_fname: z.string().optional(),
-  ls_client_lname: z.string().optional(),
-  ls_client_name: z.string().nonempty("Client name is required"),
-  ls_client_email: z.string().email("Invalid email address").optional(),
-  ls_client_phone: z.string().optional(),
-  ls_client_mobile: z.string().optional(),
-  ls_client_fax: z.string().optional(),
-  ls_client_job_title: z.string().optional(),
-  ls_client_dob: z.date().optional(),
-  ls_client_street: z.string().optional(),
-  ls_client_city: z.string().optional(),
-  ls_client_state: z.string().optional(),
-  ls_client_zip: z.string().optional(),
-  ls_client_country: z.string().default("USA"),
-  contract_type: z.string().optional(),
-  ls_client_fixed_fee: z.string().optional(),
-  ls_client_cont_fee: z.string().optional(),
-  ls_client_bpp_fixed_fee: z.string().optional(),
-  ls_client_notes: z.string().optional(),
+  ls_prop_client_id: z.number().int().nonnegative(),
+  ls_prop_cad_owner: z.string().optional(),
+  ls_prop_cad_address: z.string().optional(),
+  ls_prop_cad_mailing_address: z.string().optional(),
+  ls_prop_account_number: z.string().optional(),
+  ls_prop_type: z.string().optional(),
+  ls_prop_class: z.string().optional(),
+  ls_prop_aoa_signed_on: z.date().optional(),
+  ls_prop_protest: z.number().int().optional(),
+  ls_prop_street: z.string().optional(),
+  ls_prop_city: z.string().optional(),
+  ls_prop_state: z.string().optional(),
+  ls_prop_zip: z.string().optional(),
+  ls_prop_assessor: z.string().optional(),
+  ls_prop_current_notes: z.string().optional(),
+  ls_prop_history_notes: z.string().optional(),
+  ls_prop_special_notes: z.string().optional(),
+  ls_prop_status: z.number().int().default(1),
+  ls_prop_added_on: z.date().default(new Date()),
+  ls_prop_added_by: z.number().optional(),
+  ls_prop_updated_on: z.date().optional(),
+  ls_prop_updated_by: z.number().optional(),
 });
 
-export default function AddClientForm() {
+export default function AddPropertyForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      ls_client_country: "USA",
+      ls_prop_status: 1,
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       console.log(values);
-      toast.success("Client added successfully!");
+      toast.success("Property added successfully!");
     } catch (error) {
       console.error("Form submission error", error);
       toast.error("Failed to submit the form. Please try again.");
@@ -72,22 +71,22 @@ export default function AddClientForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8 max-w-4xl mx-auto py-10 px-6 bg-white rounded-lg shadow-lg"
       >
-        {/* Client Details Section */}
+        {/* Property Information Section */}
         <div className="border-b pb-4">
           <h1 className="text-xl font-semibold text-gray-800 mb-6">
-            Client Information
+            Property Information
           </h1>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <FormField
                 control={form.control}
-                name="ls_client_fname"
+                name="ls_prop_cad_owner"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name</FormLabel>
+                    <FormLabel>CAD Owner</FormLabel>
                     <Input
-                      placeholder="Enter First Name"
+                      placeholder="Enter CAD Owner"
                       {...field}
                       className="border-gray-300"
                     />
@@ -100,12 +99,12 @@ export default function AddClientForm() {
             <div>
               <FormField
                 control={form.control}
-                name="ls_client_lname"
+                name="ls_prop_cad_address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Last Name</FormLabel>
+                    <FormLabel>CAD Address</FormLabel>
                     <Input
-                      placeholder="Enter Last Name"
+                      placeholder="Enter CAD Address"
                       {...field}
                       className="border-gray-300"
                     />
@@ -120,12 +119,12 @@ export default function AddClientForm() {
             <div>
               <FormField
                 control={form.control}
-                name="ls_client_number"
+                name="ls_prop_account_number"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client Number</FormLabel>
+                    <FormLabel>Account Number</FormLabel>
                     <Input
-                      placeholder="Enter Client Number"
+                      placeholder="Enter Account Number"
                       {...field}
                       className="border-gray-300"
                     />
@@ -138,12 +137,12 @@ export default function AddClientForm() {
             <div>
               <FormField
                 control={form.control}
-                name="ls_client_name"
+                name="ls_prop_type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client Name</FormLabel>
+                    <FormLabel>Property Type</FormLabel>
                     <Input
-                      placeholder="Enter Client Name"
+                      placeholder="Enter Property Type"
                       {...field}
                       className="border-gray-300"
                     />
@@ -158,13 +157,12 @@ export default function AddClientForm() {
             <div>
               <FormField
                 control={form.control}
-                name="ls_client_email"
+                name="ls_prop_class"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Address</FormLabel>
+                    <FormLabel>Property Class</FormLabel>
                     <Input
-                      placeholder="Enter Email"
-                      type="email"
+                      placeholder="Enter Property Class"
                       {...field}
                       className="border-gray-300"
                     />
@@ -177,12 +175,12 @@ export default function AddClientForm() {
             <div>
               <FormField
                 control={form.control}
-                name="ls_client_phone"
+                name="ls_prop_street"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel>Street</FormLabel>
                     <Input
-                      placeholder="Enter Phone Number"
+                      placeholder="Enter Street"
                       {...field}
                       className="border-gray-300"
                     />
@@ -197,12 +195,12 @@ export default function AddClientForm() {
             <div>
               <FormField
                 control={form.control}
-                name="ls_client_mobile"
+                name="ls_prop_city"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mobile Number</FormLabel>
+                    <FormLabel>City</FormLabel>
                     <Input
-                      placeholder="Enter Mobile Number"
+                      placeholder="Enter City"
                       {...field}
                       className="border-gray-300"
                     />
@@ -215,12 +213,12 @@ export default function AddClientForm() {
             <div>
               <FormField
                 control={form.control}
-                name="ls_client_fax"
+                name="ls_prop_state"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fax Number</FormLabel>
+                    <FormLabel>State</FormLabel>
                     <Input
-                      placeholder="Enter Fax Number"
+                      placeholder="Enter State"
                       {...field}
                       className="border-gray-300"
                     />
@@ -231,44 +229,42 @@ export default function AddClientForm() {
             </div>
           </div>
 
-          {/* Date of Birth Section */}
-          <div className="mt-6">
-            <FormField
-              control={form.control}
-              name="ls_client_dob"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Date of Birth</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full sm:w-[240px] pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            <div>
+              <FormField
+                control={form.control}
+                name="ls_prop_zip"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ZIP Code</FormLabel>
+                    <Input
+                      placeholder="Enter ZIP Code"
+                      {...field}
+                      className="border-gray-300"
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div>
+              <FormField
+                control={form.control}
+                name="ls_prop_assessor"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Assessor</FormLabel>
+                    <Input
+                      placeholder="Enter Assessor"
+                      {...field}
+                      className="border-gray-300"
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         </div>
 
@@ -282,12 +278,12 @@ export default function AddClientForm() {
             <div>
               <FormField
                 control={form.control}
-                name="contract_type"
+                name="ls_prop_current_notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contract Type</FormLabel>
+                    <FormLabel>Current Notes</FormLabel>
                     <Input
-                      placeholder="Enter Contract Type"
+                      placeholder="Enter Current Notes"
                       {...field}
                       className="border-gray-300"
                     />
@@ -300,12 +296,12 @@ export default function AddClientForm() {
             <div>
               <FormField
                 control={form.control}
-                name="ls_client_fixed_fee"
+                name="ls_prop_history_notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fixed Fee</FormLabel>
+                    <FormLabel>History Notes</FormLabel>
                     <Input
-                      placeholder="Enter Fixed Fee"
+                      placeholder="Enter History Notes"
                       {...field}
                       className="border-gray-300"
                     />
@@ -320,30 +316,12 @@ export default function AddClientForm() {
             <div>
               <FormField
                 control={form.control}
-                name="ls_client_cont_fee"
+                name="ls_prop_special_notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contingency Fee</FormLabel>
+                    <FormLabel>Special Notes</FormLabel>
                     <Input
-                      placeholder="Enter Contingency Fee"
-                      {...field}
-                      className="border-gray-300"
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div>
-              <FormField
-                control={form.control}
-                name="ls_client_bpp_fixed_fee"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>BPP Fixed Fee</FormLabel>
-                    <Input
-                      placeholder="Enter BPP Fixed Fee"
+                      placeholder="Enter Special Notes"
                       {...field}
                       className="border-gray-300"
                     />
@@ -355,20 +333,35 @@ export default function AddClientForm() {
           </div>
         </div>
 
-        {/* Notes Section */}
-        <div className="mt-8">
+        {/* AOA Signed Date Section */}
+        <div className="mt-6">
           <FormField
             control={form.control}
-            name="ls_client_notes"
+            name="ls_prop_aoa_signed_on"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Notes</FormLabel>
-                <Input
-                  placeholder="Enter any additional notes"
-                  {...field}
-                  className="border-gray-300"
-                />
-                <FormMessage />
+                <FormLabel>AOA Signed Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full sm:w-[240px] pl-3 text-left font-normal"
+                      )}
+                    >
+                      {field.value
+                        ? format(field.value, "PPP")
+                        : "Select a date"}
+                      <CalendarIcon className="ml-auto h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      selected={field.value}
+                      onChange={field.onChange}
+                    />
+                  </PopoverContent>
+                </Popover>
               </FormItem>
             )}
           />
@@ -379,7 +372,7 @@ export default function AddClientForm() {
           type="submit"
           className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700"
         >
-          Submit
+          Add Property
         </Button>
       </form>
     </Form>

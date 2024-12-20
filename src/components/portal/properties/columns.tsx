@@ -15,6 +15,7 @@ import ViewModal from "@/components/modals/ViewModal";
 import ArchiveModal from "@/components/modals/ArchiveModal";
 import { useState } from "react";
 import { getSingleProperty } from "@/store/data"; // Import the new function for fetching a single property
+import { NavLink } from "react-router-dom";
 
 export type PropertyDetails = {
   type: string;
@@ -30,6 +31,7 @@ export type CADOwner = {
 };
 
 export type Properties = {
+  propertyId: string;
   clientId: string;
   propertyAccount: string;
   propertyDetails: PropertyDetails;
@@ -134,7 +136,7 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
     header: "Actions",
     id: "actions",
     cell: ({ row }) => {
-      const propertyId = parseInt( row.original.propertyAccount); // Assuming propertyAccount is the unique identifier
+      const propertyId = parseInt( row.original.propertyId); // Assuming propertyAccount is the unique identifier
       const [activeModal, setActiveModal] = useState<string | null>(null);
       const [propertyDetails, setPropertyDetails] = useState<Properties | null>(
         null
@@ -151,14 +153,16 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
           <TooltipProvider>
             <div className="flex">
               {/* Edit Button */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="icon" variant="ghost">
-                    <FilePenLine />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Edit Property</TooltipContent>
-              </Tooltip>
+              <NavLink to={`/portal/edit-properties?propertyId=${propertyId}`}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="icon" variant="ghost">
+                      <FilePenLine />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Edit Property</TooltipContent>
+                </Tooltip>
+              </NavLink>
 
               {/* View Button */}
               <Tooltip>

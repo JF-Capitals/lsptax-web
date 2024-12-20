@@ -19,6 +19,7 @@ import { contractOwnerColumns } from "@/components/portal/contract-owner/columns
 import AddProspect from "@/components/portal/prospects/add/AddProspects";
 import PropertiesTable from "@/components/portal/properties/PropertiesTable";
 import { propertiesColumn } from "@/components/portal/properties/columns";
+import PropertyForm from "@/components/portal/properties/add/PropertyForm";
 
 const AdminRoutes = () => {
   return (
@@ -30,6 +31,8 @@ const AdminRoutes = () => {
         path="/properties"
         element={<PropertiesTable columns={propertiesColumn} />}
       />
+      <Route path="/add-properties" element={<PropertyForm isEdit={false} />} />
+      <Route path="/edit-propertie" element={<PropertyForm isEdit={true} />} />
       <Route
         path="/invoices"
         element={<InvoicesTable columns={invoicesColumn} />}

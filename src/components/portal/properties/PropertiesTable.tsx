@@ -24,12 +24,13 @@ import { NavLink } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import TableBuilder from "../TableBuilder";
 import { ChevronDown, LoaderCircle } from "lucide-react";
+import { Properties } from "./columns";
 
 interface PropertiesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
 }
 
-const PropertiesTable = <TData, TValue>({
+const PropertiesTable = <TData extends Properties, TValue>({
   columns,
 }: PropertiesTableProps<TData, TValue>) => {
   const [properties, setProperties] = useState<TData[]>([]);
@@ -41,7 +42,7 @@ const PropertiesTable = <TData, TValue>({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [position, setPosition] = useState("bottom");
+  const [filter, setFilter] = useState("All Properties");
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -62,8 +63,19 @@ const PropertiesTable = <TData, TValue>({
     fetchProperties();
   }, [archived]); // Refetch data when switching between archived and active properties
 
+  // Filter properties based on the selected filter
+  const filteredProperties = properties.filter((property) => {
+    if (filter === "All Properties") {
+      return true;
+    }
+    // Filter based on the 'type' field in the 'propertyDetails' object
+    return (
+      property?.propertyDetails?.type?.toLowerCase() === filter.toLowerCase()
+    );
+  });
+
   const table = useReactTable({
-    data: properties,
+    data: filteredProperties,
     columns,
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
@@ -99,8 +111,8 @@ const PropertiesTable = <TData, TValue>({
 
   return (
     <div>
-      <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
-        <div className="flex flex-col w-full">
+      <div className="flex flex-col md:flex-row border rounded-xl items-center gap-4 bg-white m-4 p-4">
+        <div className="flex flex-col gap-2 w-full">
           <h1>Quick search a Property</h1>
           <Input
             placeholder="Search Property Name..."
@@ -113,48 +125,51 @@ const PropertiesTable = <TData, TValue>({
             className="max-w-sm"
           />
         </div>
-
-        <div className="w-full">
-          <h2 className="text-2xl font-bold ">{properties.length}</h2>
-          <h3>Total number of Properties</h3>
+        <div className="flex gap-2 w-full">
+          <div className="w-full">
+            <h2 className="text-2xl font-bold ">{filteredProperties.length}</h2>
+            <h3>{archived ? "Archived Properties" : "Active Properties"}</h3>
+          </div>
+          <div className="w-full">
+            <h2>Filter Properties</h2>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  {filter} <ChevronDown />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuRadioGroup
+                  value={filter}
+                  onValueChange={setFilter}
+                >
+                  <DropdownMenuRadioItem value="All Properties">
+                    All Properties
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="Residential">
+                    Residential
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="Commercial">
+                    Commercial
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <div className="w-full">
-          <h2>Filter Properties</h2>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                {position} <ChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuRadioGroup
-                value={position}
-                onValueChange={setPosition}
-              >
-                <DropdownMenuRadioItem value="All Clients">
-                  All Properties
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Filter 2">
-                  Filter 2
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Filter 3">
-                  Filter 3
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+
+        <div className="flex gap-2 w-full">
+          <Button className="w-32" onClick={() => setArchived(!archived)}>
+            {archived ? "View Active" : "View Archived"}
+          </Button>
+
+          <NavLink to={`/portal/add-properties`}>
+            <Button className="">Add New Property</Button>
+          </NavLink>
         </div>
-
-        <Button onClick={() => setArchived(!archived)}>
-          {archived ? "View Active" : "View Archived"}
-        </Button>
-
-        <NavLink to={`/portal/clients/add-properties`}>
-          <Button className="w-full">Add New Property</Button>
-        </NavLink>
       </div>
       <TableBuilder
-        data={properties}
+        data={filteredProperties}
         columns={columns}
         label={archived ? "Archived Properties" : "All Properties"}
       />
