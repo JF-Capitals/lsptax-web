@@ -1,36 +1,84 @@
+export const getClients = async () => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/clients`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch clients");
+    }
+    const clients = await response.json();
+    return clients;
+  } catch (error) {
+    console.log(error);
+    return [{}];
+  }
+};
 
+export const getArchiveClients = async () => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/archive_clients`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch clients");
+    }
+    const clients = await response.json();
+    return clients;
+  } catch (error) {
+    console.log(error);
+    return [{}];
+  }
+};
 
-export const getClients = async() => {
-   try {
-     const response = await fetch(
-       `${import.meta.env.VITE_BACKEND_URL}/api/clients`
-     );
-     if (!response.ok) {
-       throw new Error("Failed to fetch clients");
-     }
-     const clients = await response.json();
-     return clients;
-   } catch (error) {
-     console.log(error);
-         return [{}];
-   }
-} 
-
-export const getProperties = async() => {
+export const getProperties = async () => {
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/properties`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch properties");
-    };
+    }
     const properties = await response.json();
     return properties;
   } catch (error) {
     console.log(error);
-    return [{}]
+    return [{}];
   }
-}
+};
+
+export const getArchiveProperties = async () => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/archive_properties`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch properties");
+    }
+    const properties = await response.json();
+    return properties;
+  } catch (error) {
+    console.log(error);
+    return [{}];
+  }
+};
+
+export const getSingleProperty = async ({ propertyId }: { propertyId: number }) => {
+  try {
+    const response = await fetch(
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }/api/properties?propertyId=${propertyId}`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch properties");
+    }
+    const properties = await response.json();
+    return properties;
+  } catch (error) {
+    console.log(error);
+    return [{}];
+  }
+};
 
 export const getInvoices = async () => {
   try {
@@ -46,7 +94,22 @@ export const getInvoices = async () => {
     console.log(error);
     return [{}];
   }
-}
+};
+export const getArchiveInvoices = async () => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/invoices`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch Invoices");
+    }
+    const invoices = await response.json();
+    return invoices;
+  } catch (error) {
+    console.log(error);
+    return [{}];
+  }
+};
 
 export const getProspects = async () => {
   try {
@@ -126,7 +189,7 @@ export const getProtests = async () => {
     console.log(error);
     return [{}];
   }
-}
+};
 interface Stats {
   numOfClients: number;
   numOfProspects: number;
@@ -158,4 +221,4 @@ export const dashboardData = async (): Promise<Stats | null> => {
     console.log(error);
     return null; // Returning null in case of error to align with Stats | null type
   }
-}
+};

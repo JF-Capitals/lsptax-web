@@ -2,17 +2,22 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 // import { Checkbox } from "@/components/ui/checkbox";
-import { MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Eye,
+  Send,
+} from "lucide-react";
 import formatDate from "@/utils/formatDate";
+import { useState } from "react";
+import ArchiveModal from "@/components/modals/ArchiveModal";
+import ViewModal from "@/components/modals/ViewModal";
 
 export type Owner = {
   name: string;
@@ -68,26 +73,83 @@ export const contractsColumn: ColumnDef<Contract>[] = [
     header: "Actions",
     id: "actions",
     cell: ({ row }) => {
-      const client = row.original;
+      const contract = row.original;
+      const [activeModal, setActiveModal] = useState<string | null>(null);
+       const renderContractData = (data: Contract) => {
+         return (
+           <>
+             <div>
+               <strong>Owner:</strong> {data.owner}
+             </div>
+             <div>
+               <strong>Property Account Numbers:</strong>
+               <div className="flex flex-wrap">
+                 {data.propertyAccNumber.map((accNum, index) => (
+                   <span
+                     key={index}
+                     className="text-green-600 font-bold text-xs bg-green-100 m-1 p-1 rounded"
+                   >
+                     #{accNum}
+                   </span>
+                 ))}
+               </div>
+             </div>
+             <div>
+               <strong>Generated On:</strong> {formatDate(data.generatedOn)}
+             </div>
+             <div>
+               <strong>Signed On:</strong> {formatDate(data.signedOn)}
+             </div>
+           </>
+         );
+       };
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              {/* <span className="sr-only">Open menu</span> */}
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-gray-300">
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => console.log({ client })}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem>Add Properties</DropdownMenuItem>
-            <DropdownMenuItem>Show Properties</DropdownMenuItem>
-            <DropdownMenuItem>Delete Client</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+          <TooltipProvider>
+            <div className="flex gap-2 border">
+              {/* View Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setActiveModal("view")}
+                  >
+                    <Eye />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>View</TooltipContent>
+              </Tooltip>
+
+              {/* Send Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setActiveModal("send")}
+                  >
+                    <Send />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Send Email</TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
+          <ViewModal
+            isOpen={activeModal === "view"}
+            onClose={() => setActiveModal(null)}
+            data={contract}
+            renderData={renderContractData} // Pass the render function for the contract
+          />
+          <ArchiveModal
+            isOpen={activeModal === "archive"}
+            onClose={() => setActiveModal(null)}
+            title="Are you sure?"
+            description="this will archive the contract"
+          />
+        </>
       );
     },
   },

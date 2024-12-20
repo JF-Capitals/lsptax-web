@@ -8,52 +8,24 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { Archive, FilePenLine, Plus } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { useState } from "react";
+import ArchiveModal from "@/components/modals/ArchiveModal";
 
 export type ContractOwner = {
   name: string;
   email: string;
   phone: string;
   percent: string;
-};
-
-// Modal components
-const ArchiveModal = ({
-  isOpen,
-  setIsOpen,
-}: {
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-}) => {
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Are you sure?</DialogTitle>
-          <DialogDescription>
-            This action cannot be undone. It will archive the contract owner.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex justify-end space-x-4 mt-4">
-          <Button variant="secondary" onClick={() => setIsOpen(false)}>
-            Cancel
-          </Button>
-          <Button variant="destructive" onClick={() => setIsOpen(false)}>
-            Archive
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 };
 
 const EditModal = ({
@@ -176,29 +148,57 @@ export const contractOwnerColumns: ColumnDef<ContractOwner>[] = [
 
       return (
         <>
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-gray-300">
-              <DropdownMenuItem onClick={() => setActiveModal("archive")}>
-                Archive
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveModal("edit")}>
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveModal("subcontract")}>
-                Add Sub-contract Owner
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <TooltipProvider>
+            <div className="flex gap-2">
+              {/* Edit Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setActiveModal("edit")}
+                  >
+                    <FilePenLine />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Edit</TooltipContent>
+              </Tooltip>
 
-          {/* Modal components */}
+              {/* Add Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setActiveModal("subcontract")}
+                  >
+                    <Plus />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Sub Contract Owner</TooltipContent>
+              </Tooltip>
+
+              {/* Archive Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setActiveModal("archive")}
+                  >
+                    <Archive />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Archive Client</TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
+
           <ArchiveModal
             isOpen={activeModal === "archive"}
-            setIsOpen={() => setActiveModal(null)}
+            onClose={() => setActiveModal(null)}
+            title="Are you sure?"
+            description="this will archive the contract owner"
           />
           <EditModal
             isOpen={activeModal === "edit"}

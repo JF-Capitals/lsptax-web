@@ -1,17 +1,15 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-// import { Checkbox } from "@/components/ui/checkbox";
-import { MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Archive, Copy, Send } from "lucide-react";
 import formatDate from "@/utils/formatDate";
 
 export type Property = {
@@ -45,8 +43,18 @@ export const invoicesColumn: ColumnDef<Invoices>[] = [
       const details = row.original.property;
       return (
         <div>
-          <div>Account #: {details.account}</div>
-          <div>CAD Owner: {details.cadOwners}</div>
+          <div className="flex flex-col">
+            <h1 className="text-xs font-bold text-muted-foreground">
+              Account #:
+            </h1>
+            <span className="text-wrap w-8">{details.account}</span>
+          </div>
+          <div className="flex flex-col">
+            <h1 className="text-xs font-bold text-muted-foreground">
+              CAD Owner:
+            </h1>
+            {details.cadOwners}
+          </div>
         </div>
       );
     },
@@ -108,25 +116,42 @@ export const invoicesColumn: ColumnDef<Invoices>[] = [
     id: "actions",
     cell: ({ row }) => {
       const client = row.original;
+      console.log(client.id)
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              {/* <span className="sr-only">Open menu</span> */}
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-gray-300">
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => console.log({ client })}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem>Add Properties</DropdownMenuItem>
-            <DropdownMenuItem>Show Properties</DropdownMenuItem>
-            <DropdownMenuItem>Delete Client</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <TooltipProvider>
+          <div className="flex">
+            {/* Edit Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <Copy />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Copy Invoice</TooltipContent>
+            </Tooltip>
+
+            {/* Add Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <Send />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Send Reminder</TooltipContent>
+            </Tooltip>
+
+            {/* Archive Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <Archive />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Archive Invoice</TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
       );
     },
   },

@@ -1,4 +1,7 @@
 const formatDate = (isoDate: string): string => {
+  if (isoDate == "N/A") {
+    return isoDate;
+  }
   const date = new Date(isoDate);
   const months = [
     "January",

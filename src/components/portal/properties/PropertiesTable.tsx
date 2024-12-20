@@ -19,48 +19,63 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-import { getProperties } from "@/store/data"; // Import your data-fetching function
+import { getProperties, getArchiveProperties } from "@/store/data"; // Import both data-fetching functions
 import { NavLink } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import TableBuilder from "../TableBuilder";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, LoaderCircle } from "lucide-react";
+import { Properties } from "./columns";
 
 interface PropertiesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
 }
 
-const PropertiesTable = <TData, TValue>({
+const PropertiesTable = <TData extends Properties, TValue>({
   columns,
 }: PropertiesTableProps<TData, TValue>) => {
-  const [properties, setProperties] = useState<TData[]>([]); // Data state for properties
+  const [properties, setProperties] = useState<TData[]>([]);
+  const [archived, setArchived] = useState(false); // Track if viewing archived properties
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [loading, setLoading] = useState(true); // Track loading state
-  const [error, setError] = useState<string | null>(null); // Track error state
-  const [position, setPosition] = useState("bottom");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [filter, setFilter] = useState("All Properties");
 
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        setLoading(true); // Set loading to true while fetching
-        const data = await getProperties(); // Call your data-fetching function
-        setProperties(data); // Set the fetched data into the state
-      } catch (err) {
-        console.error("Error fetching properties:", err);
-        setError("Failed to load properties. Please try again later."); // Set the error state
+        setLoading(true);
+        const data = archived
+          ? await getArchiveProperties() // Fetch archived properties if in archived mode
+          : await getProperties(); // Fetch active properties otherwise
+        setProperties(data);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+        setError("Failed to load properties. Please try again later.");
       } finally {
-        setLoading(false); // Set loading to false once fetching is done
+        setLoading(false);
       }
     };
 
     fetchProperties();
-  }, []); // Empty dependency array to fetch data only once when the component mounts
+  }, [archived]); // Refetch data when switching between archived and active properties
+
+  // Filter properties based on the selected filter
+  const filteredProperties = properties.filter((property) => {
+    if (filter === "All Properties") {
+      return true;
+    }
+    // Filter based on the 'type' field in the 'propertyDetails' object
+    return (
+      property?.propertyDetails?.type?.toLowerCase() === filter.toLowerCase()
+    );
+  });
 
   const table = useReactTable({
-    data: properties,
+    data: filteredProperties,
     columns,
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
@@ -77,16 +92,15 @@ const PropertiesTable = <TData, TValue>({
       rowSelection,
     },
   });
-  // Render loading state
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-20">
-        <span>Loading...</span>
+      <div className="flex justify-center h-full items-center py-20">
+        <LoaderCircle className="animate-spin w-16 h-16" />
       </div>
     );
   }
 
-  // Render error state
   if (error) {
     return (
       <div className="flex justify-center items-center py-20 text-red-500">
@@ -97,10 +111,9 @@ const PropertiesTable = <TData, TValue>({
 
   return (
     <div>
-      <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
-        <div className="flex flex-col w-full">
+      <div className="flex flex-col md:flex-row border rounded-xl items-center gap-4 bg-white m-4 p-4">
+        <div className="flex flex-col gap-2 w-full">
           <h1>Quick search a Property</h1>
-
           <Input
             placeholder="Search Property Name..."
             value={
@@ -112,45 +125,53 @@ const PropertiesTable = <TData, TValue>({
             className="max-w-sm"
           />
         </div>
+        <div className="flex gap-2 w-full">
+          <div className="w-full">
+            <h2 className="text-2xl font-bold ">{filteredProperties.length}</h2>
+            <h3>{archived ? "Archived Properties" : "Active Properties"}</h3>
+          </div>
+          <div className="w-full">
+            <h2>Filter Properties</h2>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  {filter} <ChevronDown />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuRadioGroup
+                  value={filter}
+                  onValueChange={setFilter}
+                >
+                  <DropdownMenuRadioItem value="All Properties">
+                    All Properties
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="Residential">
+                    Residential
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="Commercial">
+                    Commercial
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
 
-        <div className="w-full">
-          <h2 className="text-2xl font-bold ">{properties.length}</h2>
-          <h3>Total number of Properties</h3>
+        <div className="flex gap-2 w-full">
+          <Button className="w-32" onClick={() => setArchived(!archived)}>
+            {archived ? "View Active" : "View Archived"}
+          </Button>
+
+          <NavLink to={`/portal/add-properties`}>
+            <Button className="">Add New Property</Button>
+          </NavLink>
         </div>
-        <div className="w-full">
-          <h2>Filter Properties</h2>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                {position} <ChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuRadioGroup
-                value={position}
-                onValueChange={setPosition}
-              >
-                <DropdownMenuRadioItem value="All Clients">
-                  All Properties
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Filter 2">
-                  Filter 2
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Filter 3">
-                  Filter 3
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <NavLink to={`/portal/clients/add-properties`}>
-          <Button className="w-full">Add New Property</Button>
-        </NavLink>
       </div>
       <TableBuilder
-        data={properties}
+        data={filteredProperties}
         columns={columns}
-        label="All Properties"
+        label={archived ? "Archived Properties" : "All Properties"}
       />
     </div>
   );

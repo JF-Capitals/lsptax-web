@@ -1,17 +1,16 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-// import { Checkbox } from "@/components/ui/checkbox";
-import { MoreHorizontal } from "lucide-react";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Archive, BookPlus, FilePenLine, House, Plus } from "lucide-react";
 
 export type Prospects = {
   id: string;
@@ -21,28 +20,7 @@ export type Prospects = {
 };
 
 export const prospectColumn: ColumnDef<Prospects>[] = [
-  // {
-  //   id: "select",
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={
-  //         table.getIsAllPageRowsSelected() ||
-  //         (table.getIsSomePageRowsSelected() && "indeterminate")
-  //       }
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
+ 
   {
     accessorKey: "id",
     header: "Prospect #",
@@ -64,25 +42,61 @@ export const prospectColumn: ColumnDef<Prospects>[] = [
     id: "actions",
     cell: ({ row }) => {
       const client = row.original;
+      console.log(client.id)
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              {/* <span className="sr-only">Open menu</span> */}
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-gray-300">
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => console.log({ client })}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem>Add Properties</DropdownMenuItem>
-            <DropdownMenuItem>Show Properties</DropdownMenuItem>
-            <DropdownMenuItem>Delete Client</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <TooltipProvider>
+          <div className="flex">
+            {/* Edit Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <FilePenLine />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Edit Prospect</TooltipContent>
+            </Tooltip>
+
+            {/* Add Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <Plus />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Add Property</TooltipContent>
+            </Tooltip>
+
+            {/* House Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <House />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>List Property</TooltipContent>
+            </Tooltip>
+
+            {/* Archive Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <Archive />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Archive Prospect</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <BookPlus />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Move to Client</TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
       );
     },
   },
