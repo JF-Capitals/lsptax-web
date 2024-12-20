@@ -5,7 +5,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLocation } from "react-router-dom";
-import { BellIcon, ChevronDown, User2 } from "lucide-react";
+import { BellIcon, ChevronDown, Menu, User2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const CurrentDate: React.FC = () => {
   const formatDate = (): string => {
@@ -113,7 +114,7 @@ const headerData = [
   },
 ];
 
-const DashboardHeader = () => {
+const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
   const location = useLocation();
   const currentPath = location.pathname.split("/portal/")[1];
 
@@ -121,14 +122,25 @@ const DashboardHeader = () => {
   const isDashboard = !currentPath;
 
   const currentHeader = headerData.find((item) => item.id === currentPath);
+  const [username, setUsername] = useState<string | null>(null);
+
+    useEffect(() => {
+      // Retrieve the username from localStorage
+      const storedUsername = localStorage.getItem("username");
+      setUsername(storedUsername);
+    }, []);
 
   return (
     <div className="flex justify-between p-4">
+      {/* Hamburger Menu Button (Small Screens) */}
+      <button className="sm:hidden p-2 text-gray-700" onClick={onMenuToggle}>
+        <Menu size={24} />
+      </button>
       <div>
         {isDashboard ? (
           <HeaderDescriptionItem
             icon=""
-            label="Welcome, Hussain"
+            label={`Welcome,${username}`}
             desc="This is your dashboard."
           />
         ) : currentHeader ? (
@@ -137,8 +149,10 @@ const DashboardHeader = () => {
             label={currentHeader.label}
             desc={currentHeader.desc}
           />
-        ) : (
-          <CurrentDate />
+          ) : (
+              <div className="hidden md:block">
+                <CurrentDate />
+              </div>
         )}
       </div>
       <div className="flex justify-center align-center items-center gap-4">
@@ -146,8 +160,8 @@ const DashboardHeader = () => {
         <div className="flex justify-center align-center items-center gap-4">
           <User2 />
           <div className="">
-            <h1>username</h1>
-            <h2 className="font-thin text-sm">userType</h2>
+            <h1>{ username}</h1>
+            {/* <h2 className="font-thin text-sm">userType</h2> */}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger>
@@ -167,7 +181,7 @@ const DashboardHeader = () => {
 
 const HeaderDescriptionItem = ({ icon, label, desc }: DashboardHeaderProps) => {
   return (
-    <div>
+    <div className="">
       {icon && <img src={icon} alt="" />}
       <h2 className="font-bold">{label}</h2>
       <h3 className="text-sm font-thin">{desc ? desc : <CurrentDate />}</h3>

@@ -22,6 +22,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { getClients } from "@/store/data";
+import { getArchiveClients } from "@/store/data"; // Import the function
 import { ChevronDown, LoaderCircle } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import TableBuilder from "../../TableBuilder";
@@ -34,29 +35,30 @@ const ClientTable = <TData, TValue>({
   columns,
 }: ClientTableProps<TData, TValue>) => {
   const [clients, setClients] = useState<TData[]>([]);
-  const [position, setPosition] = useState("bottom");
+  const [archived, setArchived] = useState(false); // State to track archive view
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [loading, setLoading] = useState(true); // Track loading state
-  const [error, setError] = useState<string | null>(null); // Track error state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  // const [rowSelection, setRowSelection] = useState({});
-  // const [pageSize, setPageSize] = useState(10);
+
   useEffect(() => {
-    // Fetch properties data when the component mounts
     const fetchClients = async () => {
       try {
         setLoading(true);
-        const data = await getClients(); // Call your data-fetching function
-        setClients(data); // Set the fetched data into the state
+        const data = archived ? await getArchiveClients() : await getClients(); // Fetch archived or active clients
+        setClients(data);
       } catch (error) {
-        console.error("Error fetching properties:", error);
-        setError("Failed to load properties. Please try again later."); // Set the error state
+        console.error("Error fetching clients:", error);
+        setError("Failed to load clients. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchClients();
-  }, []); // Empty dependency array to fetch data only once when the component mounts
+  }, [archived]); // Refetch data when archive state changes
+
   const table = useReactTable({
     data: clients,
     columns,
@@ -67,15 +69,13 @@ const ClientTable = <TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: getSelection,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      // rowSelection,
     },
-    manualPagination: false,
   });
+
   if (loading) {
     return (
       <div className="flex justify-center h-full items-center py-20">
@@ -90,12 +90,16 @@ const ClientTable = <TData, TValue>({
       </div>
     );
   }
+
   return (
     <div>
-      <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
-        <div className="flex flex-col w-full">
+      <div className="flex flex-col md:flex-row border rounded-xl items-center gap-4 bg-white m-4 p-4">
+        <div className="w-full">
+          <h2 className="text-2xl font-bold">{clients.length}</h2>
+          <h3>{archived ? "Archived Clients" : "Active Clients"}</h3>
+        </div>
+        <div className="flex flex-col w-full gap-2">
           <h1>Quick search a Client</h1>
-
           <Input
             placeholder="Search Client Name..."
             value={
@@ -107,42 +111,16 @@ const ClientTable = <TData, TValue>({
             className="max-w-sm"
           />
         </div>
-
-        <div className="w-full">
-          <h2 className="text-2xl font-bold ">{clients.length}</h2>
-          <h3>Total number of Clients</h3>
+        <div className="w-full flex gap-2 justify-end">
+          <Button onClick={() => setArchived((prev) => !prev)}>
+            {archived ? "View Active Clients" : "View Archive"}
+          </Button>
+          <NavLink to={`/portal/clients/add-client`}>
+            <Button>Add New Client</Button>
+          </NavLink>
         </div>
-        <div className="w-full">
-          <h2>Filter Clients</h2>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                {position} <ChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuRadioGroup
-                value={position}
-                onValueChange={setPosition}
-              >
-                <DropdownMenuRadioItem value="All Clients">
-                  All Clients
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Filter 2">
-                  Filter 2
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Filter 3">
-                  Filter 3
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <NavLink to={`/portal/clients/add-client`}>
-          <Button className="w-full">Add New Client</Button>
-        </NavLink>
       </div>
-      <TableBuilder data={clients} columns={columns} label="All Clients" />
+      <TableBuilder data={clients} columns={columns} label="Clients" />
     </div>
   );
 };

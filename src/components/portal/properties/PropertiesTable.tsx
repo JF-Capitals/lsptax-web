@@ -19,8 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-import { getProperties } from "@/store/data"; // Import your data-fetching function
+import { getProperties, getArchiveProperties } from "@/store/data"; // Import both data-fetching functions
 import { NavLink } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import TableBuilder from "../TableBuilder";
@@ -33,32 +32,35 @@ interface PropertiesTableProps<TData, TValue> {
 const PropertiesTable = <TData, TValue>({
   columns,
 }: PropertiesTableProps<TData, TValue>) => {
-  const [properties, setProperties] = useState<TData[]>([]); // Data state for properties
+  const [properties, setProperties] = useState<TData[]>([]);
+  const [archived, setArchived] = useState(false); // Track if viewing archived properties
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [loading, setLoading] = useState(true); // Track loading state
-  const [error, setError] = useState<string | null>(null); // Track error state
-  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [position, setPosition] = useState("bottom");
 
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        setLoading(true); // Set loading to true while fetching
-        const data = await getProperties(); // Call your data-fetching function
-        setProperties(data); // Set the fetched data into the state
+        setLoading(true);
+        const data = archived
+          ? await getArchiveProperties() // Fetch archived properties if in archived mode
+          : await getProperties(); // Fetch active properties otherwise
+        setProperties(data);
       } catch (error) {
         console.error("Error fetching properties:", error);
-        setError("Failed to load properties. Please try again later."); // Set the error state
+        setError("Failed to load properties. Please try again later.");
       } finally {
-        setLoading(false); // Set loading to false once fetching is done
+        setLoading(false);
       }
     };
 
     fetchProperties();
-  }, []); // Empty dependency array to fetch data only once when the component mounts
+  }, [archived]); // Refetch data when switching between archived and active properties
 
   const table = useReactTable({
     data: properties,
@@ -78,7 +80,7 @@ const PropertiesTable = <TData, TValue>({
       rowSelection,
     },
   });
-  // Render loading state
+
   if (loading) {
     return (
       <div className="flex justify-center h-full items-center py-20">
@@ -87,7 +89,6 @@ const PropertiesTable = <TData, TValue>({
     );
   }
 
-  // Render error state
   if (error) {
     return (
       <div className="flex justify-center items-center py-20 text-red-500">
@@ -101,7 +102,6 @@ const PropertiesTable = <TData, TValue>({
       <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
         <div className="flex flex-col w-full">
           <h1>Quick search a Property</h1>
-
           <Input
             placeholder="Search Property Name..."
             value={
@@ -144,6 +144,11 @@ const PropertiesTable = <TData, TValue>({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        <Button onClick={() => setArchived(!archived)}>
+          {archived ? "View Active" : "View Archived"}
+        </Button>
+
         <NavLink to={`/portal/clients/add-properties`}>
           <Button className="w-full">Add New Property</Button>
         </NavLink>
@@ -151,7 +156,7 @@ const PropertiesTable = <TData, TValue>({
       <TableBuilder
         data={properties}
         columns={columns}
-        label="All Properties"
+        label={archived ? "Archived Properties" : "All Properties"}
       />
     </div>
   );

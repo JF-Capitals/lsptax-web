@@ -3,7 +3,8 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { loginUser } from "@/api/api"; // Assuming you put the function in a utils/api file
+import { useNavigate } from "react-router-dom";
 
 import {
   Form,
@@ -22,39 +23,57 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { NavLink } from "react-router-dom";
-// import { PasswordInput } from "@/components/ui/password-input";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 // Improved schema with additional validation rules
 const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
+  username: z.string(),
   password: z
     .string()
-    .min(6, { message: "Password must be at least 6 characters long" })
-    .regex(/[a-zA-Z0-9]/, { message: "Password must be alphanumeric" }),
+    .min(6, { message: "Password must be at least 6 characters long" }),
 });
 
 export default function LoginPage() {
+    const { toast } = useToast();
+    const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      // Assuming an async login function
-      console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
+      const { username, password } = values;
+      const response = await loginUser(username, password);
+
+      // Assuming response contains token and user info
+      const { token, user } = response;
+
+      // Store the token in localStorage or cookies
+      localStorage.setItem("token", token);
+
+      // Optionally store user info if you need it
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // Show success toast
+      toast({
+        title: "Welcome Back!",
+        description: "Login Success",
+      });
+
+      navigate("/portal/dashboard"); // Relative route
     } catch (error) {
-      console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
+      console.error("Login failed", error);
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: "There was a problem with your request.",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
     }
   }
 
@@ -64,7 +83,7 @@ export default function LoginPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
-            Enter your email and password to login to your account.
+            Enter your username and password to login to your account.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -73,16 +92,16 @@ export default function LoginPage() {
               <div className="grid gap-4">
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="username"
                   render={({ field }) => (
                     <FormItem className="grid gap-2">
-                      <FormLabel htmlFor="email">Email</FormLabel>
+                      <FormLabel htmlFor="username">Username</FormLabel>
                       <FormControl>
                         <Input
-                          id="email"
+                          id="username"
                           placeholder="johndoe@mail.com"
-                          type="email"
-                          autoComplete="email"
+                          type="username"
+                          autoComplete="username"
                           {...field}
                         />
                       </FormControl>
@@ -97,12 +116,6 @@ export default function LoginPage() {
                     <FormItem className="grid gap-2">
                       <div className="flex justify-between items-center">
                         <FormLabel htmlFor="password">Password</FormLabel>
-                        <NavLink
-                          to="#"
-                          className="ml-auto inline-block text-sm underline"
-                        >
-                          Forgot your password?
-                        </NavLink>
                       </div>
                       <FormControl>
                         <Input

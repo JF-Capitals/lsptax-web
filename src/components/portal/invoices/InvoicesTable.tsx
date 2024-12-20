@@ -1,16 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  ColumnDef,
-  // SortingState,
-  // getCoreRowModel,
-  // useReactTable,
-  // getSortedRowModel,
-  // getPaginationRowModel,
-  // ColumnFiltersState,
-  // getFilteredRowModel,
-  // VisibilityState,
-} from "@tanstack/react-table";
-
+import { ColumnDef } from "@tanstack/react-table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { getInvoices } from "@/store/data";
+import { getArchiveInvoices, getInvoices } from "@/store/data";
 import TableBuilder from "../TableBuilder";
 import { ChevronDown, LoaderCircle } from "lucide-react";
 
@@ -31,54 +20,65 @@ const InvoicesTable = <TData, TValue>({
   columns,
 }: InvoicesTableProps<TData, TValue>) => {
   const [invoices, setInvoices] = useState<TData[]>([]);
-  const [filter, setFilter] = useState("completed");
-  const [loading, setLoading] = useState(true); // Track loading state
-  const [error, setError] = useState<string | null>(null); // Track error state
-  // const [sorting, setSorting] = useState<SortingState>([]);
-  // const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  // const [columnVisibility, setColumnVisibility] =
-  //   useState<VisibilityState>({});
-  // const [rowSelection, setRowSelection] = useState({});
+  const [archived, setArchived] = useState(false);
+  const [filteredInvoices, setFilteredInvoices] = useState<TData[]>([]);
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchInvoices = async () => {
+    try {
+      setLoading(true);
+      const data = archived ? await getArchiveInvoices() : await getInvoices(); // Fetch archived or active invoices
+      const invoicesWithDefaults = data.map((invoice: any) => ({
+        ...invoice,
+        type: invoice.type || "Protest", // Default type
+        status: invoice.status || "1", // Default status
+      }));
+      setInvoices(invoicesWithDefaults);
+      setFilteredInvoices(invoicesWithDefaults); // Initial filter state matches all data
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      setError("Failed to load invoices. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch invoices whenever 'archived' state changes
   useEffect(() => {
-    // Fetch properties data when the component mounts
-    const fetchInvoices = async () => {
-      try {
-        setLoading(true);      
-        const data = await getInvoices();
-        const invoicesWithStatus = data.map((invoice: { status: any }) => ({
-          ...invoice,
-          status: invoice.status || "1", // Default status
-        }));
-        setInvoices(invoicesWithStatus);
-      } catch (error) {
-        console.error("Error fetching properties:", error);
-        setError("Failed to load properties. Please try again later."); // Set the error state
-      } finally {
-        setLoading(false);
+    fetchInvoices();
+  }, [archived]); // Trigger re-fetch when archived changes
+
+  useEffect(() => {
+    const applyFilters = () => {
+      let updatedInvoices = invoices;
+
+      // Filter by type
+      if (typeFilter) {
+        updatedInvoices = updatedInvoices.filter(
+          (invoice: any) => invoice.type === typeFilter
+        );
       }
+
+      // Filter by status
+      if (statusFilter) {
+        const statusMap: { [key: string]: string } = {
+          Completed: "0",
+          Pending: "1",
+        };
+        updatedInvoices = updatedInvoices.filter(
+          (invoice: any) => invoice.status === statusMap[statusFilter]
+        );
+      }
+
+      setFilteredInvoices(updatedInvoices);
     };
 
-    fetchInvoices();
-  }, []);
+    applyFilters();
+  }, [typeFilter, statusFilter, invoices, archived]);
 
-  // const table = useReactTable({
-  //   data:invoices,
-  //   columns,
-  //   onSortingChange: setSorting,
-  //   getCoreRowModel: getCoreRowModel(),
-  //   getSortedRowModel: getSortedRowModel(),
-  //   getPaginationRowModel: getPaginationRowModel(),
-  //   onColumnFiltersChange: setColumnFilters,
-  //   getFilteredRowModel: getFilteredRowModel(),
-  //   onColumnVisibilityChange: setColumnVisibility,
-  //   onRowSelectionChange: setRowSelection,
-  //   state: {
-  //     sorting,
-  //     columnFilters,
-  //     columnVisibility,
-  //     rowSelection,
-  //   },
-  // });
   if (loading) {
     return (
       <div className="flex justify-center h-full items-center py-20">
@@ -86,6 +86,7 @@ const InvoicesTable = <TData, TValue>({
       </div>
     );
   }
+
   if (error) {
     return (
       <div className="flex justify-center items-center py-20 text-red-500">
@@ -93,23 +94,58 @@ const InvoicesTable = <TData, TValue>({
       </div>
     );
   }
+
   return (
     <div>
       <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
         <div className="w-full">
-          <h2 className="text-2xl font-bold ">{invoices.length}</h2>
+          <h2 className="text-2xl font-bold">{filteredInvoices.length}</h2>
           <h3>Total number of Invoices</h3>
         </div>
         <div className="w-full">
-          <h2>Filter Invoices</h2>
+          <h2>Type</h2>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
-                {filter} <ChevronDown />
+                {typeFilter || "All Types"} <ChevronDown />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
-              <DropdownMenuRadioGroup value={filter} onValueChange={setFilter}>
+              <DropdownMenuRadioGroup
+                value={typeFilter || "All"}
+                onValueChange={(value) =>
+                  setTypeFilter(value === "All" ? null : value)
+                }
+              >
+                <DropdownMenuRadioItem value="All">
+                  All Types
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="Protest">
+                  Protest
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="Arbitration">
+                  Arbitration
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="w-full">
+          <h2>Status</h2>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                {statusFilter || "All Statuses"} <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuRadioGroup
+                value={statusFilter || "All"}
+                onValueChange={(value) =>
+                  setStatusFilter(value === "All" ? null : value)
+                }
+              >
+                <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="Completed">
                   Completed
                 </DropdownMenuRadioItem>
@@ -120,8 +156,15 @@ const InvoicesTable = <TData, TValue>({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        <Button onClick={() => setArchived((prev) => !prev)}>
+          {archived ? "View Active Invoices" : "View Archive"}
+        </Button>
       </div>
-      <TableBuilder data={invoices} columns={columns} label="Invoices" />
+      <TableBuilder
+        data={filteredInvoices}
+        columns={columns}
+        label="Filtered Invoices"
+      />
     </div>
   );
 };

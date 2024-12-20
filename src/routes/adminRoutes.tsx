@@ -1,6 +1,5 @@
 // adminRoutes.tsx
 import { Routes, Route } from "react-router-dom";
-// import PrivateRoute from "./PrivateRoute";
 // import PropertiesTable from "@/components/portal/properties/PropertiesTable";
 import InvoicesTable from "@/components/portal/invoices/InvoicesTable";
 import ContractTable from "@/components/portal/forms/contracts/ContractsTable";

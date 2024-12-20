@@ -1,14 +1,15 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Archive, FilePenLine, House, Plus } from "lucide-react";
 
 export type Clients = {
   clientId: string;
@@ -41,27 +42,49 @@ export const clientsColumn: ColumnDef<Clients>[] = [
       const client = row.original;
 
       return (
-        <div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="flex align-center items-center justify-center"
-              >
-                {/* <MoreHorizontal className="h-4 w-4" /> */}
-                <span className="text-blue-400">View More</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-gray-300">
-              <DropdownMenuItem onClick={() => console.log({ client })}>
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem>Add Properties</DropdownMenuItem>
-              <DropdownMenuItem>Show Properties</DropdownMenuItem>
-              <DropdownMenuItem>Delete Client</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <TooltipProvider>
+          <div className="flex gap-2 border">
+            {/* Edit Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>  
+                <Button size="icon" variant="ghost">
+                  <FilePenLine />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Edit Client</TooltipContent>
+            </Tooltip>
+
+            {/* Add Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <Plus />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Add Property</TooltipContent>
+            </Tooltip>
+
+            {/* House Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <House />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>List Property</TooltipContent>
+            </Tooltip>
+
+            {/* Archive Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <Archive />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Archive Client</TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
       );
     },
   },

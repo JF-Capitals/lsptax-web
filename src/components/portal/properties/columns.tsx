@@ -1,24 +1,26 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-// import { Checkbox } from "@/components/ui/checkbox";
-import { MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import formatDate from "@/utils/formatDate";
+import { Archive, Eye, File, FilePenLine } from "lucide-react";
+import ViewModal from "@/components/modals/ViewModal";
+import ArchiveModal from "@/components/modals/ArchiveModal";
+import { useState } from "react";
+import { getSingleProperty } from "@/store/data"; // Import the new function for fetching a single property
 
 export type PropertyDetails = {
   type: string;
   class: string;
   assessor: string;
-  address: string;
+  address: string[];
 };
 
 export type CADOwner = {
@@ -38,28 +40,6 @@ export type Properties = {
 };
 
 export const propertiesColumn: ColumnDef<Properties>[] = [
-  // {
-  //   id: "select",
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={
-  //         table.getIsAllPageRowsSelected() ||
-  //         (table.getIsSomePageRowsSelected() && "indeterminate")
-  //       }
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
   {
     accessorKey: "clientId",
     header: "Client #",
@@ -75,10 +55,26 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
       const details = row.original.propertyDetails;
       return (
         <div>
-          <div>Type: {details.type}</div>
-          <div>Class: {details.class}</div>
-          <div>Assessor: {details.assessor}</div>
-          <div>Address: {details.address}</div>
+          <div className="flex flex-col">
+            <h1 className="text-xs font-bold text-muted-foreground">Type:</h1>
+            {details.type}
+          </div>
+          <div className="flex flex-col">
+            <h1 className="text-xs font-bold text-muted-foreground">Class:</h1>{" "}
+            {details.class ? details.class : "N/A"}
+          </div>
+          <div className="flex flex-col">
+            <h1 className="text-xs font-bold text-muted-foreground">
+              Assessor:
+            </h1>
+            {details.assessor ? details.assessor : "N/A"}
+          </div>{" "}
+          <div className="flex flex-col">
+            <h1 className="text-xs font-bold text-muted-foreground">
+              Address:
+            </h1>
+            {details.address ? details.address.join(", ") : "N/A"}
+          </div>
         </div>
       );
     },
@@ -89,10 +85,23 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
     cell: ({ row }) => {
       const owner = row.original.cadOwner;
       return (
-        <div>
-          <div>Name: {owner.name}</div>
-          <div>Address: {owner.address}</div>
-          <div>Mailing Address: {owner.mailingAddress}</div>
+        <div className="">
+          <div className="flex flex-col">
+            <h1 className="text-xs font-bold text-muted-foreground">Name:</h1>
+            {owner.name}
+          </div>
+          <div className="flex flex-col">
+            <h1 className="text-xs font-bold text-muted-foreground">
+              Address:
+            </h1>{" "}
+            {owner.address ? owner.address : "N/A"}
+          </div>
+          <div className="flex flex-col">
+            <h1 className="text-xs font-bold text-muted-foreground">
+              Mailing Address:
+            </h1>
+            {owner.mailingAddress ? owner.mailingAddress : "N/A"}
+          </div>
         </div>
       );
     },
@@ -100,6 +109,10 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
   {
     accessorKey: "hearingDate",
     header: "Hearing Date",
+    cell: ({ row }) => {
+      const hearingDate = row.original.hearingDate;
+      return <div className="">{formatDate(hearingDate)}</div>;
+    },
   },
   {
     accessorKey: "aoaSigned",
@@ -121,25 +134,112 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
     header: "Actions",
     id: "actions",
     cell: ({ row }) => {
-      const client = row.original;
+      const propertyId = parseInt( row.original.propertyAccount); // Assuming propertyAccount is the unique identifier
+      const [activeModal, setActiveModal] = useState<string | null>(null);
+      const [propertyDetails, setPropertyDetails] = useState<Properties | null>(
+        null
+      );
+
+      const handleViewProperty = async () => {
+        const data = await getSingleProperty({ propertyId });
+        setPropertyDetails(data[0]); // Assuming the response is an array, take the first item
+        setActiveModal("view");
+      };
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-gray-300">
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => console.log({ client })}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem>Add Properties</DropdownMenuItem>
-            <DropdownMenuItem>Show Properties</DropdownMenuItem>
-            <DropdownMenuItem>Delete Client</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+          <TooltipProvider>
+            <div className="flex">
+              {/* Edit Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost">
+                    <FilePenLine />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Edit Property</TooltipContent>
+              </Tooltip>
+
+              {/* View Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={handleViewProperty}
+                  >
+                    <Eye />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>View Property</TooltipContent>
+              </Tooltip>
+
+              {/* House Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost">
+                    <File />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Invoices</TooltipContent>
+              </Tooltip>
+
+              {/* Archive Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost">
+                    <Archive />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Archive Property</TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
+
+          {/* Modals */}
+          <ViewModal
+            isOpen={activeModal === "view"}
+            onClose={() => setActiveModal(null)}
+            data={propertyDetails} // Pass the fetched property details to the modal
+            renderData={(data) => {
+              // Render property details inside the modal
+              return (
+                <div>
+                  <div className="flex flex-col">
+                    <h1 className="text-xs font-bold text-muted-foreground">
+                      Type:
+                    </h1>
+                    {data?.propertyDetails.type}
+                  </div>
+                  <div className="flex flex-col">
+                    <h1 className="text-xs font-bold text-muted-foreground">
+                      Class:
+                    </h1>{" "}
+                    {data?.propertyDetails.class || "N/A"}
+                  </div>
+                  <div className="flex flex-col">
+                    <h1 className="text-xs font-bold text-muted-foreground">
+                      Assessor:
+                    </h1>
+                    {data?.propertyDetails.assessor || "N/A"}
+                  </div>{" "}
+                  <div className="flex flex-col">
+                    <h1 className="text-xs font-bold text-muted-foreground">
+                      Address:
+                    </h1>
+                    {data?.propertyDetails.address?.join(", ") || "N/A"}
+                  </div>
+                </div>
+              );
+            }}
+          />
+          <ArchiveModal
+            isOpen={activeModal === "archive"}
+            onClose={() => setActiveModal(null)}
+            title="Are you sure?"
+            description="This will archive the property"
+          />
+        </>
       );
     },
   },
