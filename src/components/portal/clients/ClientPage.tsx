@@ -58,9 +58,9 @@ const ClientPage = () => {
     }
   }, [clientId]);
 
-  const renderData = (data: string | null | undefined) => {
-    return data ? data : "N/A";
-  };
+  // const renderData = (data: string | null | undefined) => {
+  //   return data ? data : "N/A";
+  // };
 
   if (!clientData) {
     return (

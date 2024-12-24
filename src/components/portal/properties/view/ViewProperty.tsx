@@ -9,7 +9,6 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import formatDate from "@/utils/formatDate";
 import { Button } from "@/components/ui/button";
 import TableBuilder from "../../TableBuilder";
-import YearTable from "../yeardata/YearTable";
 import { propertyYearDataColumn } from "../yeardata/columns";
 
 const ViewProperty = () => {

@@ -94,6 +94,7 @@ export default function EditProperty() {
     try {
       // Call the API or function to update the property
       // await updateProperty({ propertyId, data: values });
+      console.log("PROPERTY FORM DATA :",{values})
       toast.success("Property updated successfully!");
     } catch (error) {
       toast.error("Failed to update property. Please try again.");
