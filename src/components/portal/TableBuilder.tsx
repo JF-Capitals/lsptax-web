@@ -48,6 +48,7 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
   const [rowSelection, setRowSelection] = useState({});
   const [pageSize, setPageSize] = useState(10);
   const [selectedRow, setSelectedRow] = useState<any | null>(null);
+  const [pageIndex, setPageIndex] = useState(0); // Add a pageIndex state
 
   const table = useReactTable({
     data,
@@ -65,12 +66,23 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination: {
+        pageSize,
+        pageIndex, // Set the pageIndex in the state
+      },
     },
     manualPagination: false,
   });
 
+  // Update the table's page size whenever it changes
+  const handlePageSizeChange = (value: number) => {
+    setPageSize(value);
+    setPageIndex(0); // Reset to first page when page size changes
+    table.setPageSize(value);
+  };
+
   return (
-    <div className="rounded-xl border m-4 bg-white p-4 ">
+    <div className="rounded-xl border m-4 bg-white p-4 flex flex-col overflow-y-auto h-[calc(100vh-230px)] ">
       <div className="pb-8 flex justify-between">
         <h2 className="text-2xl font-bold">{label}</h2>
         <div className="text-sm">
@@ -84,7 +96,7 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
             <DropdownMenuContent align="end">
               <DropdownMenuRadioGroup
                 value={pageSize.toString()}
-                onValueChange={(value) => setPageSize(Number(value))}
+                onValueChange={(value) => handlePageSizeChange(Number(value))}
               >
                 <DropdownMenuRadioItem value="10">10</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="25">25</DropdownMenuRadioItem>
@@ -92,29 +104,23 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
                 <DropdownMenuRadioItem value="100">100</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu>{" "}
           per page
         </div>
       </div>
-      <div
-        className="overflow-auto scrollbar-custom max-h-[calc(100vh-200px)]"
-        style={{ minHeight: "300px" }}
-      >
-        <div className="w-full overflow-x-auto h-96">
-          <Table className="table-fixed min-w-full">
+
+      <div className="overflow-auto scrollbar-custom flex-1">
+        <div className="overflow-x-auto h-full">
+          <Table className="table-auto min-w-full">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header, index) => (
                     <TableHead
                       key={header.id}
-                      className={
-                        header.id === "select"
-                          ? ""
-                          : `cursor-pointer select-none ${
-                              index > 1 ? "hidden md:table-cell" : ""
-                            }`
-                      }
+                      className={`cursor-pointer select-none ${
+                        index > 1 ? "hidden md:table-cell" : ""
+                      } text-gray-700 font-semibold`}
                       onClick={
                         header.id === "select"
                           ? undefined
@@ -135,8 +141,6 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
                           null)}
                     </TableHead>
                   ))}
-                  {/* Add 'Actions' column header only if visible */}
-                  <TableHead className="sm:hidden">Actions</TableHead>
                 </TableRow>
               ))}
             </TableHeader>
@@ -161,7 +165,6 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
                         )}
                       </TableCell>
                     ))}
-                    {/* Action column - only visible on small screens */}
                     <TableCell className="sm:hidden">
                       <Dialog>
                         <DialogTrigger asChild>
@@ -178,19 +181,17 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
                             <DialogTitle>Row Details</DialogTitle>
                           </DialogHeader>
                           <div className="p-4">
-                            {/* Map through selectedRow details */}
                             {selectedRow &&
-                              Object.entries(selectedRow).map(
-                                ([key]) => (
-                                  <div
-                                    key={key}
-                                    className="flex justify-between py-2"
-                                  >
-                                    <span className="font-medium">{key}:</span>
-                                    <span>{selectedRow.key}</span>
-                                  </div>
-                                )
-                              )}
+                              Object.entries(selectedRow).map(([key]) => (
+                                <div
+                                  key={key}
+                                  className="flex justify-between py-2"
+                                >
+                                  <span className="font-medium">{key}:</span>
+                                  <span>{selectedRow[key]}</span>{" "}
+                                  {/* Fix: Use selectedRow[key] */}
+                                </div>
+                              ))}
                           </div>
                         </DialogContent>
                       </Dialog>
@@ -211,19 +212,26 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
           </Table>
         </div>
       </div>
+
       <div className="flex items-center justify-start space-x-2 py-4">
         <Button
-          variant="outline"
+          variant={"blue"}
           size="sm"
-          onClick={() => table.previousPage()}
+          onClick={() => {
+            setPageIndex((old) => Math.max(old - 1, 0)); // Go to the previous page
+            table.previousPage();
+          }}
           disabled={!table.getCanPreviousPage()}
         >
           Previous
         </Button>
         <Button
-          variant="outline"
+          variant={"blue"}
           size="sm"
-          onClick={() => table.nextPage()}
+          onClick={() => {
+            setPageIndex((old) => old + 1); // Go to the next page
+            table.nextPage();
+          }}
           disabled={!table.getCanNextPage()}
         >
           Next

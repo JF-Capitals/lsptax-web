@@ -65,6 +65,9 @@ export default {
       animation: {
         vibrate: "vibrate 0.2s ease-in-out infinite",
       },
+      fontFamily: {
+        sans: ["Nunito", "sans-serif"],
+      },
     },
   },
   plugins: [tailwindcssAnimate, tailwindScrollbar],

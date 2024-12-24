@@ -19,7 +19,6 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { useState } from "react";
-import ArchiveModal from "@/components/modals/ArchiveModal";
 
 export type ContractOwner = {
   name: string;
@@ -72,7 +71,7 @@ const EditModal = ({
             className="block w-full rounded-md border-gray-300 p-2"
           />
           <div className="flex justify-end">
-            <Button type="submit" className="mt-4">
+            <Button type="submit" variant={"blue"} className="mt-4">
               Save Changes
             </Button>
           </div>
@@ -110,7 +109,7 @@ const SubContractModal = ({
             className="block w-full rounded-md border-gray-300 p-2"
           />
           <div className="flex justify-end">
-            <Button type="submit" className="mt-4">
+            <Button type="submit" variant={"blue"} className="mt-4">
               Add Sub-contract Owner
             </Button>
           </div>
@@ -138,79 +137,79 @@ export const contractOwnerColumns: ColumnDef<ContractOwner>[] = [
     accessorKey: "percent",
     header: "Percent",
   },
-  {
-    header: "Actions",
-    id: "actions",
-    cell: ({ row }) => {
-      const client = row.original;
+  // {
+  //   header: "Actions",
+  //   id: "actions",
+  //   cell: ({ row }) => {
+  //     const client = row.original;
 
-      const [activeModal, setActiveModal] = useState<string | null>(null);
+  //     const [activeModal, setActiveModal] = useState<string | null>(null);
 
-      return (
-        <>
-          <TooltipProvider>
-            <div className="flex gap-2">
-              {/* Edit Button */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setActiveModal("edit")}
-                  >
-                    <FilePenLine />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Edit</TooltipContent>
-              </Tooltip>
+  //     return (
+  //       <>
+  //         <TooltipProvider>
+  //           <div className="flex gap-2">
+  //             {/* Edit Button */}
+  //             <Tooltip>
+  //               <TooltipTrigger asChild>
+  //                 <Button
+  //                   size="icon"
+  //                   variant="ghost"
+  //                   onClick={() => setActiveModal("edit")}
+  //                 >
+  //                   <FilePenLine />
+  //                 </Button>
+  //               </TooltipTrigger>
+  //               <TooltipContent>Edit</TooltipContent>
+  //             </Tooltip>
 
-              {/* Add Button */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setActiveModal("subcontract")}
-                  >
-                    <Plus />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Sub Contract Owner</TooltipContent>
-              </Tooltip>
+  //             {/* Add Button */}
+  //             <Tooltip>
+  //               <TooltipTrigger asChild>
+  //                 <Button
+  //                   size="icon"
+  //                   variant="ghost"
+  //                   onClick={() => setActiveModal("subcontract")}
+  //                 >
+  //                   <Plus />
+  //                 </Button>
+  //               </TooltipTrigger>
+  //               <TooltipContent>Sub Contract Owner</TooltipContent>
+  //             </Tooltip>
 
-              {/* Archive Button */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setActiveModal("archive")}
-                  >
-                    <Archive />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Archive Client</TooltipContent>
-              </Tooltip>
-            </div>
-          </TooltipProvider>
+  //             {/* Archive Button */}
+  //             <Tooltip>
+  //               <TooltipTrigger asChild>
+  //                 <Button
+  //                   size="icon"
+  //                   variant="ghost"
+  //                   onClick={() => setActiveModal("archive")}
+  //                 >
+  //                   <Archive />
+  //                 </Button>
+  //               </TooltipTrigger>
+  //               <TooltipContent>Archive Client</TooltipContent>
+  //             </Tooltip>
+  //           </div>
+  //         </TooltipProvider>
 
-          <ArchiveModal
-            isOpen={activeModal === "archive"}
-            onClose={() => setActiveModal(null)}
-            title="Are you sure?"
-            description="this will archive the contract owner"
-          />
-          <EditModal
-            isOpen={activeModal === "edit"}
-            setIsOpen={() => setActiveModal(null)}
-            client={client}
-          />
-          <SubContractModal
-            isOpen={activeModal === "subcontract"}
-            setIsOpen={() => setActiveModal(null)}
-          />
-        </>
-      );
-    },
-  },
+  //         {/* <ArchiveModal
+  //           isOpen={activeModal === "archive"}
+  //           onClose={() => setActiveModal(null)}
+  //           title="Are you sure?"
+  //           description="this will archive the contract owner"
+  //         /> */}
+  //         <EditModal
+  //           isOpen={activeModal === "edit"}
+  //           setIsOpen={() => setActiveModal(null)}
+  //           client={client}
+  //         />
+  //         <SubContractModal
+  //           isOpen={activeModal === "subcontract"}
+  //           setIsOpen={() => setActiveModal(null)}
+  //         />
+  //       </>
+  //     );
+  //   },
+  // },
 ];

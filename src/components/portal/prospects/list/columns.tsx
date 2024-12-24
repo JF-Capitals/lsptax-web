@@ -37,67 +37,67 @@ export const prospectColumn: ColumnDef<Prospects>[] = [
     accessorKey: "mobile",
     header: "Mobile",
   },
-  {
-    header: "Actions",
-    id: "actions",
-    cell: ({ row }) => {
-      const client = row.original;
-      console.log(client.id)
+  // {
+  //   header: "Actions",
+  //   id: "actions",
+  //   cell: ({ row }) => {
+  //     const client = row.original;
+  //     console.log(client.id)
 
-      return (
-        <TooltipProvider>
-          <div className="flex">
-            {/* Edit Button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost">
-                  <FilePenLine />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Edit Prospect</TooltipContent>
-            </Tooltip>
+  //     return (
+  //       <TooltipProvider>
+  //         <div className="flex">
+  //           {/* Edit Button */}
+  //           <Tooltip>
+  //             <TooltipTrigger asChild>
+  //               <Button size="icon" variant="ghost">
+  //                 <FilePenLine />
+  //               </Button>
+  //             </TooltipTrigger>
+  //             <TooltipContent>Edit Prospect</TooltipContent>
+  //           </Tooltip>
 
-            {/* Add Button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost">
-                  <Plus />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Add Property</TooltipContent>
-            </Tooltip>
+  //           {/* Add Button */}
+  //           <Tooltip>
+  //             <TooltipTrigger asChild>
+  //               <Button size="icon" variant="ghost">
+  //                 <Plus />
+  //               </Button>
+  //             </TooltipTrigger>
+  //             <TooltipContent>Add Property</TooltipContent>
+  //           </Tooltip>
 
-            {/* House Button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost">
-                  <House />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>List Property</TooltipContent>
-            </Tooltip>
+  //           {/* House Button */}
+  //           <Tooltip>
+  //             <TooltipTrigger asChild>
+  //               <Button size="icon" variant="ghost">
+  //                 <House />
+  //               </Button>
+  //             </TooltipTrigger>
+  //             <TooltipContent>List Property</TooltipContent>
+  //           </Tooltip>
 
-            {/* Archive Button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost">
-                  <Archive />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Archive Prospect</TooltipContent>
-            </Tooltip>
+  //           {/* Archive Button */}
+  //           <Tooltip>
+  //             <TooltipTrigger asChild>
+  //               <Button size="icon" variant="ghost">
+  //                 <Archive />
+  //               </Button>
+  //             </TooltipTrigger>
+  //             <TooltipContent>Archive Prospect</TooltipContent>
+  //           </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost">
-                  <BookPlus />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Move to Client</TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
-      );
-    },
-  },
+  //           <Tooltip>
+  //             <TooltipTrigger asChild>
+  //               <Button size="icon" variant="ghost">
+  //                 <BookPlus />
+  //               </Button>
+  //             </TooltipTrigger>
+  //             <TooltipContent>Move to Client</TooltipContent>
+  //           </Tooltip>
+  //         </div>
+  //       </TooltipProvider>
+  //     );
+  //   },
+  // },
 ];

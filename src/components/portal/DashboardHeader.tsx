@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLocation } from "react-router-dom";
 import { BellIcon, ChevronDown, Menu, User2 } from "lucide-react";
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
 
 const CurrentDate: React.FC = () => {
   const formatDate = (): string => {
@@ -122,13 +122,13 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
   const isDashboard = !currentPath;
 
   const currentHeader = headerData.find((item) => item.id === currentPath);
-  const [username, setUsername] = useState<string | null>(null);
+  // const [username, setUsername] = useState<string | null>("Hussain");
 
-    useEffect(() => {
-      // Retrieve the username from localStorage
-      const storedUsername = localStorage.getItem("username");
-      setUsername(storedUsername);
-    }, []);
+    // useEffect(() => {
+    //   // Retrieve the username from localStorage
+    //   const storedUsername = localStorage.getItem("username");
+    //   setUsername(storedUsername);
+    // }, []);
 
   return (
     <div className="flex justify-between p-4">
@@ -140,7 +140,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
         {isDashboard ? (
           <HeaderDescriptionItem
             icon=""
-            label={`Welcome,${username}`}
+            label={`Welcome,${`Hussain`}`}
             desc="This is your dashboard."
           />
         ) : currentHeader ? (
@@ -149,10 +149,10 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
             label={currentHeader.label}
             desc={currentHeader.desc}
           />
-          ) : (
+        ) : (
               <div className="hidden md:block">
-                <CurrentDate />
-              </div>
+                <HeaderDescriptionItem icon={""} label={"Welcome, Hussain"} desc={""}/>
+          </div>
         )}
       </div>
       <div className="flex justify-center align-center items-center gap-4">
@@ -160,7 +160,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
         <div className="flex justify-center align-center items-center gap-4">
           <User2 />
           <div className="">
-            <h1>{ username}</h1>
+            <h1>{`Hussain`}</h1>
             {/* <h2 className="font-thin text-sm">userType</h2> */}
           </div>
           <DropdownMenu>
@@ -183,7 +183,7 @@ const HeaderDescriptionItem = ({ icon, label, desc }: DashboardHeaderProps) => {
   return (
     <div className="">
       {icon && <img src={icon} alt="" />}
-      <h2 className="font-bold">{label}</h2>
+      <h2 className="font-extrabold text-xl">{label}</h2>
       <h3 className="text-sm font-thin">{desc ? desc : <CurrentDate />}</h3>
     </div>
   );

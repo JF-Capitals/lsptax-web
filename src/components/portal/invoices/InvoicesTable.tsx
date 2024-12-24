@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   DropdownMenu,
@@ -8,9 +9,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { getArchiveInvoices, getInvoices } from "@/store/data";
+import {
+  getArchiveInvoices,
+  getInvoices,
+  getInvoiceByPropertyId,
+} from "@/store/data";
 import TableBuilder from "../TableBuilder";
-import { ChevronDown, LoaderCircle } from "lucide-react";
+import { Archive, ChevronDown, LoaderCircle } from "lucide-react";
 
 interface InvoicesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -19,6 +24,7 @@ interface InvoicesTableProps<TData, TValue> {
 const InvoicesTable = <TData, TValue>({
   columns,
 }: InvoicesTableProps<TData, TValue>) => {
+  const location = useLocation();
   const [invoices, setInvoices] = useState<TData[]>([]);
   const [archived, setArchived] = useState(false);
   const [filteredInvoices, setFilteredInvoices] = useState<TData[]>([]);
@@ -27,29 +33,47 @@ const InvoicesTable = <TData, TValue>({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchInvoices = async () => {
-    try {
-      setLoading(true);
-      const data = archived ? await getArchiveInvoices() : await getInvoices(); // Fetch archived or active invoices
-      const invoicesWithDefaults = data.map((invoice: any) => ({
-        ...invoice,
-        type: invoice.type || "Protest", // Default type
-        status: invoice.status || "1", // Default status
-      }));
-      setInvoices(invoicesWithDefaults);
-      setFilteredInvoices(invoicesWithDefaults); // Initial filter state matches all data
-    } catch (error) {
-      console.error("Error fetching invoices:", error);
-      setError("Failed to load invoices. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch invoices whenever 'archived' state changes
   useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        setLoading(true);
+
+        // Extract query parameters from the URL
+        const params = new URLSearchParams(location.search);
+        const propertyId = params.get("propertyId");
+
+        let data;
+
+        if (propertyId) {
+          // Fetch invoices by propertyId
+          data = await getInvoiceByPropertyId({
+            propertyId: Number(propertyId),
+          });
+        } else if (archived) {
+          // Fetch archived invoices
+          data = await getArchiveInvoices();
+        } else {
+          // Fetch all invoices
+          data = await getInvoices();
+        }
+
+        const invoicesWithDefaults = data.map((invoice: any) => ({
+          ...invoice,
+          type: invoice.type || "Protest", // Default type
+          status: invoice.status || "1", // Default status
+        }));
+        console.log(data);
+        setInvoices(invoicesWithDefaults);
+        setFilteredInvoices(invoicesWithDefaults); // Initial filter state matches all data
+      } catch (error) {
+        console.error("Error fetching invoices:", error);
+        setError("Failed to load invoices. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchInvoices();
-  }, [archived]); // Trigger re-fetch when archived changes
+  }, [archived, location.search]); // Trigger re-fetch when archived or URL query changes
 
   useEffect(() => {
     const applyFilters = () => {
@@ -77,7 +101,7 @@ const InvoicesTable = <TData, TValue>({
     };
 
     applyFilters();
-  }, [typeFilter, statusFilter, invoices, archived]);
+  }, [typeFilter, statusFilter, invoices]);
 
   if (loading) {
     return (
@@ -156,7 +180,12 @@ const InvoicesTable = <TData, TValue>({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <Button onClick={() => setArchived((prev) => !prev)}>
+        <Button
+          variant={"blue"}
+          className=""
+          onClick={() => setArchived(!archived)}
+        >
+          <Archive />
           {archived ? "View Active Invoices" : "View Archive"}
         </Button>
       </div>

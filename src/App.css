@@ -39,10 +39,13 @@
 
 #root {
   margin: 0 auto;
-  overflow-x:hidden
   /* text-align: center; */
 }
 
+body{
+  margin: 0 !important;
+  padding: 0 !important ;
+}
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);

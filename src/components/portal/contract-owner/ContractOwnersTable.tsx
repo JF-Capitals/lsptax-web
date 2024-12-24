@@ -83,6 +83,10 @@ const ContractOwnerTable = <TData, TValue>({
   return (
     <div>
       <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
+        <div className="w-full">
+          <h2 className="text-2xl font-bold ">{contractOwners.length}</h2>
+          <h3>Total number of Contract Owners</h3>
+        </div>
         <div className="flex flex-col w-full">
           <h1>Quick search a Contract Owner</h1>
 
@@ -94,10 +98,6 @@ const ContractOwnerTable = <TData, TValue>({
             }
             className="max-w-sm"
           />
-        </div>
-        <div className="w-full">
-          <h2 className="text-2xl font-bold ">{contractOwners.length}</h2>
-          <h3>Total number of Contract Owners</h3>
         </div>
       </div>
       <TableBuilder

@@ -70,7 +70,7 @@ export default function AddClientForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 max-w-4xl mx-auto py-10 px-6 bg-white rounded-lg shadow-lg"
+        className="space-y-8 m-3 py-10 px-6 bg-white rounded-lg shadow-lg"
       >
         {/* Client Details Section */}
         <div className="border-b pb-4">
@@ -78,7 +78,7 @@ export default function AddClientForm() {
             Client Information
           </h1>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <div>
               <FormField
                 control={form.control}
@@ -114,9 +114,7 @@ export default function AddClientForm() {
                 )}
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
             <div>
               <FormField
                 control={form.control}
@@ -154,7 +152,7 @@ export default function AddClientForm() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <div>
               <FormField
                 control={form.control}
@@ -191,9 +189,7 @@ export default function AddClientForm() {
                 )}
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
             <div>
               <FormField
                 control={form.control}
@@ -244,7 +240,7 @@ export default function AddClientForm() {
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full sm:w-[240px] pl-3 text-left font-normal",
+                          "w-full sm:w-[240px] pl-3 mx-4 text-left font-normal",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -256,7 +252,7 @@ export default function AddClientForm() {
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 bg-g-100 text-black" align="start">
                       <Calendar
                         mode="single"
                         selected={field.value}
@@ -278,7 +274,7 @@ export default function AddClientForm() {
             Additional Information
           </h1>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <div>
               <FormField
                 control={form.control}
@@ -314,9 +310,7 @@ export default function AddClientForm() {
                 )}
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
             <div>
               <FormField
                 control={form.control}
@@ -375,13 +369,11 @@ export default function AddClientForm() {
         </div>
 
         {/* Submit Button */}
-        <Button
-          type="submit"
-          className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700"
-        >
+        <Button type="submit" variant={"blue"} className="mt-6 w-64">
           Submit
         </Button>
       </form>
     </Form>
   );
 }
+
