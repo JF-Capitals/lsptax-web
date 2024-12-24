@@ -20,19 +20,26 @@ import AddProspect from "@/components/portal/prospects/add/AddProspects";
 import PropertiesTable from "@/components/portal/properties/PropertiesTable";
 import { propertiesColumn } from "@/components/portal/properties/columns";
 import PropertyForm from "@/components/portal/properties/add/PropertyForm";
+import EditProperty from "@/components/portal/properties/edit/EditProperty";
+import ViewProperty from "@/components/portal/properties/view/ViewProperty";
+import AgentForm from "@/components/portal/forms/agent/AgentForm";
+import ClientPage  from "@/components/portal/clients/ClientPage";
+import ContractForm from "@/components/portal/forms/contracts/ContractForm";
+
 
 const AdminRoutes = () => {
   return (
     <Routes>
       {/* <Route element={<PrivateRoute />}> */}
-      <Route path="/portal" element={<Dashboard />} />
+      <Route path="/*" element={<Dashboard />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route
         path="/properties"
         element={<PropertiesTable columns={propertiesColumn} />}
       />
       <Route path="/add-properties" element={<PropertyForm />} />
-      <Route path="/edit-propertie" element={<PropertyForm  />} />
+      <Route path="/property" element={<ViewProperty />} />
+      <Route path="/edit-properties" element={<EditProperty />} />
       <Route
         path="/invoices"
         element={<InvoicesTable columns={invoicesColumn} />}
@@ -50,6 +57,7 @@ const AdminRoutes = () => {
         element={<ClientTable columns={clientsColumn} />}
       />
       <Route path="/clients/add-client" element={<AddClient />} />
+      <Route path="/client" element={<ClientPage />} />
       <Route path="/prospects/add-prospect" element={<AddProspect />} />
       <Route
         path="/forms/agent"
@@ -59,6 +67,8 @@ const AdminRoutes = () => {
         path="/prospects/list-prospect"
         element={<ProspectTable columns={prospectColumn} />}
       />
+      <Route path="/agent-form" element={<AgentForm />} />
+      <Route path="/contract-form" element={<ContractForm />} />
 
       {/* </Route> */}
     </Routes>

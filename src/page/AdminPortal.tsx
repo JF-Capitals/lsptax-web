@@ -8,19 +8,19 @@ const AdminPortal = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div className="bg-[#F8F9FD]">
-      <div className="flex">
+    <div className="bg-[#F8F9FD] border">
+      <div className="flex h-dvh">
         {/* Side Menu */}
         <div
           className={`fixed z-40 top-0 left-0 h-full bg-white shadow-lg transition-transform transform ${
             isMenuOpen ? "translate-x-0" : "-translate-x-full"
-          } sm:relative sm:translate-x-0 sm:flex sm:w-64`}
+          } sm:relative sm:translate-x-0 sm:flex sm:w-32`}
         >
           <SideMenu />
         </div>
 
         {/* Main Content */}
-        <div className="flex-1">
+        <div className="flex-1 h-full  overflow-y-auto">
           <DashboardHeader onMenuToggle={() => setIsMenuOpen(!isMenuOpen)} />
           <Routes>
             <Route path="/*" element={<AdminRoutes />} />

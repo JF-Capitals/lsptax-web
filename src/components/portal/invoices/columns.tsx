@@ -1,15 +1,6 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Archive, Copy, Send } from "lucide-react";
 import formatDate from "@/utils/formatDate";
 
 export type Property = {
@@ -31,10 +22,14 @@ export const invoicesColumn: ColumnDef<Invoices>[] = [
   {
     accessorKey: "id",
     header: "Invoice #",
-  },
-  {
-    accessorKey: "type",
-    header: "Type",
+    cell: ({ row }) => {
+      const id = row.original.id;
+      return (
+        <div className="text-blue-400 font-bold">
+          #{id}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "property",
@@ -47,7 +42,9 @@ export const invoicesColumn: ColumnDef<Invoices>[] = [
             <h1 className="text-xs font-bold text-muted-foreground">
               Account #:
             </h1>
-            <span className="text-wrap w-8">{details.account}</span>
+            <h1 className="text-wrap">
+              {details.account}
+            </h1>
           </div>
           <div className="flex flex-col">
             <h1 className="text-xs font-bold text-muted-foreground">
@@ -58,6 +55,10 @@ export const invoicesColumn: ColumnDef<Invoices>[] = [
         </div>
       );
     },
+  },
+  {
+    accessorKey: "type",
+    header: "Type",
   },
   {
     accessorKey: "amount",
@@ -99,7 +100,7 @@ export const invoicesColumn: ColumnDef<Invoices>[] = [
         .map((reminder) => formatDate(reminder)); // Use the existing formatDate function
 
       // Debug output
-      console.log("Formatted Reminders:", formattedReminders);
+      // console.log("Formatted Reminders:", formattedReminders);
 
       return (
         <ul>
@@ -111,48 +112,52 @@ export const invoicesColumn: ColumnDef<Invoices>[] = [
     },
   },
 
-  {
-    header: "Actions",
-    id: "actions",
-    cell: ({ row }) => {
-      const client = row.original;
-      console.log(client.id)
+  // {
+  //   header: "Actions",
+  //   id: "actions",
+  //   cell: ({ row }) => {
+  //     const invoice = row.original;
+  //     console.log(invoice.id);
 
-      return (
-        <TooltipProvider>
-          <div className="flex">
-            {/* Edit Button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost">
-                  <Copy />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Copy Invoice</TooltipContent>
-            </Tooltip>
+  //     return (
+  //       <TooltipProvider>
+  //         <div className="flex">
+  //           {/* Edit Button */}
+  //           <Tooltip>
+  //             <TooltipTrigger asChild>
+  //               <Button size="icon" variant="ghost">
+  //                 <Copy />
+  //               </Button>
+  //             </TooltipTrigger>
+  //             <TooltipContent>Copy Invoice</TooltipContent>
+  //           </Tooltip>
 
-            {/* Add Button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost">
-                  <Send />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Send Reminder</TooltipContent>
-            </Tooltip>
+  //           {/* Add Button */}
+  //           <Tooltip>
+  //             <TooltipTrigger asChild>
+  //               <Button size="icon" variant="ghost">
+  //                 <Send />
+  //               </Button>
+  //             </TooltipTrigger>
+  //             <TooltipContent>Send Reminder</TooltipContent>
+  //           </Tooltip>
 
-            {/* Archive Button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost">
-                  <Archive />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Archive Invoice</TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
-      );
-    },
-  },
+  //           {/* Archive Button */}
+  //           <Tooltip>
+  //             <TooltipTrigger asChild>
+  //               <Button
+  //                 size="icon"
+  //                 variant="ghost"
+  //                 // onClick={() => handleArchiveUnarchive(invoice.id)}
+  //               >
+  //                 <Archive />
+  //               </Button>
+  //             </TooltipTrigger>
+  //             <TooltipContent>Archive Invoice</TooltipContent>
+  //           </Tooltip>
+  //         </div>
+  //       </TooltipProvider>
+  //     );
+  //   },
+  // },
 ];

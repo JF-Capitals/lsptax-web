@@ -18,12 +18,12 @@ const SideMenu: React.FC = () => {
     { id: "contract-owner", label: "Contract Owner" },
     { id: "clients/list-client", label: "Clients" },
     { id: "prospects/list-prospect", label: "Prospects" },
-    // { id: "forms/contract", label: "Contracts" },
-    // { id: "forms/agent", label: "Agents" },
+    { id: "forms/contract", label: "Contracts" },
+    { id: "forms/agent", label: "Agents" },
   ];
 
   return (
-    <div className="w-64 bg-white h-screen">
+    <div className="w-32 bg-white h-screen">
       <div className="flex justify-center items-center py-4">
         <img src={mainLogo} alt="Logo" />
       </div>

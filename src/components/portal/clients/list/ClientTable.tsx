@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getClients } from "@/store/data";
 import { getArchiveClients } from "@/store/data"; // Import the function
-import { LoaderCircle } from "lucide-react";
+import { Archive, LoaderCircle, UserRoundPlus } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import TableBuilder from "../../TableBuilder";
 
@@ -106,11 +106,12 @@ const ClientTable = <TData, TValue>({
           />
         </div>
         <div className="w-full flex gap-2 justify-end">
-          <Button onClick={() => setArchived((prev) => !prev)}>
+          <Button variant={"blue"} onClick={() => setArchived((prev) => !prev)}>
+            <Archive/>
             {archived ? "View Active Clients" : "View Archive"}
           </Button>
           <NavLink to={`/portal/clients/add-client`}>
-            <Button>Add New Client</Button>
+            <Button variant={"blue"}> <UserRoundPlus/> Add New Client</Button>
           </NavLink>
         </div>
       </div>

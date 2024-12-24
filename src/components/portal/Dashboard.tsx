@@ -1,17 +1,44 @@
 import DashboardStats from "./dashboard/DashboardStats";
-import DonutChart from "./dashboard/Chart";
-
-// const dashboardItem = [
-//   { label: "Add Client", desc: "Add new client to the system", route:"/portal/clients/add-client" },
-//   { label: "Properties", desc: "List of all properties added to system", route:"/portal/properties" },
-//   { label: "Contract Owners", desc: "List of all contract added to system", route:"/portal/contract-owner" },
-// ];
+import MiniTableContainer from "./dashboard/mini-tables/MiniTableContainer";
+import { useEffect, useState } from "react";
+import { Properties } from "./properties/columns";
+import { getClients, getContractOwner, getProperties } from "@/store/data";
+import { Clients } from "./clients/list/columns";
+import { ContractOwner } from "./contract-owner/columns";
 
 const Dashboard = () => {
+  const [propData, setPropData] = useState<Properties | null>(null);
+  const [clientData, setClientData] = useState<Clients | null>(null);
+  const [contractOwnersData, setContractOwnersData] = useState<ContractOwner>();
+  useEffect(() => {
+    // Fetch stats from dashboardData function
+    const fetchData = async () => {
+      try {
+        const fetchedPropData = await getProperties();
+        const fetchedClientData = await getClients();
+        const fetchedContractOwnerData = await getContractOwner();
+        setPropData(fetchedPropData);
+        setClientData(fetchedClientData);
+        setContractOwnersData(fetchedContractOwnerData);
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (!propData || !clientData || !contractOwnersData) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col">
       <DashboardStats />
-      <DonutChart/>
+      <MiniTableContainer
+        propData={propData}
+        clientData={clientData}
+        contractOwnersData={contractOwnersData}
+      />
     </div>
   );
 };
