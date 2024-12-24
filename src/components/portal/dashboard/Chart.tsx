@@ -19,7 +19,7 @@ const COLORS = ["#F29425", "#10A142", "#E54F53"]; // Colors for each slice
 const DonutChart: React.FC = () => (
   <div className="flex justify-around items-center bg-white rounded-xl h-full">
     {/* Legend Section */}
-    <div className="flex  flex-col items-start mr-4">
+    <div className="flex  flex-col items-start mr-4 p-2">
       <h1 className="font-bold text-xl mb-6">500 Total Applications</h1>
       {data.map((entry, index) => (
         <div key={`legend-${index}`} className="flex items-center mb-2">
