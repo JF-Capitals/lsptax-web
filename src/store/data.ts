@@ -13,7 +13,7 @@ export const getClients = async () => {
     return [{}];
   }
 };
-export const getSingleClient = async ({ clientId }: { clientId: number }) => {
+export const getSingleClient = async ({ clientId }: { clientId?: string }) => {
   console.log({ clientId });
   try {
     const response = await fetch(
@@ -51,6 +51,7 @@ export const getProperties = async () => {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/properties`
     );
+    console.log(response);
     if (!response.ok) {
       throw new Error("Failed to fetch properties");
     }
@@ -81,7 +82,7 @@ export const getArchiveProperties = async () => {
 export const getSingleProperty = async ({
   propertyId,
 }: {
-  propertyId: number;
+  propertyId: string;
 }) => {
   try {
     const response = await fetch(
@@ -101,10 +102,31 @@ export const getSingleProperty = async ({
   }
 };
 
-export const getInvoices = async () => {
+export const getInvoice = async ({ clientId }: { clientId: string }) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/invoices`
+      `${import.meta.env.VITE_BACKEND_URL}/api/invoice/${clientId}`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch Invoices");
+    }
+    const invoice = await response.json();
+    return invoice;
+  } catch (error) {
+    console.log(error);
+    return [{}];
+  }
+};
+export const getInvoiceByPropertyId = async ({
+  propertyId,
+}: {
+  propertyId: string;
+}) => {
+  try {
+    const response = await fetch(
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }/api/invoice_prop?propertyId=${propertyId}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch Invoices");
@@ -116,22 +138,16 @@ export const getInvoices = async () => {
     return [{}];
   }
 };
-export const getInvoiceByPropertyId = async ({
-  propertyId,
-}: {
-  propertyId: number;
-}) => {
+export const getAllInvoices = async () => {
   try {
     const response = await fetch(
-      `${
-        import.meta.env.VITE_BACKEND_URL
-      }/api/data/invoice?propertyId=${propertyId}`
+      `${import.meta.env.VITE_BACKEND_URL}/api/invoices`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch Invoices");
     }
-    const invoices = await response.json();
-    return invoices;
+    const invoice = await response.json();
+    return invoice;
   } catch (error) {
     console.log(error);
     return [{}];
@@ -186,11 +202,7 @@ export const getContractOwner = async () => {
   }
 };
 
-export const getContractOwnerById = async ({
-  coId,
-}: {
-  coId: number;
-}) => {
+export const getContractOwnerById = async ({ coId }: { coId: number }) => {
   try {
     const response = await fetch(
       `${

@@ -165,7 +165,7 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
                         )}
                       </TableCell>
                     ))}
-                    <TableCell className="sm:hidden">
+                    {/* <TableCell className="sm:hidden">
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
@@ -189,13 +189,12 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
                                 >
                                   <span className="font-medium">{key}:</span>
                                   <span>{selectedRow[key]}</span>{" "}
-                                  {/* Fix: Use selectedRow[key] */}
                                 </div>
                               ))}
                           </div>
                         </DialogContent>
                       </Dialog>
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 ))
               ) : (

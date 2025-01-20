@@ -1,53 +1,28 @@
 import { NavLink, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getSingleClient } from "@/store/data";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { House, Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ClientData, Property, PropertyData } from "@/types/types";
 
-// Type definition for Client based on your Prisma schema
 interface Client {
-  ls_client_id: number;
-  ls_client_number: string;
-  ls_client_is_prospect: number;
-  ls_client_co_id?: number;
-  ls_client_subco_id?: number;
-  ls_client_salutation?: string;
-  ls_client_fname?: string;
-  ls_client_lname?: string;
-  ls_client_name?: string;
-  ls_client_email?: string;
-  ls_client_phone?: string;
-  ls_client_mobile?: string;
-  ls_client_fax?: string;
-  ls_client_job_title?: string;
-  ls_client_dob?: string;
-  ls_client_street?: string;
-  ls_client_city?: string;
-  ls_client_state?: string;
-  ls_client_zip?: string;
-  ls_client_country: string;
-  contract_type?: string;
-  ls_client_fixed_fee?: string;
-  ls_client_cont_fee?: string;
-  ls_client_bpp_fixed_fee?: string;
-  ls_client_notes?: string;
-  ls_client_status: number;
-  ls_client_added_on: string;
-  ls_client_added_by?: number;
-  ls_client_updated_on?: string;
-  ls_client_updated_by?: number;
+  client: ClientData;
+  properties: Property[];
 }
 
 const ClientPage = () => {
   const [searchParams] = useSearchParams();
-  const clientId = Number(searchParams.get("clientId"));
+  const clientId = searchParams.get("clientId");
   const [clientData, setClientData] = useState<Client | null>(null);
 
   useEffect(() => {
     const fetchClientData = async () => {
       try {
-        const response = await getSingleClient({ clientId: clientId });
-        setClientData(response);
+        if (clientId) {
+          const response = await getSingleClient({ clientId: clientId });
+          console.log("CLINET RES:", response);
+          setClientData(response);
+        }
       } catch (error) {
         console.error("Error fetching client data:", error);
       }
@@ -73,14 +48,18 @@ const ClientPage = () => {
       <div className="flex justify-between">
         <h1 className="text-4xl font-bold text-center mb-6">Client Details</h1>
         <div className="flex gap-4">
-          <NavLink to={``}>
+          <NavLink
+            to={`/portal/edit-client?clientId=${clientData.client.CLIENTNumber}`}
+          >
             <Button variant={"blue"} className="w-full">
               Edit Client Details
             </Button>
           </NavLink>
-          <NavLink to={"/add-properties"}>
+          <NavLink
+            to={`/portal/invoice?clientId=${clientData.client.CLIENTNumber}`}
+          >
             <Button variant={"blue"} className="w-full">
-              Add Properties
+              Invoice
             </Button>
           </NavLink>
         </div>
@@ -94,35 +73,28 @@ const ClientPage = () => {
             <tbody>
               <tr>
                 <td className="font-medium">Client:</td>
-                <td>
-                  {clientData.ls_client_fname +
-                    " " +
-                    clientData.ls_client_lname}
-                </td>
+                <td>{clientData?.client.CLIENTNAME}</td>
               </tr>
               <tr>
                 <td className="font-medium">Phone:</td>
                 <td>
                   <Phone size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.ls_client_mobile || clientData.ls_client_phone}
+                  {"mobile"}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">Email:</td>
                 <td>
                   <Mail size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.ls_client_email}
+                  {clientData.client.Email}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">Address:</td>
                 <td>
                   <MapPin size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.ls_client_street + " "}
-                  {clientData.ls_client_city + " "}
-                  {clientData.ls_client_state + " "}
-                  {clientData.ls_client_zip + " "}
-                  {clientData.ls_client_country}
+                  {clientData.client.MAILINGADDRESS},
+                  {clientData.client.MAILINGADDRESSCITYTXZIP}
                 </td>
               </tr>
             </tbody>
@@ -131,11 +103,48 @@ const ClientPage = () => {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold  mb-6">Associated Property(s)</h1>
-        <div></div>
+        <div className="flex justify-between">
+          <h1 className="text-2xl font-bold  mb-6">Associated Property(s)</h1>
+          <NavLink
+            to={`/portal/add-property?clientId=${clientData.client.CLIENTNumber}`}
+          >
+            <Button variant={"blue"} className="w-full">
+              Add Properties
+            </Button>
+          </NavLink>
+        </div>
+        <div className="flex flex-col gap-4">
+          {clientData.properties.map((property) => (
+            <div className="">
+              <PropertyBox
+                key={property.id}
+                AccountNumber={property.AccountNumber}
+                NAMEONCAD={property.NAMEONCAD}
+                id={property.id}
+                IsArchived={property.IsArchived}
+                createdAt={property.createdAt}
+                updatedAt={property.updatedAt}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 };
 
 export default ClientPage;
+
+const PropertyBox: React.FC<Property> = ({ AccountNumber, NAMEONCAD }) => {
+  return (
+    <div className="flex border border-red-100 rounded-xl p-4 align-center items-center gap-4 w-max">
+      <House />
+      <div className="flex flex-col ">
+        <NavLink to={`/portal/property?propertyId=${AccountNumber}`}>
+          <h2 className="text-xl font-bold text-green-800">{AccountNumber}</h2>
+        </NavLink>
+        <div>CAD Details: {NAMEONCAD}</div>
+      </div>
+    </div>
+  );
+};

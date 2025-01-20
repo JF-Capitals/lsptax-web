@@ -1,39 +1,119 @@
 // src/types.ts
 
-// Define the raw data structure that comes from the API
+export interface ClientData {
+  id: number;
+  TypeOfAcct: string;
+  CLIENTNumber?: string; // Optional to match `String?` in Prisma
+  CLIENTNAME?: string;
+  Email?: string;
+  PHONENUMBER?: string;
+  NAMEONCAD?: string;
+  MAILINGADDRESS?: string;
+  MAILINGADDRESSCITYTXZIP?: string;
+  IsArchived: boolean; // Boolean with default handled in backend
+  createdAt: Date;
+  updatedAt: Date;
+}
 export interface Property {
-  ls_prop_client_id: number;
-  ls_prop_account_number: string;
-  ls_prop_type: string;
-  ls_prop_class: string;
-  ls_prop_assessor: string;
-  ls_prop_street: string;
-  ls_prop_city: string;
-  ls_prop_state: string;
-  ls_prop_zip: string;
-  ls_prop_cad_owner: string;
-  ls_prop_cad_address: string;
-  ls_prop_cad_mailing_address: string;
-  ls_prop_aoa_signed_on: string;
-  ls_prop_added_on: string;
+  id: number;
+  StatusNotes?: string;
+  OtherNotes?: string;
+  NAMEONCAD?: string;
+  MAILINGADDRESS?: string;
+  MAILINGADDRESSCITYTXZIP?: string;
+  CADMailingADDRESS?: string;
+  CADCITY?: string;
+  CADZIPCODE?: string;
+  CADCOUNTY?: string;
+  AccountNumber?: string;
+  CLIENTNumber?: string;
+  CONTACTOWNER?: string;
+  SUBCONTRACTOWNER?: string;
+  BPPFEE?: string;
+  CONTINGENCYFee?: string;
+  FlatFee?: string;
+  IsArchived: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  invoices?: InvoiceData[];
 }
 
-// Define the structured data you want to use in the table
-export interface StructuredProperty {
-  clientId: number;
-  propertyAccount: string;
-  propertyDetails: {
-    type: string;
-    class: string;
-    assessor: string;
-    address: string[];
-  };
-  cadOwner: {
-    name: string;
-    address: string;
-    mailingAddress: string;
-  };
-  hearingDate: string;
-  aoaSigned: string;
-  addedOn: string;
+export interface Invoice {
+  id: number;
+  AccountNumber?: string;
+  CLIENTNumber?: string;
+  BPPInvoice?: string;
+  BPPInvoicePaid?: string;
+  NoticeMarketValue?: string;
+  FinalMarketValue?: string;
+  MarketValueReduction?: string;
+  NoticeAppraisedValue?: string;
+  FinalAppraisedValue?: string;
+  ValueAppraisedValueReduction?: string;
+  ValueOverallTaxRate?: string;
+  ValueTaxSavings?: string;
+  Contingency?: string;
+  ContingencyFeeDue?: string;
+  TaxBPPBPPLastYearAppraised?: string;
+  TaxBPPFinalAppraisedTotal?: string;
+  TaxBPPAppraisedValueReduction?: string;
+  TaxBPPOverallTaxRate?: string;
+  TaxBPPTaxSavings?: string;
+  TaxBPPContingencyFee?: string;
+  TaxBPPDue?: string;
+  JustBPPBPPLastYearAppraised?: string;
+  BPPThisYearAppraised?: string;
+  ProtestInvoice?: string;
+  ProtestInvoicePaid?: string;
+  ONLYMarketChangeInARB?: string;
+  NoticeAppraisedTotal?: string;
+  ArbitrationFinalAppraisedTotal?: string;
+  ArbitrationAppraisedValueReduction?: string;
+  ArbitrationOverallTaxRate?: string;
+  TaxSavings?: string;
+  ArbitrationContingencyFee?: string;
+  ArbitrationDue?: string;
+  ARBFee?: string;
+  ComptrollerRefundCK?: string;
+  CollectOrRefund?: string;
+  ARBInvoice?: string;
+  ClientPaidOrArbRefundUsed?: string;
+  TotalDue?: string;
+  TypeOfService?: string;
+  AnyRandamServiceInvoice?: string;
+  RandomServiceFeeInvoicePaid?: string;
+  LastYearAppraised?: string;
+  Value2525FinalAppraisedTotal?: string;
+  Value2525AppraisedValueReduction?: string;
+  Value2525OverallTaxRate?: string;
+  Value2525TaxSavings?: string;
+  Value2525ContingencyFee?: string;
+  Value2525Due?: string;
+  PastDue?: string;
+  PastDuePaid?: string;
+  IsArchived: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface InvoiceSummary {
+  clientId: string;
+  propertyNumbers: string[]; 
+  totalContingencyFeeDue: number;
+  createdAt: string; 
+}
+
+export interface InvoiceData {
+  client: ClientData;
+  properties: InvoiceProperty[];
+}
+interface InvoiceProperty{
+  propertyDetails: Property;
+  invoice: Invoice;
+}
+
+export interface PropertyData {
+  clientDetails: ClientData;
+  propertyDetails: Property;
+  invoices: Invoice;
 }

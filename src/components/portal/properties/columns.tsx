@@ -46,7 +46,7 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
 
       return (
         <NavLink
-          to={`/portal/property?propertyId=${row.original.propertyId}`}
+          to={`/portal/property?propertyId=${row.original.propertyAccount}`}
         >
           <div className="text-blue-400 font-bold">#{propertyAccount}</div>
         </NavLink>
@@ -60,14 +60,14 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
       const details = row.original.propertyDetails;
       return (
         <div className=" gap-4">
-          <div className="flex flex-col">
+          {/* <div className="flex flex-col">
             <h1 className="text-xs font-bold text-muted-foreground">Type:</h1>
             {details.type}
           </div>
           <div className="flex flex-col">
             <h1 className="text-xs font-bold text-muted-foreground">Class:</h1>{" "}
             {details.class ? details.class : "N/A"}
-          </div>
+          </div> */}
           <div className="flex flex-col">
             <h1 className="text-xs font-bold text-muted-foreground">
               Assessor:

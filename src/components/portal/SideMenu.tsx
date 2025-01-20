@@ -15,36 +15,38 @@ const SideMenu: React.FC = () => {
     { id: "dashboard", label: "Dashboard" },
     { id: "properties", label: "Properties" },
     { id: "invoices", label: "Invoices" },
-    { id: "contract-owner", label: "Contract Owner" },
+    // { id: "contract-owner", label: "Contract Owner" },
     { id: "clients/list-client", label: "Clients" },
-    { id: "prospects/list-prospect", label: "Prospects" },
+    // { id: "prospects/list-prospect", label: "Prospects" },
     { id: "forms/contract", label: "Contracts" },
-    { id: "forms/agent", label: "Agents" },
+    // { id: "forms/agent", label: "Agents" },
   ];
 
   return (
-    <div className="w-32 bg-white h-screen">
+    <div className="w-64 bg-white h-screen ">
       <div className="flex justify-center items-center py-4">
         <img src={mainLogo} alt="Logo" />
       </div>
-      {menuOptions.map((option) => (
-        <div
-          key={option.id}
-          className="group flex items-center hover:bg-[#F2F7FF] hover:border-l-4 hover:border-[#5584CE] transition-all w-full"
-        >
-          {/* NavLink */}
-          <NavLink
-            to={`/portal/${option.id}`}
-            className={`flex items-center justify-between p-4 w-full ${
-              activeOption.startsWith(option.id)
-                ? "bg-[#F2F7FF] text-transparent bg-gradient-to-r from-[#14ADD6] to-[#384295] bg-clip-text"
-                : ""
-            }`}
+      <div className="flex flex-col items-center align-center">
+        {menuOptions.map((option) => (
+          <div
+            key={option.id}
+            className="group flex justify-center items-center hover:bg-[#F2F7FF] hover:border-l-4 hover:border-[#5584CE] transition-all w-full"
           >
-            <span>{option.label}</span>
-          </NavLink>
-        </div>
-      ))}
+            {/* NavLink */}
+            <NavLink
+              to={`/portal/${option.id}`}
+              className={`flex text-center items-center p-4 w-full ${
+                activeOption.startsWith(option.id)
+                  ? "bg-[#F2F7FF] text-transparent bg-gradient-to-r from-[#14ADD6] to-[#384295] bg-clip-text"
+                  : ""
+              }`}
+            >
+              <span>{option.label}</span>
+            </NavLink>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
