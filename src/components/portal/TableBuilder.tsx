@@ -40,7 +40,7 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [pageSize, setPageSize] = useState(10);
-  const [selectedRow, setSelectedRow] = useState<any | null>(null);
+  // const [selectedRow, setSelectedRow] = useState<any | null>(null);
   const [pageIndex, setPageIndex] = useState(0); // Add a pageIndex state
 
   const table = useReactTable({

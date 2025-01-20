@@ -76,6 +76,7 @@ export default function EditProperty() {
     };
 
     fetchProperty();
+    console.log(property)
   }, [propertyId, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
