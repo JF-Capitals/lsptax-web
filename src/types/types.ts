@@ -92,8 +92,9 @@ export interface Invoice {
   PastDue?: string;
   PastDuePaid?: string;
   IsArchived: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  year: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InvoiceSummary {
@@ -115,5 +116,5 @@ interface InvoiceProperty{
 export interface PropertyData {
   clientDetails: ClientData;
   propertyDetails: Property;
-  invoices: Invoice;
+  invoices: Invoice[];
 }

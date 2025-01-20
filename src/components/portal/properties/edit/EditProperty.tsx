@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { getSingleProperty } from "@/store/data"; // Assuming this is the function to fetch property data
-import { Property } from "@/types/types";
+import { PropertyData } from "@/types/types";
+import EditableYearTable from "../yeardata/EditableYearTable";
 
 const formSchema = z.object({
   StatusNotes: z.string().optional(),
@@ -40,7 +41,7 @@ export default function EditProperty() {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [property, setProperty] = useState<Property | null>(null);
+  const [property, setProperty] = useState<PropertyData | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -310,6 +311,8 @@ export default function EditProperty() {
             />
           </div>
         </div>
+
+        <EditableYearTable invoices={property?.invoices}/>
 
         {/* Submit and Revert Buttons */}
         <div className="flex justify-between mt-6">
