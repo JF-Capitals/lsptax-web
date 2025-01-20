@@ -6,6 +6,7 @@ import {
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PropertyData } from "@/types/types";
+import YearTable from "../yeardata/YearTable";
 
 const ViewProperty = () => {
   const [property, setProperty] = useState<PropertyData>();
@@ -39,117 +40,6 @@ const ViewProperty = () => {
     fetchProperty();
     console.log({ property });
   }, [searchParams]); // Trigger when searchParams changes
-
-  const groups = [
-    {
-      title: "General Info",
-      fields: [
-        // { label: "ID", value: property?.invoiceDetails.id },
-        {
-          label: "Account Number",
-          value: property?.propertyDetails.AccountNumber,
-        },
-        {
-          label: "CLIENT Number",
-          value: property?.propertyDetails.CLIENTNumber,
-        },
-        // { label: "Type of Service", value: property?. },
-        // { label: "Total Due", value: property?.TotalDue },
-        {
-          label: "Archived",
-          value: property?.propertyDetails.IsArchived ? "Yes" : "No",
-        },
-      ],
-    },
-    {
-      title: "BPP Details",
-      fields: [
-        { label: "BPP Invoice", value: property?.invoices.BPPInvoice },
-        {
-          label: "BPP Invoice Paid",
-          value: property?.invoices.BPPInvoicePaid,
-        },
-        {
-          label: "BPP This Year Appraised",
-          value: property?.invoices.BPPThisYearAppraised,
-        },
-        {
-          label: "Last Year Appraised",
-          value: property?.invoices.TaxBPPBPPLastYearAppraised,
-        },
-        {
-          label: "Final Appraised Total",
-          value: property?.invoices.TaxBPPFinalAppraisedTotal,
-        },
-        {
-          label: "Appraised Value Reduction",
-          value: property?.invoices.TaxBPPAppraisedValueReduction,
-        },
-        {
-          label: "Overall Tax Rate",
-          value: property?.invoices.TaxBPPOverallTaxRate,
-        },
-        {
-          label: "Tax Savings",
-          value: property?.invoices.TaxBPPTaxSavings,
-        },
-        {
-          label: "Contingency Fee",
-          value: property?.invoices.TaxBPPContingencyFee,
-        },
-        { label: "Tax Due", value: property?.invoices.TaxBPPDue },
-      ],
-    },
-    {
-      title: "Arbitration Details",
-      fields: [
-        {
-          label: "Final Appraised Total",
-          value: property?.invoices.ArbitrationFinalAppraisedTotal,
-        },
-        {
-          label: "Appraised Value Reduction",
-          value: property?.invoices.ArbitrationAppraisedValueReduction,
-        },
-        {
-          label: "Overall Tax Rate",
-          value: property?.invoices.ArbitrationOverallTaxRate,
-        },
-        { label: "Tax Savings", value: property?.invoices.TaxSavings },
-        {
-          label: "Contingency Fee",
-          value: property?.invoices.ArbitrationContingencyFee,
-        },
-        { label: "Due", value: property?.invoices.ArbitrationDue },
-      ],
-    },
-    {
-      title: "2525 Details",
-      fields: [
-        {
-          label: "Final Appraised Total",
-          value: property?.invoices.Value2525FinalAppraisedTotal,
-        },
-        {
-          label: "Appraised Value Reduction",
-          value: property?.invoices.Value2525AppraisedValueReduction,
-        },
-        {
-          label: "Overall Tax Rate",
-          value: property?.invoices.Value2525OverallTaxRate,
-        },
-        {
-          label: "Tax Savings",
-          value: property?.invoices.Value2525TaxSavings,
-        },
-        {
-          label: "Contingency Fee",
-          value: property?.invoices.Value2525ContingencyFee,
-        },
-        { label: "Due", value: property?.invoices.Value2525Due },
-      ],
-    },
-  ];
 
   if (loading) {
     return (
@@ -282,7 +172,8 @@ const ViewProperty = () => {
 
       <div className="p-6 bg-gray-50 border rounded-lg my-2 p-4">
         <h2 className="text-2xl font-bold mb-6">Invoice Details</h2>
-        {property.invoices ? (
+        <YearTable invoices={property.invoices}/>
+        {/* {property.invoices ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {groups.map((group, index) => (
               <div key={index} className="bg-white p-4 rounded-lg shadow">
@@ -302,7 +193,7 @@ const ViewProperty = () => {
           </div>
         ) : (
           <p className="text-gray-500">No invoice data available.</p>
-        )}
+        )} */}
       </div>
     </div>
   );
