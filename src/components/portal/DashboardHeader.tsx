@@ -55,7 +55,7 @@ const CurrentDate: React.FC = () => {
       }
     };
 
-    return `Today is ${dayName}, ${date}${ordinalSuffix(
+    return `${dayName}, ${date}${ordinalSuffix(
       date
     )} ${month} ${year}`;
   };

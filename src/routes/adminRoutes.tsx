@@ -25,19 +25,22 @@ import ViewProperty from "@/components/portal/properties/view/ViewProperty";
 import AgentForm from "@/components/portal/forms/agent/AgentForm";
 import ClientPage  from "@/components/portal/clients/ClientPage";
 import ContractForm from "@/components/portal/forms/contracts/ContractForm";
+import InvoiceSummary from "@/components/portal/clients/invoice/InvoiceSummary";
+import InvoicePage from "@/components/portal/clients/invoice/InvoicePage";
+import EditClient from "@/components/portal/clients/edit/EditClient";
 
 
 const AdminRoutes = () => {
   return (
     <Routes>
       {/* <Route element={<PrivateRoute />}> */}
-      <Route path="/*" element={<Dashboard />} />
+      {/* <Route path="/*" element={<Dashboard />} /> */}
       <Route path="/dashboard" element={<Dashboard />} />
       <Route
         path="/properties"
         element={<PropertiesTable columns={propertiesColumn} />}
       />
-      <Route path="/add-properties" element={<PropertyForm />} />
+      <Route path="/add-property" element={<PropertyForm />} />
       <Route path="/property" element={<ViewProperty />} />
       <Route path="/edit-properties" element={<EditProperty />} />
       <Route
@@ -58,6 +61,7 @@ const AdminRoutes = () => {
       />
       <Route path="/clients/add-client" element={<AddClient />} />
       <Route path="/client" element={<ClientPage />} />
+      <Route path="/edit-client" element={<EditClient />} />
       <Route path="/prospects/add-prospect" element={<AddProspect />} />
       <Route
         path="/forms/agent"
@@ -68,7 +72,9 @@ const AdminRoutes = () => {
         element={<ProspectTable columns={prospectColumn} />}
       />
       <Route path="/agent-form" element={<AgentForm />} />
-      <Route path="/contract-form" element={<ContractForm />} />
+      <Route path="/contract" element={<ContractForm />} />
+      <Route path="/invoice" element={<InvoicePage />} />
+      {/* <Route path="/form" element={<InvoiceForm2 />} /> */}
 
       {/* </Route> */}
     </Routes>

@@ -17,11 +17,11 @@ export const clientsColumn: ColumnDef<Clients>[] = [
     accessorKey: "clientId",
     header: "Client #",
     cell: ({ row }) => {
-      const id = row.original.clientId;
+      // const id = row.original.clientId;
       const clientNum = row.original.clientNumber;
 
       return (
-        <NavLink to={`/portal/client?clientId=${id}`}>
+        <NavLink to={`/portal/client?clientId=${clientNum}`}>
           <div className="text-blue-400 font-bold">#{clientNum}</div>
         </NavLink>
       );
