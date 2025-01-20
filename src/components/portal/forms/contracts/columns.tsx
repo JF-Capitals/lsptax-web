@@ -1,7 +1,6 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import formatDate from "@/utils/formatDate";
 import { NavLink } from "react-router-dom";
 
 export type Clients = {

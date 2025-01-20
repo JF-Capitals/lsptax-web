@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getSingleClient } from "@/store/data";
 import { House, Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ClientData, Property, PropertyData } from "@/types/types";
+import { ClientData, Property } from "@/types/types";
 
 interface Client {
   client: ClientData;

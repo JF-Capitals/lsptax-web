@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+// import { useLocation } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   DropdownMenu,
@@ -10,9 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
-  getArchiveInvoices,
-  getInvoices,
-  getInvoiceByPropertyId,
   getAllInvoices,
 } from "@/store/data";
 import TableBuilder from "../TableBuilder";
@@ -25,10 +22,10 @@ interface InvoicesTableProps<TData, TValue> {
 const InvoicesTable = <TData, TValue>({
   columns,
 }: InvoicesTableProps<TData, TValue>) => {
-  const location = useLocation();
+  // const location = useLocation();
   const [invoices, setInvoices] = useState<TData[]>([]);
   const [archived, setArchived] = useState(false);
-  const [filteredInvoices, setFilteredInvoices] = useState<TData[]>([]);
+  // const [filteredInvoices, setFilteredInvoices] = useState<TData[]>([]);
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -71,7 +68,7 @@ const InvoicesTable = <TData, TValue>({
     <div>
       <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
         <div className="w-full">
-          <h2 className="text-2xl font-bold">{filteredInvoices.length}</h2>
+          {/* <h2 className="text-2xl font-bold">{filteredInvoices.length}</h2> */}
           <h3>Total number of Invoices</h3>
         </div>
         <div className="w-full">
