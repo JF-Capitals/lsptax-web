@@ -25,7 +25,6 @@ import ViewProperty from "@/components/portal/properties/view/ViewProperty";
 import AgentForm from "@/components/portal/forms/agent/AgentForm";
 import ClientPage  from "@/components/portal/clients/ClientPage";
 import ContractForm from "@/components/portal/forms/contracts/ContractForm";
-import InvoiceSummary from "@/components/portal/clients/invoice/InvoiceSummary";
 import InvoicePage from "@/components/portal/clients/invoice/InvoicePage";
 import EditClient from "@/components/portal/clients/edit/EditClient";
 

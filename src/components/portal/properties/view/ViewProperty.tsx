@@ -1,15 +1,10 @@
 import { useEffect, useState } from "react";
 import { NavLink, useSearchParams } from "react-router-dom";
 import {
-  getInvoiceByPropertyId,
-  getSingleClient,
   getSingleProperty,
 } from "@/store/data";
 import { Mail, MapPin, Phone } from "lucide-react";
-import formatDate from "@/utils/formatDate";
 import { Button } from "@/components/ui/button";
-import TableBuilder from "../../TableBuilder";
-import { propertyYearDataColumn } from "../yeardata/columns";
 import { PropertyData } from "@/types/types";
 
 const ViewProperty = () => {
