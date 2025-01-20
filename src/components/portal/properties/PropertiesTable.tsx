@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import {
   ColumnDef,
-  SortingState,
-  getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
-  getPaginationRowModel,
-  ColumnFiltersState,
-  getFilteredRowModel,
-  VisibilityState,
+  // SortingState,
+  // getCoreRowModel,
+  // useReactTable,
+  // getSortedRowModel,
+  // getPaginationRowModel,
+  // ColumnFiltersState,
+  // getFilteredRowModel,
+  // VisibilityState,
 } from "@tanstack/react-table";
 
 import {
@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { getProperties, getArchiveProperties } from "@/store/data"; // Import both data-fetching functions
 import TableBuilder from "../TableBuilder";
-import { Archive, ChevronDown, HousePlus, LoaderCircle } from "lucide-react";
+import { Archive, ChevronDown, LoaderCircle } from "lucide-react";
 import { Properties } from "./columns";
 
 interface PropertiesTableProps<TData, TValue> {
@@ -33,10 +33,10 @@ const PropertiesTable = <TData extends Properties, TValue>({
 }: PropertiesTableProps<TData, TValue>) => {
   const [properties, setProperties] = useState<TData[]>([]);
   const [archived, setArchived] = useState(false); // Track if viewing archived properties
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
+  // const [sorting, setSorting] = useState<SortingState>([]);
+  // const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  // const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  // const [rowSelection, setRowSelection] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,24 +72,24 @@ const PropertiesTable = <TData extends Properties, TValue>({
     );
   });
 
-  const table = useReactTable({
-    data: filteredProperties,
-    columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
+  // const table = useReactTable({
+  //   data: filteredProperties,
+  //   columns,
+  //   onSortingChange: setSorting,
+  //   getCoreRowModel: getCoreRowModel(),
+  //   getSortedRowModel: getSortedRowModel(),
+  //   getPaginationRowModel: getPaginationRowModel(),
+  //   onColumnFiltersChange: setColumnFilters,
+  //   getFilteredRowModel: getFilteredRowModel(),
+  //   onColumnVisibilityChange: setColumnVisibility,
+  //   onRowSelectionChange: setRowSelection,
+  //   state: {
+  //     sorting,
+  //     columnFilters,
+  //     columnVisibility,
+  //     rowSelection,
+  //   },
+  // });
 
   if (loading) {
     return (
