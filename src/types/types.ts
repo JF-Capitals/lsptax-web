@@ -107,10 +107,11 @@ export interface InvoiceSummary {
 export interface InvoiceData {
   client: ClientData;
   properties: InvoiceProperty[];
+  year: number;
 }
 interface InvoiceProperty{
   propertyDetails: Property;
-  invoice: Invoice;
+  invoice: Invoice[];
 }
 
 export interface PropertyData {
