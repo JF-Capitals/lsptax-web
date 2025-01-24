@@ -5,6 +5,7 @@ import prospectLogo from "@/assets/dashboard/prospects-logo.svg";
 import agentsLogo from "@/assets/dashboard/agents-logo.svg";
 import { dashboardData } from "@/store/data";
 import { NavLink } from "react-router-dom";
+import { LoaderCircle } from "lucide-react";
 
 const statsItemData = [
   {
@@ -65,7 +66,11 @@ const DashboardStats = () => {
     fetchStats();
   }, []);
   if (!stats) {
-    return <div>Loading...</div>;
+   return (
+     <div className="flex justify-center h-full items-center py-20">
+       <LoaderCircle className="animate-spin w-16 h-16" />
+     </div>
+   );
   }
   // Update statsItemData with the fetched stats
   const updatedStatsItemData = statsItemData.map((item) => {

@@ -1,75 +1,73 @@
-"use client";
-
+import { useEffect, useState } from "react";
 import {
   ColumnDef,
-  // SortingState,
-  // getCoreRowModel,
-  // useReactTable,
-  // getSortedRowModel,
-  // getPaginationRowModel,
-  // ColumnFiltersState,
-  // getFilteredRowModel,
-  // VisibilityState,
+  SortingState,
+  getCoreRowModel,
+  useReactTable,
+  getSortedRowModel,
+  getPaginationRowModel,
+  ColumnFiltersState,
+  getFilteredRowModel,
+  VisibilityState,
 } from "@tanstack/react-table";
 
+import { Button } from "@/components/ui/button";
 
-import { useEffect, useState } from "react";
-import { getContracts } from "@/store/data";
+import { Input } from "@/components/ui/input";
+import { getClients } from "@/store/data";
+import { getArchiveClients } from "@/store/data"; // Import the function
+import { Archive, LoaderCircle, UserRoundPlus } from "lucide-react";
+import { NavLink } from "react-router-dom";
 import TableBuilder from "../../TableBuilder";
-import { LoaderCircle } from "lucide-react";
 
 interface ContractTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
 }
 
 const ContractTable = <TData, TValue>({
-  columns
+  columns,
 }: ContractTableProps<TData, TValue>) => {
-  const [contracts, setContracts] = useState<TData[]>([]);
-  const [loading, setLoading] = useState(true); // Track loading state
-  const [error, setError] = useState<string | null>(null); // Track error state
-  // const [sorting, setSorting] = useState<SortingState>([]);
-  // const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  // const [columnVisibility, setColumnVisibility] =
-  //   React.useState<VisibilityState>({});
-  // const [rowSelection, setRowSelection] = React.useState({});
+  const [clients, setClients] = useState<TData[]>([]);
+  const [archived, setArchived] = useState(false); // State to track archive view
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   useEffect(() => {
-    // Fetch properties data when the component mounts
-    const fetchContracts = async () => {
+    const fetchClients = async () => {
       try {
         setLoading(true);
-        const data = await getContracts(); // Call your data-fetching function
-        setContracts(data); // Set the fetched data into the state
+        const data = archived ? await getArchiveClients() : await getClients(); // Fetch archived or active clients
+        setClients(data);
       } catch (error) {
-        console.error("Error fetching properties:", error);
-        setError("Failed to load properties. Please try again later."); // Set the error state
+        console.error("Error fetching clients:", error);
+        setError("Failed to load clients. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchContracts();
-  }, []);
+    fetchClients();
+  }, [archived]); // Refetch data when archive state changes
+  const table = useReactTable({
+    data: clients,
+    columns,
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+    },
+  });
 
-  // const table = useReactTable({
-  //   data:contracts,
-  //   columns,
-  //   onSortingChange: setSorting,
-  //   getCoreRowModel: getCoreRowModel(),
-  //   getSortedRowModel: getSortedRowModel(),
-  //   getPaginationRowModel: getPaginationRowModel(),
-  //   onColumnFiltersChange: setColumnFilters,
-  //   getFilteredRowModel: getFilteredRowModel(),
-  //   onColumnVisibilityChange: setColumnVisibility,
-  //   onRowSelectionChange: setRowSelection,
-  //   state: {
-  //     sorting,
-  //     columnFilters,
-  //     columnVisibility,
-  //     rowSelection,
-  //   },
-  // });
   if (loading) {
     return (
       <div className="flex justify-center h-full items-center py-20">
@@ -84,12 +82,17 @@ const ContractTable = <TData, TValue>({
       </div>
     );
   }
+
   return (
     <div>
-      <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
-        {/* <div className="flex flex-col p-4 w-full">
+      
+      <div className="flex flex-col md:flex-row border rounded-xl items-center gap-4 bg-white m-4 p-4">
+        <div className="w-full">
+          <h2 className="text-2xl font-bold">{clients.length}</h2>
+          <h3>{archived ? "Archived Clients" : "Active Clients"}</h3>
+        </div>
+        <div className="flex flex-col w-full gap-2">
           <h1>Quick search a Client</h1>
-
           <Input
             placeholder="Search Client Name..."
             value={
@@ -100,43 +103,21 @@ const ContractTable = <TData, TValue>({
             }
             className="max-w-sm"
           />
-        </div> */}
-
-        <div className="w-full">
-          <h2 className="text-2xl font-bold ">{contracts.length}</h2>
-          <h3>Total number of Contracts</h3>
         </div>
-        {/* <div className="w-full">
-          <h2>Filter Clients</h2>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                {position} <ChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuRadioGroup
-                value={position}
-                onValueChange={setPosition}
-              >
-                <DropdownMenuRadioItem value="All Clients">
-                  All Clients
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Filter 2">
-                  Filter 2
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Filter 3">
-                  Filter 3
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div> */}
-        {/* <NavLink to={`/portal/clients/add-client`}>
-          <Button className="w-full">Add New Client</Button>
-        </NavLink> */}
+        <div className="w-full flex gap-2 justify-end">
+          <Button variant={"blue"} onClick={() => setArchived((prev) => !prev)}>
+            <Archive />
+            {archived ? "View Active Clients" : "View Archive"}
+          </Button>
+          <NavLink to={`/portal/clients/add-client`}>
+            <Button variant={"blue"}>
+              {" "}
+              <UserRoundPlus /> Add New Client
+            </Button>
+          </NavLink>
+        </div>
       </div>
-      <TableBuilder data={contracts} columns={columns} label="Contracts" />
+      <TableBuilder data={clients} columns={columns} label="Clients" />
     </div>
   );
 };

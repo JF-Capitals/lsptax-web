@@ -5,6 +5,7 @@ import { Properties } from "./properties/columns";
 import { getClients, getContractOwner, getProperties } from "@/store/data";
 import { Clients } from "./clients/list/columns";
 import { ContractOwner } from "./contract-owner/columns";
+import { LoaderCircle } from "lucide-react";
 
 const Dashboard = () => {
   const [propData, setPropData] = useState<Properties | null>(null);
@@ -28,7 +29,11 @@ const Dashboard = () => {
   }, []);
 
   if (!propData || !clientData || !contractOwnersData) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center h-full items-center py-20">
+        <LoaderCircle className="animate-spin w-16 h-16" />
+      </div>
+    );
   }
 
   return (

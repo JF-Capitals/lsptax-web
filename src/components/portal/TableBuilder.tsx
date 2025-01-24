@@ -27,13 +27,6 @@ import {
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 
 interface TableBuilderProps {
   data: any;
@@ -47,7 +40,7 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [pageSize, setPageSize] = useState(10);
-  const [selectedRow, setSelectedRow] = useState<any | null>(null);
+  // const [selectedRow, setSelectedRow] = useState<any | null>(null);
   const [pageIndex, setPageIndex] = useState(0); // Add a pageIndex state
 
   const table = useReactTable({
@@ -165,7 +158,7 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
                         )}
                       </TableCell>
                     ))}
-                    <TableCell className="sm:hidden">
+                    {/* <TableCell className="sm:hidden">
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
@@ -189,13 +182,12 @@ const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
                                 >
                                   <span className="font-medium">{key}:</span>
                                   <span>{selectedRow[key]}</span>{" "}
-                                  {/* Fix: Use selectedRow[key] */}
                                 </div>
                               ))}
                           </div>
                         </DialogContent>
                       </Dialog>
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 ))
               ) : (

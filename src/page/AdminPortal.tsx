@@ -14,7 +14,7 @@ const AdminPortal = () => {
         <div
           className={`fixed z-40 top-0 left-0 h-full bg-white shadow-lg transition-transform transform ${
             isMenuOpen ? "translate-x-0" : "-translate-x-full"
-          } sm:relative sm:translate-x-0 sm:flex sm:w-32`}
+          } sm:relative sm:translate-x-0 sm:flex  `}
         >
           <SideMenu />
         </div>

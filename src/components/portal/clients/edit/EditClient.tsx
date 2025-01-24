@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearchParams } from "react-router-dom";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,19 +13,73 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { getSingleClient } from "@/store/data";
+import { ClientData, Property } from "@/types/types";
 
-const formSchema = z.object({
-  TypeOfAcct: z.string().optional(),
-  CLIENTNumber: z.string().nonempty("Client number is required"),
-  CLIENTNAME: z.string().optional(),
-  Email: z.string().email("Invalid email address").optional(),
-  PHONENUMBER: z.string().optional(),
-  MAILINGADDRESS: z.string().optional(),
-  MAILINGADDRESSCITYTXZIP: z.string().optional(),
-  IsArchived: z.boolean().optional(),
-});
+interface Client {
+  client: ClientData;
+  properties: Property[];
+}
 
-export default function AddClientForm() {
+export default function EditClient() {
+  const [client, setClient] = useState<Client | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchParams] = useSearchParams();
+  const clientId = searchParams.get("clientId");
+  console.log(clientId); // Check if the ID is correct
+  useEffect(() => {
+    async function loadClientData() {
+      try {
+        if (clientId) {
+          const data = await getSingleClient({ clientId });
+          setClient(data);
+          console.log({ data });
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Failed to load client data", error);
+        toast.error("Could not load client data. Please try again later.");
+        setError("Error getting client details");
+      }
+    }
+    if (clientId) {
+      loadClientData();
+    }
+  }, [searchParams]);
+
+  const formSchema = z.object({
+    TypeOfAcct: z
+      .string()
+      .optional()
+      .default(client?.client.TypeOfAcct || ""),
+    CLIENTNumber: z.string().nonempty(client?.client.CLIENTNumber || ""),
+    CLIENTNAME: z
+      .string()
+      .optional()
+      .default(client?.client.CLIENTNAME || ""),
+    Email: z
+      .string()
+      .email("Invalid email address")
+      .optional()
+      .default(client?.client.Email || ""),
+    PHONENUMBER: z
+      .string()
+      .optional()
+      .default(client?.client.PHONENUMBER || ""),
+    MAILINGADDRESS: z
+      .string()
+      .optional()
+      .default(client?.client.MAILINGADDRESS || ""),
+    MAILINGADDRESSCITYTXZIP: z
+      .string()
+      .optional()
+      .default(client?.client.MAILINGADDRESSCITYTXZIP || ""),
+    IsArchived: z
+      .boolean()
+      .optional()
+      .default(client?.client.IsArchived || false),
+  });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -31,16 +87,28 @@ export default function AddClientForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      console.log(values);
-      toast.success("Client added successfully!");
+      // Call the API or function to update the property
+      // await updateProperty({ propertyId, data: values });
+      console.log("PROPERTY FORM DATA :", { values });
+      toast.success("Property updated successfully!");
     } catch (error) {
-      console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
+      toast.error("Failed to update property. Please try again.");
     }
+  };
+
+  const revertChanges = () => {
+    // form.reset(client); // Reset form to the fetched property data
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
+  if (error) {
+    return <div>{error}</div>;
+  }
   return (
     <Form {...form}>
       <form
@@ -48,10 +116,10 @@ export default function AddClientForm() {
         className="space-y-8 m-3 py-10 px-6 bg-white rounded-lg shadow-lg"
       >
         <h1 className="text-xl font-semibold text-gray-800 mb-6">
-          Client Information
+          Edit Client Information
         </h1>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           <div>
             <FormField
               control={form.control}
@@ -60,7 +128,7 @@ export default function AddClientForm() {
                 <FormItem>
                   <FormLabel>Client Number</FormLabel>
                   <Input
-                    placeholder="Enter Client Number"
+                    placeholder={client?.client.CLIENTNumber}
                     {...field}
                     className="border-gray-300"
                   />
@@ -78,7 +146,7 @@ export default function AddClientForm() {
                 <FormItem>
                   <FormLabel>Client Name</FormLabel>
                   <Input
-                    placeholder="Enter Client Name"
+                    placeholder={client?.client.CLIENTNAME}
                     {...field}
                     className="border-gray-300"
                   />
@@ -96,7 +164,7 @@ export default function AddClientForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <Input
-                    placeholder="Enter Email"
+                    placeholder={client?.client.Email}
                     type="email"
                     {...field}
                     className="border-gray-300"
@@ -106,8 +174,7 @@ export default function AddClientForm() {
               )}
             />
           </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+
           <div>
             <FormField
               control={form.control}
@@ -116,7 +183,7 @@ export default function AddClientForm() {
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <Input
-                    placeholder="Enter Phone Number"
+                    placeholder={client?.client.PHONENUMBER}
                     {...field}
                     className="border-gray-300"
                   />
@@ -125,6 +192,9 @@ export default function AddClientForm() {
               )}
             />
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-4">
           <div>
             <FormField
               control={form.control}
@@ -163,7 +233,11 @@ export default function AddClientForm() {
         </div>
 
         <Button type="submit" variant="blue" className="mt-6 w-64">
-          Submit
+          Update Client
+        </Button>
+
+        <Button variant="blue" className="mt-6 w-64" onClick={revertChanges}>
+          Revert Changes
         </Button>
       </form>
     </Form>

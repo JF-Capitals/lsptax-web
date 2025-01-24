@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import {
   ColumnDef,
-  SortingState,
-  getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
-  getPaginationRowModel,
-  ColumnFiltersState,
-  getFilteredRowModel,
-  VisibilityState,
+  // SortingState,
+  // getCoreRowModel,
+  // useReactTable,
+  // getSortedRowModel,
+  // getPaginationRowModel,
+  // ColumnFiltersState,
+  // getFilteredRowModel,
+  // VisibilityState,
 } from "@tanstack/react-table";
 
 import {
@@ -20,10 +20,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { getProperties, getArchiveProperties } from "@/store/data"; // Import both data-fetching functions
-import { NavLink } from "react-router-dom";
-import { Input } from "@/components/ui/input";
 import TableBuilder from "../TableBuilder";
-import { Archive, ChevronDown, HousePlus, LoaderCircle } from "lucide-react";
+import { Archive, ChevronDown, LoaderCircle } from "lucide-react";
 import { Properties } from "./columns";
 
 interface PropertiesTableProps<TData, TValue> {
@@ -35,10 +33,10 @@ const PropertiesTable = <TData extends Properties, TValue>({
 }: PropertiesTableProps<TData, TValue>) => {
   const [properties, setProperties] = useState<TData[]>([]);
   const [archived, setArchived] = useState(false); // Track if viewing archived properties
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
+  // const [sorting, setSorting] = useState<SortingState>([]);
+  // const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  // const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  // const [rowSelection, setRowSelection] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,24 +72,24 @@ const PropertiesTable = <TData extends Properties, TValue>({
     );
   });
 
-  const table = useReactTable({
-    data: filteredProperties,
-    columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
+  // const table = useReactTable({
+  //   data: filteredProperties,
+  //   columns,
+  //   onSortingChange: setSorting,
+  //   getCoreRowModel: getCoreRowModel(),
+  //   getSortedRowModel: getSortedRowModel(),
+  //   getPaginationRowModel: getPaginationRowModel(),
+  //   onColumnFiltersChange: setColumnFilters,
+  //   getFilteredRowModel: getFilteredRowModel(),
+  //   onColumnVisibilityChange: setColumnVisibility,
+  //   onRowSelectionChange: setRowSelection,
+  //   state: {
+  //     sorting,
+  //     columnFilters,
+  //     columnVisibility,
+  //     rowSelection,
+  //   },
+  // });
 
   if (loading) {
     return (
@@ -116,7 +114,7 @@ const PropertiesTable = <TData extends Properties, TValue>({
           <h2 className="text-2xl font-bold ">{filteredProperties.length}</h2>
           <h3>{archived ? "Archived Properties" : "Active Properties"}</h3>
         </div>
-        <div className="flex flex-col gap-2 w-full">
+        {/* <div className="flex flex-col gap-2 w-full">
           <h1>Quick search a Property</h1>
           <Input
             placeholder="Search Property Name..."
@@ -128,7 +126,7 @@ const PropertiesTable = <TData extends Properties, TValue>({
             }
             className="max-w-sm"
           />
-        </div>
+        </div> */}
         <div className="flex gap-2 w-full">
           <div className="w-full">
             <h2>Filter Properties</h2>
@@ -168,12 +166,12 @@ const PropertiesTable = <TData extends Properties, TValue>({
             {archived ? "View Active" : "View Archived"}
           </Button>
 
-          <NavLink to={`/portal/add-properties`}>
+          {/* <NavLink to={`/portal/add-properties`}>
             <Button variant={"blue"} className="">
               <HousePlus />
               Add New Property
             </Button>
-          </NavLink>
+          </NavLink> */}
         </div>
       </div>
       <TableBuilder
