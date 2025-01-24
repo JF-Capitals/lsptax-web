@@ -7,6 +7,7 @@ const Hero = () => {
       id="hero"
       className="bg-[#F7FAFF] md:max-h-[90vh] flex flex-col md:flex-row items-center justify-between relative p-10 md:p-18 pb-32 z-1"
     >
+      {/* /h */}
       {/* Left Section */}
       <div className="w-full md:w-1/2 flex flex-col items-start md:ml-32 mb-8 md:mb-0">
         <div>
