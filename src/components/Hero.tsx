@@ -5,7 +5,7 @@ const Hero = () => {
   return (
     <div
       id="hero"
-      className="bg-[#F7FAFF] flex flex-col md:flex-row items-center relative p-8 md:p-18 pb-32 z-1"
+      className="bg-[#F7FAFF] md:max-h-[90vh] flex flex-col md:flex-row items-center justify-between relative p-10 md:p-18 pb-32 z-1"
     >
       {/* Left Section */}
       <div className="w-full md:w-1/2 flex flex-col items-start md:ml-32 mb-8 md:mb-0">
@@ -41,11 +41,24 @@ const Hero = () => {
       </div>
 
       {/* Right Section */}
-      <div className="w-full md:w-1/2 flex justify-center md:mr-16 shadow-lg h-full md:h-1/2 rounded-full">
+      <div className="w-full md:w-1/2 md:mr-16  h-full md:h-1/2 rounded-full  md:hidden">
+      
         <img
           src={heroImage}
           alt="Hero Image"
-          className="relative z-10 w-full max-w-md md:max-w-full rounded-full "
+          className="relative z-10 w-full max-w-md md:max-w-[50%] rounded-full shadow-md"
+        />
+        
+      </div>
+      
+      <div className="mb-10 hidden md:block mt-8">
+        <svg width="610" height="560" viewBox="0 0 610 640" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute z-0 ">
+          <circle opacity="0.5" cx="420" cy="180" r="370" fill="#0093FF" fill-opacity="0.8" />
+        </svg>
+        <img
+          src={heroImage}
+          alt="Hero Image"
+          className="relative z-10 w-[500px] rounded-full mt-16"
         />
       </div>
     </div>

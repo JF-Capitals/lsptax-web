@@ -1,5 +1,8 @@
 import React from "react";
 import { InvoiceData } from "@/types/types";
+import { useReactToPrint } from "react-to-print";
+import { useRef } from "react";
+
 
 const InvoiceSummary: React.FC<{ invoice?: InvoiceData }> = ({ invoice }) => {
   const calculateFees = () => {
@@ -7,41 +10,34 @@ const InvoiceSummary: React.FC<{ invoice?: InvoiceData }> = ({ invoice }) => {
     return invoice.properties.reduce((total, property) => {
       const feeString = property.invoice.ContingencyFeeDue || "$0";
       const numericValue = parseFloat(feeString.replace(/[^0-9.]/g, "")); // Remove '$' and other characters
-      console.log({numericValue})
+      console.log({ numericValue })
       return total + (isNaN(numericValue) ? 0 : numericValue);
     }, 0);
   };
   const totalFees = calculateFees();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const reactToPrintFn = useReactToPrint({ contentRef});
   return (
     <div
-      className="flex justify-center items-center min-h-screen bg-gray-100"
+      className="flex flex-col justify-center items-center min-h-screen bg-gray-100"
       style={{
         overflow: "hidden",
       }}
     >
-      {/* A4 Page Container */}
-      <div
-        id="pdf-content"
-        className="bg-white overflow-auto shadow-lg p-4 sm:p-6 md:p-8"
-        style={{
-          width: "100vw",
-          height: "100vh",
-          aspectRatio: "210 / 297", // Maintain A4 ratio
-          maxWidth: "210mm",
-          maxHeight: "297mm",
-          boxSizing: "border-box",
-          overflowY: "auto",
-          overflowX: "hidden",
-        }}
-      >
-        <div className="text-center mb-4">
+      <div className="text-center ">
           <button
-            className="border-1 border-black bg-slate-400 rounded-md p-2"
-            onClick={() => window.print()}
+            className="bg-[#0093FF] rounded-md p-2 px-6 m-2 text-white"
+            onClick={() => reactToPrintFn()}
           >
-            Print
+            Print Invoice 
           </button>
         </div>
+      {/* A4 Page Container */}
+      <div ref={contentRef}
+        id="pdf-content"
+        className="bg-white w-[210mm] min-h-screen overflow-auto shadow-lg p-4 sm:p-6 md:p-8"
+      >
+        
 
         <div className="flex justify-between items-start mb-4">
           <div className="flex justify-between items-start ">

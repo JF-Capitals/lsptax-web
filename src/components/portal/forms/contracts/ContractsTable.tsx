@@ -85,6 +85,7 @@ const ContractTable = <TData, TValue>({
 
   return (
     <div>
+      
       <div className="flex flex-col md:flex-row border rounded-xl items-center gap-4 bg-white m-4 p-4">
         <div className="w-full">
           <h2 className="text-2xl font-bold">{clients.length}</h2>

@@ -7,6 +7,19 @@
 html {
   @apply font-sans;
 }
+html, body {
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+@media print {
+  .page-break {
+    page-break-before: always;
+  }
+}
 
 
 @layer base {

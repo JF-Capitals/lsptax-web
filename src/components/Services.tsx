@@ -28,24 +28,7 @@ const services = [
     desc: "Our “No Savings, No Fee” policy means you only pay if we reduce your taxes. If we can’t lower your property tax bill, there’s no cost to you.",
     ctaLink: "",
   },
-  {
-    logo: s1,
-    label: "Expertise in Savings",
-    desc: "Our team specializes in Texas property tax laws and knows the ins and outs of local tax assessments.",
-    ctaLink: "",
-  },
-  {
-    logo: s1,
-    label: "Client-Focused Service",
-    desc: "We bring our members high-quality commercial investment opportunities that are normally hidden away in country clubs or investment firms.",
-    ctaLink: "",
-  },
-  {
-    logo: s1,
-    label: "Risk-Free Savings",
-    desc: "Our “No Savings, No Fee” policy means you only pay if we reduce your taxes. If we can’t lower your property tax bill, there’s no cost to you.",
-    ctaLink: "",
-  },
+  
 ];
 
 const Services = () => {

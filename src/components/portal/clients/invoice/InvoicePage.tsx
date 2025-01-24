@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import InvoiceSummary from "./InvoiceSummary";
 import InvoiceDetails from "./InvoiceDetails";
 
+
 const InvoicePage = () => {
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get("clientId");
@@ -26,6 +27,7 @@ const InvoicePage = () => {
       fetchInvoiceData();
     }
   }, [clientId]);
+  
   return (
     <div>
       <InvoiceSummary invoice={invoiceData} />
