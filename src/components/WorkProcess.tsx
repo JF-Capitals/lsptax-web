@@ -2,26 +2,26 @@ import w1 from "@/assets/work/w1.png";
 import w2 from "@/assets/work/w2.png";
 import w3 from "@/assets/work/w3.png";
 
-const workProcessCopy = [
-  {
-    image: w1,
-    title: "We submit your protest",
-    desc: "We handle your property tax protest from start to finish, ensuring all paperwork is filed accurately and on time for a better chance at reduction.",
-    color: "#0056B3",
-  },
-  {
-    image: w2,
-    title: "We gather the evidence",
-    desc: "We collect key evidence like market trends and property data to build a strong case for lowering your taxes.",
-    color: "#FFD700",
-  },
-  {
-    image: w3,
-    title: "We fight your case",
-    desc: "We negotiate with tax authorities on your behalf to secure a fair property tax reduction.",
-    color: "#FF4500",
-  },
-];
+// const workProcessCopy = [
+//   {
+//     image: w1,
+//     title: "We submit your protest",
+//     desc: "We handle your property tax protest from start to finish, ensuring all paperwork is filed accurately and on time for a better chance at reduction.",
+//     color: "#0056B3",
+//   },
+//   {
+//     image: w2,
+//     title: "We gather the evidence",
+//     desc: "We collect key evidence like market trends and property data to build a strong case for lowering your taxes.",
+//     color: "#FFD700",
+//   },
+//   {
+//     image: w3,
+//     title: "We fight your case",
+//     desc: "We negotiate with tax authorities on your behalf to secure a fair property tax reduction.",
+//     color: "#FF4500",
+//   },
+// ];
 
 const WorkProcess = () => {
   return (
