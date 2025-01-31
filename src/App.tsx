@@ -8,8 +8,6 @@ import ProtectedRoute from "./utils/ProtectedRoute";
 
 
 function App() {
-  // Simulate authentication check (replace this with your actual logic)
-  const isAuthenticated = true;
 
   return (
     <Router>
@@ -19,7 +17,7 @@ function App() {
         <Route
           path="/portal/*"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute >
               <AdminPortal />
             </ProtectedRoute>
           }
