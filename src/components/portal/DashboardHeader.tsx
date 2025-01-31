@@ -6,6 +6,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLocation } from "react-router-dom";
 import { BellIcon, ChevronDown, Menu, User2 } from "lucide-react";
+import { logoutUser } from "@/api/api";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 // import { useEffect, useState } from "react";
 
 const CurrentDate: React.FC = () => {
@@ -55,9 +58,7 @@ const CurrentDate: React.FC = () => {
       }
     };
 
-    return `${dayName}, ${date}${ordinalSuffix(
-      date
-    )} ${month} ${year}`;
+    return `${dayName}, ${date}${ordinalSuffix(date)} ${month} ${year}`;
   };
 
   return <h3>{formatDate()}</h3>;
@@ -115,8 +116,25 @@ const headerData = [
 ];
 
 const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname.split("/portal/")[1];
+
+  const name = localStorage.getItem("user");
+  console.log("USER:", name)
+
+  async function logoutHandler() {
+    try {
+      logoutUser();
+      // Show success toast
+      toast({
+        title: "Logged Out!",
+      });
+
+      navigate("/login"); // Relative route
+    } catch (error) {}
+  }
 
   // If there's no path after /portal, treat it as the dashboard
   const isDashboard = !currentPath;
@@ -124,11 +142,11 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
   const currentHeader = headerData.find((item) => item.id === currentPath);
   // const [username, setUsername] = useState<string | null>("Hussain");
 
-    // useEffect(() => {
-    //   // Retrieve the username from localStorage
-    //   const storedUsername = localStorage.getItem("username");
-    //   setUsername(storedUsername);
-    // }, []);
+  // useEffect(() => {
+  //   // Retrieve the username from localStorage
+  //   const storedUsername = localStorage.getItem("username");
+  //   setUsername(storedUsername);
+  // }, []);
 
   return (
     <div className="flex justify-between p-4">
@@ -140,7 +158,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
         {isDashboard ? (
           <HeaderDescriptionItem
             icon=""
-            label={`Welcome,${`Hussain`}`}
+            label={`Welcome,${`${localStorage.getItem("user")}`}`}
             desc="This is your dashboard."
           />
         ) : currentHeader ? (
@@ -150,8 +168,12 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
             desc={currentHeader.desc}
           />
         ) : (
-              <div className="hidden md:block">
-                <HeaderDescriptionItem icon={""} label={"Welcome, Hussain"} desc={""}/>
+          <div className="hidden md:block">
+            <HeaderDescriptionItem
+              icon={""}
+              label={"Welcome, Hussain"}
+              desc={""}
+            />
           </div>
         )}
       </div>
@@ -170,7 +192,9 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
             <DropdownMenuContent className="p-4 font-semibold">
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={logoutHandler}>
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

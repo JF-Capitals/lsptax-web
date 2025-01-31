@@ -28,27 +28,28 @@ import { ToastAction } from "@/components/ui/toast";
 
 // Improved schema with additional validation rules
 const formSchema = z.object({
-  username: z.string(),
+  email: z.string(),
   password: z
     .string()
     .min(6, { message: "Password must be at least 6 characters long" }),
 });
 
 export default function LoginPage() {
-    const { toast } = useToast();
-    const navigate = useNavigate();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const { username, password } = values;
-      const response = await loginUser(username, password);
+      const { email, password } = values;
+      console.log({ email, password });
+      const response = await loginUser(email, password);
 
       // Assuming response contains token and user info
       const { token, user } = response;
@@ -68,12 +69,12 @@ export default function LoginPage() {
       navigate("/portal/dashboard"); // Relative route
     } catch (error) {
       console.error("Login failed", error);
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: "There was a problem with your request.",
-          action: <ToastAction altText="Try again">Try again</ToastAction>,
-        });
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
     }
   }
 
@@ -92,10 +93,10 @@ export default function LoginPage() {
               <div className="grid gap-4">
                 <FormField
                   control={form.control}
-                  name="username"
+                  name="email"
                   render={({ field }) => (
                     <FormItem className="grid gap-2">
-                      <FormLabel htmlFor="username">Username</FormLabel>
+                      <FormLabel htmlFor="email">Username</FormLabel>
                       <FormControl>
                         <Input
                           id="username"
