@@ -23,7 +23,7 @@ import { invoicesColumn } from "@/components/portal/invoices/columns";
 import { contractOwnerColumns } from "@/components/portal/contract-owner/columns";
 import { contractsColumn } from "@/components/portal/forms/contracts/columns";
 import { clientsColumn } from "@/components/portal/clients/list/columns";
-import { agentsColumn } from "@/components/portal/forms/agent/columns";
+// import { agentsColumn } from "@/components/portal/forms/agent/columns";
 import { prospectColumn } from "@/components/portal/prospects/list/columns";
 import ProtectedRoute from "@/utils/ProtectedRoute";
 
