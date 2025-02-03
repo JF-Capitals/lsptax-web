@@ -5,16 +5,16 @@ const Hero = () => {
   return (
     <div
       id="hero"
-      className="bg-[#F7FAFF] md:max-h-[90vh] flex flex-col md:flex-row items-center justify-between relative p-10 md:p-18 pb-32 z-1"
+      className="bg-[#F7FAFF] md:max-h-[90vh] flex flex-col md:flex-row items-center justify-between relative p-6 md:p-10 lg:p-18 pb-20 md:pb-32 z-1 overflow-hidden"
     >
       {/* /h */}
       {/* Left Section */}
       <div className="w-full md:w-1/2 flex flex-col items-start md:ml-32 mb-8 md:mb-0">
-        <div>
+        <div className=" w-full max-w-[90%] md:max-w-full">
           <h4 className="border-l-4 border-blue-400 px-4 text-lg md:text-xl">
             Offering the best tax reduction services
           </h4>
-          <h1 className="text-4xl md:text-6xl font-bold my-4">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold my-4">
             Maximize Your
             <br /> Property Tax Savings
           </h1>
@@ -52,14 +52,21 @@ const Hero = () => {
         
       </div>
       
-      <div className="mb-10 hidden md:block mt-8">
-        <svg width="610" height="560" viewBox="0 0 610 640" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute z-0 ">
-          <circle opacity="0.5" cx="420" cy="180" r="370" fill="#0093FF" fill-opacity="0.8" />
+      <div className="mb-10 hidden md:block ">
+      <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 610 640"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="absolute z-0 w-[80%] md:w-[90%] lg:w-[500px] h-auto top-0 right-0 md:hidden lg:block "
+        >
+          <circle opacity="0.5" cx="420" cy="180" r="370" fill="#0093FF" fillOpacity="0.8" />
         </svg>
         <img
           src={heroImage}
           alt="Hero Image"
-          className="relative z-10 w-[500px] rounded-full mt-16"
+          className="relative z-10 w-[500px] rounded-full mt-16 "
         />
       </div>
     </div>

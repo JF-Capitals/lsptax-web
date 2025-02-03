@@ -3,8 +3,9 @@ import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AdminPortal from "./page/AdminPortal";
 import LandingPage from "./page/LandingPage";
-import LoginPage from "./page/LoginPage";
+
 import ProtectedRoute from "./utils/ProtectedRoute";
+import LoginPage from "./page/LoginPage";
 
 
 function App() {

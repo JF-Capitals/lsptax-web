@@ -66,9 +66,9 @@ const Footer = () => {
         </div>
         <div className="flex w-full md:w-1/3 justify-between md:gap-8 md:mt-0 mt-2 items-center flex-col md:flex-row">
           <h2>Contact:</h2>
-          <h2 className="font-bold">info@lsptax.com</h2>
+          <h2 className="font-bold whitespace-nowrap">info@lsptax.com</h2>
           <h2 className="hidden md:block">|</h2>
-          <h2 className="font-bold">+1-833-577-8291</h2>
+          <h2 className="font-bold whitespace-nowrap">+1-833-577-8291</h2>
         </div>
       </div>
     </div>
