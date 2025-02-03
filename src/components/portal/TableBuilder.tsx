@@ -32,8 +32,8 @@ interface TableBuilderProps {
   data: any;
   columns: any;
   label: string;
-  columnFilters: ColumnFiltersState;
-  setColumnFilters: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
+  columnFilters?: ColumnFiltersState;
+  setColumnFilters?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
 }
 
 

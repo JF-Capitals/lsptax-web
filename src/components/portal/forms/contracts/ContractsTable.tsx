@@ -117,7 +117,7 @@ const ContractTable = <TData, TValue>({
           </NavLink>
         </div>
       </div>
-      <TableBuilder data={clients} columns={columns} label="Clients" />
+      <TableBuilder data={clients} columns={columns} label="Clients" columnFilters={columnFilters} setColumnFilters={setColumnFilters}  />
     </div>
   );
 };
