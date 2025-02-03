@@ -13,7 +13,7 @@ import AddClient from "@/components/portal/clients/add/AddClient";
 import ClientPage from "@/components/portal/clients/ClientPage";
 import EditClient from "@/components/portal/clients/edit/EditClient";
 import AddProspect from "@/components/portal/prospects/add/AddProspects";
-import AgentTable from "@/components/portal/forms/agent/AgentsTable";
+// import AgentTable from "@/components/portal/forms/agent/AgentsTable";
 import ProspectTable from "@/components/portal/prospects/list/ProspectsTable";
 import AgentForm from "@/components/portal/forms/agent/AgentForm";
 import ContractForm from "@/components/portal/forms/contracts/ContractForm";
@@ -59,10 +59,10 @@ const AdminRoutes = () => {
         <Route path="/client" element={<ClientPage />} />
         <Route path="/edit-client" element={<EditClient />} />
         <Route path="/prospects/add-prospect" element={<AddProspect />} />
-        <Route
+        {/* <Route
           path="/forms/agent"
           element={<AgentTable columns={agentsColumn} />}
-        />
+        /> */}
         <Route
           path="/prospects/list-prospect"
           element={<ProspectTable columns={prospectColumn} />}
