@@ -64,7 +64,7 @@ export default function ContractForm() {
                 </p>
                 <p className="mt-2">
                   The contingency fee is calculated without regard to exemption amounts oered by individual taxing jurisdictions. If LSPT has
-                  records demonstrating you have an over 65 exemption, the contingency fee for that property will be reduced to 25%
+                  records demonstrating you have an over 65 exemption, the contingency fee for that property will be reduced to {}
                 </p>
                 <p className="mt-2">
                   I understand that the contingency fee will be invoiced upon completion of the property tax hearing and is due within 30 days

@@ -32,40 +32,42 @@ interface TableBuilderProps {
   data: any;
   columns: any;
   label: string;
+  columnFilters: ColumnFiltersState;
+  setColumnFilters: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
 }
 
-const TableBuilder = ({ data, columns, label }: TableBuilderProps) => {
+
+const TableBuilder = ({ data, columns, label,columnFilters,setColumnFilters }: TableBuilderProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [pageSize, setPageSize] = useState(10);
   // const [selectedRow, setSelectedRow] = useState<any | null>(null);
   const [pageIndex, setPageIndex] = useState(0); // Add a pageIndex state
 
-  const table = useReactTable({
-    data,
-    columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-      pagination: {
-        pageSize,
-        pageIndex, // Set the pageIndex in the state
-      },
+const table = useReactTable({
+  data,
+  columns,
+  onSortingChange: setSorting,
+  getCoreRowModel: getCoreRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  onColumnFiltersChange: setColumnFilters, // Use prop from ClientTable
+  getFilteredRowModel: getFilteredRowModel(),
+  onColumnVisibilityChange: setColumnVisibility,
+  onRowSelectionChange: setRowSelection,
+  state: {
+    sorting,
+    columnFilters, // Use state from ClientTable
+    columnVisibility,
+    rowSelection,
+    pagination: {
+      pageSize,
+      pageIndex,
     },
-    manualPagination: false,
-  });
+  },
+});
+
 
   // Update the table's page size whenever it changes
   const handlePageSizeChange = (value: number) => {

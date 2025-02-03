@@ -1,4 +1,5 @@
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -11,6 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { addClient } from "@/api/api";
 
 const formSchema = z.object({
   TypeOfAcct: z.string().optional(),
@@ -24,20 +26,70 @@ const formSchema = z.object({
 });
 
 export default function AddClientForm() {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       IsArchived: false,
+      CLIENTNAME:"",
+      Email: "",
+      PHONENUMBER: "",
+      MAILINGADDRESS: "",
+      MAILINGADDRESSCITYTXZIP: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log({ values });
     try {
-      console.log(values);
-      toast.success("Client added successfully!");
+      if (
+        !values.CLIENTNAME ||
+        !values.Email ||
+        !values.PHONENUMBER ||
+        !values.MAILINGADDRESS ||
+        !values.MAILINGADDRESSCITYTXZIP
+      ) {
+        toast({
+          title: "Missing Data!",
+        });
+        return;
+      }
+      await addClient(
+        values.CLIENTNAME,
+        values.Email,
+        values.PHONENUMBER || "",
+        values.MAILINGADDRESS || "",
+        values.MAILINGADDRESSCITYTXZIP || "",
+        values.TypeOfAcct|| "",
+      );
+      toast({
+        title: "Client added successfully!",
+      });
+      form.reset();
     } catch (error) {
-      console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
+      console.error("Error submitting form:", error);
+
+      let errorMessage = "Failed to add client. Please try again.";
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      if (errorMessage === "Email Already Present") {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: "This email is already registered. Try a different one.",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: "There was a problem with your request.",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
+      }
     }
   }
 
@@ -52,24 +104,6 @@ export default function AddClientForm() {
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <div>
-            <FormField
-              control={form.control}
-              name="CLIENTNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Client Number</FormLabel>
-                  <Input
-                    placeholder="Enter Client Number"
-                    {...field}
-                    className="border-gray-300"
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
           <div>
             <FormField
               control={form.control}

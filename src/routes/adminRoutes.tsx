@@ -67,6 +67,10 @@ const AdminRoutes = () => {
           path="/prospects/list-prospect"
           element={<ProspectTable columns={prospectColumn} />}
         />
+        <Route
+          path="/prospect/add-prospect"
+          element={<AddProspect />}
+        />
         <Route path="/agent-form" element={<AgentForm />} />
         <Route path="/contract" element={<ContractForm />} />
         <Route path="/invoice" element={<InvoicePage />} />

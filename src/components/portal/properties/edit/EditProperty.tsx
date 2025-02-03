@@ -13,10 +13,37 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { getSingleProperty } from "@/store/data"; // Assuming this is the function to fetch property data
+import { getSingleProperty } from "@/store/data";
 import { PropertyData } from "@/types/types";
-import EditableYearTable from "../yeardata/EditableYearTable";
+import { editProperty } from "@/api/api";
 
+// Table Row Type Definition
+type TableRow = {
+  year: number;
+  "Protested Date": string;
+  "BPP Rendered": string;
+  "Prelim Land": string;
+  "Prelim Building": string;
+  "Prelim Total": string;
+  "Assessed Prelim": string;
+  "Final Land": string;
+  "Final Building": string;
+  "Final Total": string;
+  "Assessed Final": string;
+  "Hearing Date": string;
+  "Invoice Date": string;
+  "Under Litigation": boolean;
+  "Under Arbitration": boolean;
+  Reduction: string;
+  "Tax Rate": string;
+  "Taxes Saved": string;
+  "Contingency Fee": string;
+  "Invoice Amount": string;
+  "Paid Date": string;
+  "Payment Notes": string;
+};
+
+// Form Schema
 const formSchema = z.object({
   StatusNotes: z.string().optional(),
   OtherNotes: z.string().optional(),
@@ -37,20 +64,26 @@ const formSchema = z.object({
   IsArchived: z.boolean().default(false),
 });
 
+// Complete Submission Type
+interface CompleteSubmission {
+  propertyDetails: z.infer<typeof formSchema>;
+  yearlyData: Record<number, Omit<TableRow, "year">>;
+}
+
 export default function EditProperty() {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [property, setProperty] = useState<PropertyData | null>(null);
+  const propertyId = searchParams.get("propertyId");
+  const years = [2021, 2022, 2023, 2024, 2025];
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       IsArchived: false,
     },
   });
-
-  const propertyId = searchParams.get("propertyId");
-  console.log(propertyId); // Check if the ID is correct
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -64,8 +97,7 @@ export default function EditProperty() {
         const property = await getSingleProperty({ propertyId });
         if (property) {
           setProperty(property);
-          console.log("line78", property);
-          form.reset(property[0]); // Prefill the form with the property data
+          form.reset(property[0]);
         } else {
           setError("Property not found");
         }
@@ -77,30 +109,104 @@ export default function EditProperty() {
     };
 
     fetchProperty();
-    console.log(property)
   }, [propertyId, form]);
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      // Call the API or function to update the property
-      // await updateProperty({ propertyId, data: values });
-      console.log("PROPERTY FORM DATA :", { values });
-      toast.success("Property updated successfully!");
-    } catch (error) {
-      toast.error("Failed to update property. Please try again.");
-    }
-  };
-  const revertChanges = () => {
-    // form.reset(property); // Reset form to the fetched property data
+  const invoices = property?.invoices;
+
+  const initialTableData: TableRow[] = years.map((year) => {
+    const yearData = invoices?.find((invoice) => invoice.year === year);
+    return {
+      year,
+      "Protested Date": "-",
+      "BPP Rendered": "",
+      "Prelim Land": yearData?.BPPInvoice || "N/A",
+      "Prelim Building": yearData?.BPPInvoicePaid || "N/A",
+      "Prelim Total": yearData?.NoticeMarketValue || "N/A",
+      "Assessed Prelim": "",
+      "Final Land": "",
+      "Final Building": "",
+      "Final Total": "",
+      "Assessed Final": "",
+      "Hearing Date": "",
+      "Invoice Date": "",
+      "Under Litigation": false,
+      "Under Arbitration": false,
+      Reduction: "",
+      "Tax Rate": "",
+      "Taxes Saved": "",
+      "Contingency Fee": yearData?.ArbitrationContingencyFee || "N/A",
+      "Invoice Amount": yearData?.TotalDue || "N/A",
+      "Paid Date": "",
+      "Payment Notes": "",
+    };
+  });
+
+  const [tableData, setTableData] = useState<TableRow[]>(initialTableData);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    rowIndex: number,
+    columnKey: keyof TableRow
+  ) => {
+    const { value } = e.target;
+    setTableData((prev) =>
+      prev.map((row, idx) =>
+        idx === rowIndex ? { ...row, [columnKey]: value } : row
+      )
+    );
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const handleCheckboxChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    rowIndex: number,
+    columnKey: keyof TableRow
+  ) => {
+    const { checked } = e.target;
+    setTableData((prev) =>
+      prev.map((row, idx) =>
+        idx === rowIndex ? { ...row, [columnKey]: checked } : row
+      )
+    );
+  };
 
-  if (error) {
-    return <div>{error}</div>;
+const onSubmit = async (values: z.infer<typeof formSchema>): Promise<void> => {
+  try {
+    const completeSubmission: CompleteSubmission = {
+      propertyDetails: values,
+      yearlyData: tableData.reduce((acc, row) => {
+        const { year, ...rowWithoutYear } = row;
+        acc[year] = rowWithoutYear;
+        return acc;
+      }, {} as Record<number, Omit<TableRow, "year">>),
+    };
+
+    // Call the editProperty API function
+    await editProperty(
+      propertyId!, // Add non-null assertion since we check for propertyId earlier
+      completeSubmission.propertyDetails,
+      completeSubmission.yearlyData
+    );
+
+    toast.success("Property updated successfully!");
+  } catch (error) {
+    console.error("Submission error:", error);
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : "Failed to update property. Please try again."
+    );
   }
+};
+
+  // const revertChanges = () => {
+  //   if (property) {
+  //     form.reset(property[0]);
+  //     setTableData(initialTableData);
+  //   }
+  // };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <Form {...form}>
@@ -114,6 +220,7 @@ export default function EditProperty() {
           </h1>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Form Fields */}
             <FormField
               control={form.control}
               name="NAMEONCAD"
@@ -285,6 +392,8 @@ export default function EditProperty() {
               )}
             />
           </div>
+
+          {/* Status and Other Notes */}
           <div className="flex gap-4 justify-between">
             <FormField
               control={form.control}
@@ -297,7 +406,6 @@ export default function EditProperty() {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="OtherNotes"
@@ -312,7 +420,82 @@ export default function EditProperty() {
           </div>
         </div>
 
-        <EditableYearTable invoices={property?.invoices}/>
+        {/* Yearly Invoice Data Table */}
+        <div className="container mx-auto p-6">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+            Editable Yearly Invoices Summary
+          </h2>
+          <div className="overflow-x-auto rounded-lg shadow-md">
+            <table className="min-w-full text-left border-collapse bg-white rounded-lg">
+              <thead>
+                <tr className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white">
+                  <th className="px-6 py-3 text-sm font-medium uppercase"></th>
+                  {years.map((year) => (
+                    <th
+                      key={year}
+                      className="px-6 py-3 text-sm font-medium uppercase"
+                    >
+                      {year}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Object.keys(tableData[0]).map((key) => {
+                  if (key === "year") return null;
+                  return (
+                    <tr
+                      key={key}
+                      className="hover:bg-gray-100 even:bg-gray-50 odd:bg-white"
+                    >
+                      <td className="px-6 py-3 text-sm font-medium text-gray-800">
+                        {key}
+                      </td>
+                      {tableData.map((row, rowIndex) => (
+                        <td
+                          key={`${row.year}-${key}`}
+                          className="px-6 py-3 text-sm text-gray-700"
+                        >
+                          {key === "Under Litigation" ||
+                          key === "Under Arbitration" ? (
+                            <div className="flex gap-4 justify-center items-center">
+                              <input
+                                type="checkbox"
+                                checked={row[key as keyof TableRow] as boolean}
+                                onChange={(e) =>
+                                  handleCheckboxChange(
+                                    e,
+                                    rowIndex,
+                                    key as keyof TableRow
+                                  )
+                                }
+                                className="form-checkbox h-5 w-5 text-indigo-600"
+                              />
+                              <span>Yes</span>
+                            </div>
+                          ) : (
+                            <input
+                              type="text"
+                              value={row[key as keyof TableRow] as string}
+                              onChange={(e) =>
+                                handleInputChange(
+                                  e,
+                                  rowIndex,
+                                  key as keyof TableRow
+                                )
+                              }
+                              className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            />
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         {/* Submit and Revert Buttons */}
         <div className="flex justify-between mt-6">
@@ -320,11 +503,10 @@ export default function EditProperty() {
             type="button"
             variant="outline"
             className="w-full sm:w-[240px] text-gray-600"
-            onClick={revertChanges}
+            // onClick={revertChanges}
           >
             Revert Changes
           </Button>
-
           <Button
             type="submit"
             className="w-full sm:w-[240px] bg-blue-600 text-white hover:bg-blue-700"

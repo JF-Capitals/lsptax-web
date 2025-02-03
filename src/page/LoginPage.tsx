@@ -6,7 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { loginUser } from "@/api/api"; // Assuming you put the function in a utils/api file
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import {
     Form,
@@ -87,8 +87,9 @@ export default function LoginPage() {
                 <div className="md:w-[350px] md:h-[562px] ">
                     <div className="flex justify-between items-center w-full mb-12 ">
                         <div>
+                            <NavLink to={'/'}>
                             <img className="" src={Logo} alt="" />
-
+                            </NavLink>
                         </div>
                     </div>
                     <div>

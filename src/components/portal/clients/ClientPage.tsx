@@ -49,14 +49,14 @@ const ClientPage = () => {
         <h1 className="text-4xl font-bold text-center mb-6">Client Details</h1>
         <div className="flex gap-4">
           <NavLink
-            to={`/portal/edit-client?clientId=${clientData.client.CLIENTNumber}`}
+            to={`/portal/edit-client?clientId=${clientData.client.id}`}
           >
             <Button variant={"blue"} className="w-full">
               Edit Client Details
             </Button>
           </NavLink>
           <NavLink
-            to={`/portal/invoice?clientId=${clientData.client.CLIENTNumber}`}
+            to={`/portal/invoice?clientId=${clientData.client.id}`}
           >
             <Button variant={"blue"} className="w-full">
               Invoice
@@ -72,14 +72,14 @@ const ClientPage = () => {
           <table className="table-auto w-full">
             <tbody>
               <tr>
-                <td className="font-medium">Client:</td>
+                <td className="font-medium">Client Name:</td>
                 <td>{clientData?.client.CLIENTNAME}</td>
               </tr>
               <tr>
                 <td className="font-medium">Phone:</td>
                 <td>
                   <Phone size={18} className="inline text-indigo-600 mr-2" />
-                  {"mobile"}
+                  {clientData?.client.PHONENUMBER}
                 </td>
               </tr>
               <tr>
@@ -113,7 +113,7 @@ const ClientPage = () => {
             </Button>
           </NavLink>
         </div>
-        <div className="flex flex-col gap-4">
+        {clientData.properties.length ?  <div className="flex flex-col gap-4">
           {clientData.properties.map((property) => (
             <div className="">
               <PropertyBox
@@ -127,7 +127,8 @@ const ClientPage = () => {
               />
             </div>
           ))}
-        </div>
+        </div> : <h1 className="text-center ">No Properties found for this Client...</h1> }
+      
       </div>
     </div>
   );

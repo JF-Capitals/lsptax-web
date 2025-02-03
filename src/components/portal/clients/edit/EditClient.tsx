@@ -27,14 +27,12 @@ export default function EditClient() {
   const [error, setError] = useState("");
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get("clientId");
-  console.log(clientId); // Check if the ID is correct
   useEffect(() => {
     async function loadClientData() {
       try {
         if (clientId) {
           const data = await getSingleClient({ clientId });
           setClient(data);
-          console.log({ data });
           setLoading(false);
         }
       } catch (error) {
@@ -52,7 +50,7 @@ export default function EditClient() {
     TypeOfAcct: z
       .string()
       .optional()
-      .default(client?.client.TypeOfAcct || ""),
+      .default(client?.client.TypeOfAcct || "ty"),
     CLIENTNumber: z.string().nonempty(client?.client.CLIENTNumber || ""),
     CLIENTNAME: z
       .string()
@@ -80,6 +78,7 @@ export default function EditClient() {
       .optional()
       .default(client?.client.IsArchived || false),
   });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -89,74 +88,45 @@ export default function EditClient() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Call the API or function to update the property
-      // await updateProperty({ propertyId, data: values });
-      console.log("PROPERTY FORM DATA :", { values });
-      toast.success("Property updated successfully!");
+      console.log("Client Data :", { values });
+      toast.success("Client updated successfully!");
     } catch (error) {
-      toast.error("Failed to update property. Please try again.");
+      toast.error("Failed to update client. Please try again.");
     }
   };
 
   const revertChanges = () => {
-    // form.reset(client); // Reset form to the fetched property data
+    form.reset();
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="text-center text-gray-600">Loading...</div>;
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <div className="text-center text-red-500">{error}</div>;
   }
+
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 m-3 py-10 px-6 bg-white rounded-lg shadow-lg"
-      >
-        <h1 className="text-xl font-semibold text-gray-800 mb-6">
-          Edit Client Information
-        </h1>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          <div>
-            <FormField
-              control={form.control}
-              name="CLIENTNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Client Number</FormLabel>
-                  <Input
-                    placeholder={client?.client.CLIENTNumber}
-                    {...field}
-                    className="border-gray-300"
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div>
+    <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-10">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+        Edit Client Information
+      </h1>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <FormField
               control={form.control}
               name="CLIENTNAME"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Client Name</FormLabel>
-                  <Input
-                    placeholder={client?.client.CLIENTNAME}
-                    {...field}
-                    className="border-gray-300"
-                  />
+                  <Input {...field} className="border-gray-300 rounded-lg" />
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
 
-          <div>
             <FormField
               control={form.control}
               name="Email"
@@ -164,82 +134,65 @@ export default function EditClient() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <Input
-                    placeholder={client?.client.Email}
                     type="email"
                     {...field}
-                    className="border-gray-300"
+                    className="border-gray-300 rounded-lg"
                   />
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
 
-          <div>
             <FormField
               control={form.control}
               name="PHONENUMBER"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
-                  <Input
-                    placeholder={client?.client.PHONENUMBER}
-                    {...field}
-                    className="border-gray-300"
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-4">
-          <div>
-            <FormField
-              control={form.control}
-              name="MAILINGADDRESS"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mailing Address</FormLabel>
-                  <Input
-                    placeholder="Enter Mailing Address"
-                    {...field}
-                    className="border-gray-300"
-                  />
+                  <Input {...field} className="border-gray-300 rounded-lg" />
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
-          <div>
-            <FormField
-              control={form.control}
-              name="MAILINGADDRESSCITYTXZIP"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mailing Address (City, TX, ZIP)</FormLabel>
-                  <Input
-                    placeholder="Enter City, TX, ZIP"
-                    {...field}
-                    className="border-gray-300"
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="MAILINGADDRESSCITYTXZIP"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Mailing Address (City, TX, ZIP)</FormLabel>
+                <Input {...field} className="border-gray-300 rounded-lg" />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="TypeOfAcct"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Type</FormLabel>
+                <Input {...field} className="border-gray-300 rounded-lg" />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-center gap-4">
+            <Button type="submit" variant="blue" className="w-64">
+              Update Client
+            </Button>
+            <Button
+              variant="secondary"
+              className="w-64"
+              onClick={revertChanges}
+            >
+              Revert Changes
+            </Button>
           </div>
-        </div>
-
-        <Button type="submit" variant="blue" className="mt-6 w-64">
-          Update Client
-        </Button>
-
-        <Button variant="blue" className="mt-6 w-64" onClick={revertChanges}>
-          Revert Changes
-        </Button>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </div>
   );
 }

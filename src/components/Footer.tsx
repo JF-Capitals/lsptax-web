@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 const footerListItems = [
   {
@@ -62,7 +63,9 @@ const Footer = () => {
           <h2 className="hover:underline cursor-pointer">Terms & Conditions</h2>
           <h2 className="hover:underline cursor-pointer">Refund Policy</h2>
           <h2 className="hover:underline cursor-pointer">Privacy Policy</h2>
-          <h2 className="hover:underline cursor-pointer">Sitemap</h2>
+          <NavLink to={'/portal/dashboard'}>
+          <h2 className="hover:underline cursor-pointer">Portal</h2>
+          </NavLink>
         </div>
         <div className="flex w-full md:w-1/3 justify-between md:gap-8 md:mt-0 mt-2 items-center flex-col md:flex-row">
           <h2>Contact:</h2>

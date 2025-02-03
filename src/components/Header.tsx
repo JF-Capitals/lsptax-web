@@ -7,9 +7,9 @@ const Header = () => {
       {/* Mobile View */}
       <div className="flex md:hidden justify-between items-center p-4">
         <img src={logo} />
-        <a className="bg-[#E84F5A] text-white p-2 px-4 border rounded-full flex gap-2 cursor-pointer group">
+        <a href="#contact" className="bg-[#E84F5A] text-white p-2 px-4 border rounded-full flex gap-2 cursor-pointer group">
           <img src={phoneLogo} alt="" className="group-hover:animate-vibrate" />
-          Call Now
+    Contact Us
         </a>
       </div>
       {/* Desktop View */}
@@ -45,9 +45,9 @@ const Header = () => {
         >
           <span className="relative"> Key Dates</span>
         </a>
-        <a className="bg-[#E84F5A] text-white p-4 px-8 border rounded-full flex gap-2 cursor-pointer group">
+        <a href="#contact" className="bg-[#E84F5A] text-white p-4 px-8 border rounded-full flex gap-2 cursor-pointer group">
           <img src={phoneLogo} alt="" className="group-hover:animate-vibrate" />
-          Call Now
+          Contact Us
         </a>
       </div>
     </div>

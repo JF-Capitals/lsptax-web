@@ -26,6 +26,7 @@ export const loginUser = async (email: string, password: string) => {
     // Save token and username in localStorage
     const { token, user } = data;
     localStorage.setItem("token", token);
+    localStorage.setItem("username", user.name)
     localStorage.setItem("email", email); // Save username
     localStorage.setItem("user", JSON.stringify(user)); // Save user info
 
@@ -68,5 +69,136 @@ export const logoutUser = async () => {
   } catch (error) {
     console.error("Error during logout:", error);
     throw new Error("Logout failed. Please try again.");
+  }
+};
+
+export const addProspect = async (
+  ProspectName: string,
+  Email: string,
+  PHONENUMBER: string,
+  MAILINGADDRESS: string,
+  MAILINGADDRESSCITYTXZIP: string
+) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/add-prospect`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ProspectName,
+          Email,
+          PHONENUMBER,
+          MAILINGADDRESS,
+          MAILINGADDRESSCITYTXZIP,
+        }),
+      }
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to add prospect");
+    }
+
+    return data;
+  } catch (error: unknown) {
+    let errorMessage = "Prospect Addition Failed. Please try again.";
+
+    if (error instanceof Error) {
+      console.log({ error });
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
+export const addClient = async (
+  CLIENTNAME: string,
+  Email: string,
+  PHONENUMBER: string,
+  MAILINGADDRESS: string,
+  MAILINGADDRESSCITYTXZIP: string,
+  TypeOfAcct: string
+) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/add-client`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          CLIENTNAME,
+          Email,
+          PHONENUMBER,
+          MAILINGADDRESS,
+          MAILINGADDRESSCITYTXZIP,
+          TypeOfAcct,
+        }),
+      }
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to add client");
+    }
+
+    return data;
+  } catch (error: unknown) {
+    let errorMessage = "Prospect Addition Failed. Please try again.";
+
+    if (error instanceof Error) {
+      console.log({ error });
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
+export const editProperty = async (
+  propertyId: string,
+  propertyDetails: any,
+  yearlyData: Record<number, any>
+) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/edit-property`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          propertyId,
+          propertyDetails,
+          yearlyData,
+        }),
+      }
+    );
+
+    // Check if response is OK before trying to parse JSON
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to update property");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error: unknown) {
+    let errorMessage = "Property Update Failed. Please try again.";
+
+    if (error instanceof Error) {
+      console.log({ error });
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
   }
 };

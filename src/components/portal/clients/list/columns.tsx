@@ -30,6 +30,7 @@ export const clientsColumn: ColumnDef<Clients>[] = [
   {
     accessorKey: "clientName",
     header: "Client Name",
+    enableColumnFilter: true,
   },
   {
     accessorKey: "email",

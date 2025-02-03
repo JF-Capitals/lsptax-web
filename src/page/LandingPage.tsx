@@ -9,6 +9,7 @@ import KeyDates from "../components/KeyDates";
 import Testimonials from "../components/Testimonials";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Contact from "@/components/Contact";
 
 const LandingPage = () => {
   return (
@@ -23,6 +24,7 @@ const LandingPage = () => {
       <WhyUs />
       <KeyDates />
       <Testimonials />
+      <Contact/>
       <Footer />
     </>
   );

@@ -2,25 +2,25 @@ import DashboardStats from "./dashboard/DashboardStats";
 import MiniTableContainer from "./dashboard/mini-tables/MiniTableContainer";
 import { useEffect, useState } from "react";
 import { Properties } from "./properties/columns";
-import { getClients, getContractOwner, getProperties } from "@/store/data";
+import { getClients, getProperties, getProspects } from "@/store/data";
 import { Clients } from "./clients/list/columns";
-import { ContractOwner } from "./contract-owner/columns";
 import { LoaderCircle } from "lucide-react";
+import { Prospects } from "./prospects/list/columns";
 
 const Dashboard = () => {
   const [propData, setPropData] = useState<Properties | null>(null);
   const [clientData, setClientData] = useState<Clients | null>(null);
-  const [contractOwnersData, setContractOwnersData] = useState<ContractOwner>();
+  const [prospectData, setProspectData] = useState<Prospects | null>(null);
   useEffect(() => {
     // Fetch stats from dashboardData function
     const fetchData = async () => {
       try {
         const fetchedPropData = await getProperties();
         const fetchedClientData = await getClients();
-        const fetchedContractOwnerData = await getContractOwner();
+        const fetchedProspectData = await getProspects();
         setPropData(fetchedPropData);
         setClientData(fetchedClientData);
-        setContractOwnersData(fetchedContractOwnerData);
+        setProspectData(fetchedProspectData);
       } catch (error) {
         console.error("Error fetching stats:", error);
       }
@@ -28,7 +28,7 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  if (!propData || !clientData || !contractOwnersData) {
+  if (!propData || !clientData || !prospectData) {
     return (
       <div className="flex justify-center h-full items-center py-20">
         <LoaderCircle className="animate-spin w-16 h-16" />
@@ -40,9 +40,9 @@ const Dashboard = () => {
     <div className="flex flex-col">
       <DashboardStats />
       <MiniTableContainer
+        prospectData={prospectData}
         propData={propData}
         clientData={clientData}
-        contractOwnersData={contractOwnersData}
       />
     </div>
   );

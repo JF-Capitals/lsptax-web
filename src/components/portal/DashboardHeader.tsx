@@ -121,7 +121,9 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
   const location = useLocation();
   const currentPath = location.pathname.split("/portal/")[1];
 
-  const name = localStorage.getItem("user");
+  const name = localStorage.getItem("username");
+
+
   console.log("USER:", name)
 
   async function logoutHandler() {
@@ -131,8 +133,8 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
       toast({
         title: "Logged Out!",
       });
-
-      navigate("/login"); // Relative route
+console.log("hi")
+      navigate("/login"); // Relative routejhg
     } catch (error) {}
   }
 
@@ -171,7 +173,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
           <div className="hidden md:block">
             <HeaderDescriptionItem
               icon={""}
-              label={"Welcome, Hussain"}
+              label={`Welcome, ${name}`}
               desc={""}
             />
           </div>
@@ -182,7 +184,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
         <div className="flex justify-center align-center items-center gap-4">
           <User2 />
           <div className="">
-            <h1>{`Hussain`}</h1>
+            <h1>{name}</h1>
             {/* <h2 className="font-thin text-sm">userType</h2> */}
           </div>
           <DropdownMenu>

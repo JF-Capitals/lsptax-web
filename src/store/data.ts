@@ -23,6 +23,7 @@ export const getSingleClient = async ({ clientId }: { clientId?: string }) => {
       throw new Error("Failed to fetch clients");
     }
     const client = await response.json();
+    console.log({client})
     return client;
   } catch (error) {
     console.log(error);
