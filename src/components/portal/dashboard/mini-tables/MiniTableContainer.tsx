@@ -37,7 +37,7 @@ const MiniTableContainer = ({ propData,clientData,prospectData }: MiniTableConta
             data={propData}
             columns={propertiesColumn}
             label="Properties"
-            link="/portal/property"
+            link="/portal/properties"
           />
         </div>
         <div className="md:w-1/2">

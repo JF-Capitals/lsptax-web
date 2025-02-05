@@ -26,6 +26,7 @@ import { clientsColumn } from "@/components/portal/clients/list/columns";
 // import { agentsColumn } from "@/components/portal/forms/agent/columns";
 import { prospectColumn } from "@/components/portal/prospects/list/columns";
 import ProtectedRoute from "@/utils/ProtectedRoute";
+import MoveFromProspect from "@/components/portal/clients/add/MoveFromProspect";
 
 const AdminRoutes = () => {
   return (
@@ -56,6 +57,7 @@ const AdminRoutes = () => {
           element={<ClientTable columns={clientsColumn} />}
         />
         <Route path="/clients/add-client" element={<AddClient />} />
+        <Route path="/move_to_client" element={< MoveFromProspect/>} />
         <Route path="/client" element={<ClientPage />} />
         <Route path="/edit-client" element={<EditClient />} />
         <Route path="/prospects/add-prospect" element={<AddProspect />} />
@@ -67,10 +69,7 @@ const AdminRoutes = () => {
           path="/prospects/list-prospect"
           element={<ProspectTable columns={prospectColumn} />}
         />
-        <Route
-          path="/prospect/add-prospect"
-          element={<AddProspect />}
-        />
+        <Route path="/prospect/add-prospect" element={<AddProspect />} />
         <Route path="/agent-form" element={<AgentForm />} />
         <Route path="/contract" element={<ContractForm />} />
         <Route path="/invoice" element={<InvoicePage />} />

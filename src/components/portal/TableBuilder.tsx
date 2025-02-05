@@ -36,38 +36,41 @@ interface TableBuilderProps {
   setColumnFilters?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
 }
 
-
-const TableBuilder = ({ data, columns, label,columnFilters,setColumnFilters }: TableBuilderProps) => {
+const TableBuilder = ({
+  data,
+  columns,
+  label,
+  columnFilters,
+  setColumnFilters,
+}: TableBuilderProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [pageSize, setPageSize] = useState(10);
-  // const [selectedRow, setSelectedRow] = useState<any | null>(null);
   const [pageIndex, setPageIndex] = useState(0); // Add a pageIndex state
 
-const table = useReactTable({
-  data,
-  columns,
-  onSortingChange: setSorting,
-  getCoreRowModel: getCoreRowModel(),
-  getSortedRowModel: getSortedRowModel(),
-  getPaginationRowModel: getPaginationRowModel(),
-  onColumnFiltersChange: setColumnFilters, // Use prop from ClientTable
-  getFilteredRowModel: getFilteredRowModel(),
-  onColumnVisibilityChange: setColumnVisibility,
-  onRowSelectionChange: setRowSelection,
-  state: {
-    sorting,
-    columnFilters, // Use state from ClientTable
-    columnVisibility,
-    rowSelection,
-    pagination: {
-      pageSize,
-      pageIndex,
+  const table = useReactTable({
+    data,
+    columns,
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onColumnFiltersChange: setColumnFilters, // Use prop from ClientTable
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters, // Use state from ClientTable
+      columnVisibility,
+      rowSelection,
+      pagination: {
+        pageSize,
+        pageIndex,
+      },
     },
-  },
-});
-
+  });
 
   // Update the table's page size whenever it changes
   const handlePageSizeChange = (value: number) => {
@@ -116,24 +119,23 @@ const table = useReactTable({
                       className={`cursor-pointer select-none ${
                         index > 1 ? "hidden md:table-cell" : ""
                       } text-gray-700 font-semibold`}
-                      onClick={
-                        header.id === "select"
-                          ? undefined
-                          : header.column.getToggleSortingHandler()
-                      }
+                      onClick={header.column.getToggleSortingHandler()}
                     >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                      {header.id !== "select" &&
-                        ({
-                          asc: <ChevronUp />,
-                          desc: <ChevronDown />,
-                        }[header.column.getIsSorted() as string] ??
-                          null)}
+                      <div className="flex items-center justify-between">
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                        {header.column.getIsSorted() && (
+                          <span>
+                            {header.column.getIsSorted() === "asc" ? (
+                              <ChevronUp className="ml-2 h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="ml-2 h-4 w-4" />
+                            )}
+                          </span>
+                        )}
+                      </div>
                     </TableHead>
                   ))}
                 </TableRow>

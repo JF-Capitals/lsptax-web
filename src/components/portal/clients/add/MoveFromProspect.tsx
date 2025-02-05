@@ -2,6 +2,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearchParams } from "react-router-dom";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,19 +21,56 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { addClient } from "@/api/api";
+import { useEffect, useState } from "react";
+import { Prospect } from "@/types/types";
+import { getSingleProspect } from "@/store/data";
 
-const formSchema = z.object({
-  TypeOfAcct: z.string().optional(),
-  CLIENTNumber: z.string().optional(),
-  CLIENTNAME: z.string().min(1, "Client name is required"),
-  Email: z.string().email("Invalid email address"),
-  PHONENUMBER: z.string().min(1, "Phone number is required"),
-  MAILINGADDRESSCITYTXZIP: z.string().min(1, "City, State, ZIP is required"),
-  IsArchived: z.boolean().optional(),
-});
-
-export default function AddClientForm() {
+const MoveFromProspect = () => {
   const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [prospectData, setProspectData] = useState<Prospect | null>(null);
+  const [searchParams] = useSearchParams();
+  const prospectId = searchParams.get("prospectId");
+
+  useEffect(() => {
+    async function loadProspectData() {
+      try {
+        if (prospectId) {
+          const data = await getSingleProspect({ prospectId });
+          setProspectData(data);
+          // Update form values when prospect data is loaded
+          form.reset({
+            CLIENTNAME: data.ProspectName,
+            Email: data.Email,
+            PHONENUMBER: data.PHONENUMBER,
+            MAILINGADDRESSCITYTXZIP: data.MAILINGADDRESSCITYTXZIP,
+            TypeOfAcct: "Real",
+            IsArchived: false,
+          });
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Failed to load prospect data", error);
+        // toast( tit"Could not load client data. Please try again later.");
+        setError("Error getting prospect details");
+      }
+    }
+    if (prospectId) {
+      loadProspectData();
+    }
+    console.log({ prospectData });
+  }, [searchParams]);
+
+  const formSchema = z.object({
+    TypeOfAcct: z.string().optional(),
+    CLIENTNumber: z.string().optional(),
+    CLIENTNAME: z.string().min(1, "Client name is required"),
+    Email: z.string().email("Invalid email address"),
+    PHONENUMBER: z.string().min(1, "Phone number is required"),
+    MAILINGADDRESSCITYTXZIP: z.string().min(1, "City, State, ZIP is required"),
+    IsArchived: z.boolean().optional(),
+  });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -54,11 +92,11 @@ export default function AddClientForm() {
         values.MAILINGADDRESSCITYTXZIP,
         values.TypeOfAcct || ""
       );
-      
+
       toast({
         title: "✓ Client added successfully",
       });
-      
+
       form.reset();
     } catch (error) {
       if (error instanceof Error && error.message === "Email Already Present") {
@@ -76,7 +114,13 @@ export default function AddClientForm() {
       }
     }
   }
+  if (loading) {
+    return <div className="text-center text-gray-600">Loading...</div>;
+  }
 
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>;
+  }
   return (
     <Form {...form}>
       <form
@@ -84,7 +128,9 @@ export default function AddClientForm() {
         className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border p-8"
       >
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-xl font-semibold text-gray-900">New Client</h1>
+          <h1 className="text-xl font-semibold text-gray-900">
+            Moving Prospect to Client
+          </h1>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -171,4 +217,6 @@ export default function AddClientForm() {
       </form>
     </Form>
   );
-}
+};
+
+export default MoveFromProspect;

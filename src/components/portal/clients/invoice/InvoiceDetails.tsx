@@ -2,45 +2,58 @@ import React from "react";
 import { InvoiceData } from "@/types/types";
 import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
 
-const InvoiceDetails: React.FC<{ invoice?: InvoiceData }> = ({ invoice }) => {
+const InvoiceDetails: React.FC<{
+  invoice?: InvoiceData;
+  selectedYear: number;
+}> = ({ invoice, selectedYear }) => {
+  const getYearlyInvoiceData = (property: any) => {
+    return property.invoice.find((inv: any) => inv.year === selectedYear);
+  };
+
   const calculateFees = () => {
     if (!invoice?.properties) return 0;
 
     return invoice.properties.reduce((total, property) => {
-      const feeString = property.invoice.ContingencyFeeDue || "$0";
-      const numericValue = parseFloat(feeString.replace(/[^0-9.]/g, "")); // Remove '$' and other characters
-      console.log({ numericValue });
+      const yearlyInvoice = getYearlyInvoiceData(property);
+      const feeString = yearlyInvoice?.ContingencyFeeDue || "$0";
+      const numericValue = parseFloat(feeString.replace(/[^0-9.]/g, ""));
       return total + (isNaN(numericValue) ? 0 : numericValue);
     }, 0);
   };
+
   const totalFees = calculateFees();
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({
     contentRef,
     pageStyle: `
     @page {
-      size: A4 portrait;
-      margin: 0;
+      size: A4 landscape;
+      margin: 10mm;
     }
     @media print {
-      body {
-        zoom: 1;
-      }
+      body { zoom: 1; }
       #pdf-content {
         width: 100%;
-        max-width: 297mm;
+        max-width: 420mm;
+        height: auto !important;
+        overflow: visible !important;
       }
-        
       table {
+        page-break-inside: auto;
         width: 100%;
         max-width: 100%;
         table-layout: fixed;
         border-collapse: collapse;
       }
+      tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
       th, td {
         font-size: 8px;
-        padding: 2px;
         word-wrap: break-word;
         overflow-wrap: break-word;
         white-space: normal;
@@ -50,37 +63,45 @@ const InvoiceDetails: React.FC<{ invoice?: InvoiceData }> = ({ invoice }) => {
         min-width: 50px;
         max-width: 70px;
       }
+          @media print {
+      /* Previous styles remain the same */
+      
+      th, td {
+        font-size: 8px;
+        padding: 1px !important;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+      }
     }
-  `
+    }
+  `,
   });
+
   return (
     <>
-      <div className="text-center ">
-        <button
-          className="bg-[#0093FF] rounded-md p-2 px-6 m-2 text-white"
+      <div className="text-center">
+        <Button
+          variant={"blue"}
+          className="bg-[#0093FF] rounded-md p-2 px-6 ml-4 text-white"
           onClick={() => reactToPrintFn()}
         >
-          Print Detailed Invoice
-        </button>
+          <Printer />
+          Print
+        </Button>
       </div>
 
       <div
         className="flex justify-center items-center min-h-screen bg-gray-100"
-        style={{
-          overflow: "hidden",
-        }}
+        style={{ overflow: "hidden" }}
       >
-
-        {/* A4 Page Container */}
-        <div ref={contentRef}
+        <div
+          ref={contentRef}
           id="pdf-content"
-          className="bg-white min-w-screen h-[210mm] overflow-auto shadow-lg p-4 sm:p-6 md:p-8"
+          className="bg-white min-w-screen h-[210mm] overflow-auto shadow-lg sm:p-6 md:p-8"
         >
-
-
           <div className="flex justify-between items-start mb-4 border-4 border-black">
-            <div className="flex justify-between items-start  ">
-              {/* <img className="w-20 mr-2  p-2" src={Logo}></img> */}
+            <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-bold">LONE STAR PROPERTY TAX</h2>
                 <p className="text-sm">16107 KENSINGTON DRIVE, STE. 194</p>
@@ -89,7 +110,7 @@ const InvoiceDetails: React.FC<{ invoice?: InvoiceData }> = ({ invoice }) => {
                 <p className="text-sm">713-505-6806</p>
               </div>
             </div>
-            <div className="">
+            <div>
               <div>
                 <p>{invoice?.client?.CLIENTNAME}</p>
                 <p>{invoice?.client?.MAILINGADDRESS}</p>
@@ -98,7 +119,6 @@ const InvoiceDetails: React.FC<{ invoice?: InvoiceData }> = ({ invoice }) => {
             </div>
           </div>
 
-          {/* Additional content */}
           <div className="overflow-x-auto mb-6">
             <table className="min-w-full border-collapse border-2 border-black">
               <thead>
@@ -151,41 +171,56 @@ const InvoiceDetails: React.FC<{ invoice?: InvoiceData }> = ({ invoice }) => {
                 </tr>
               </thead>
               <tbody>
-                {invoice?.properties.map((property) => (
-                  <tr key={property.propertyDetails.id}>
-                    <td className="border border-gray-300 px-4 py-2">Real</td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {property.propertyDetails.CADMailingADDRESS}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">{property.propertyDetails.CADCOUNTY}</td>
-                    <td className="border border-gray-300 px-4 py-2">{property.propertyDetails.AccountNumber}</td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      2025 Protest
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {property.invoice.NoticeMarketValue}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {property.invoice.FinalMarketValue}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">{property.invoice.MarketValueReduction}</td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {property.invoice.NoticeAppraisedValue}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {property.invoice.FinalAppraisedValue}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">{property.invoice.ValueAppraisedValueReduction}</td>
-                    <td className="border border-gray-300 px-4 py-2">{property.invoice.ValueOverallTaxRate}</td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {property.invoice.ValueTaxSavings}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">{property.invoice.Contingency}</td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {property.invoice.ContingencyFeeDue}
-                    </td>
-                  </tr>
-                ))}
+                {invoice?.properties.map((property) => {
+                  const yearlyInvoice = getYearlyInvoiceData(property);
+                  return (
+                    <tr key={property.propertyDetails.id}>
+                      <td className="border border-gray-300 px-4 py-2">Real</td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {property.propertyDetails.CADMailingADDRESS}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {property.propertyDetails.CADCOUNTY}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {property.propertyDetails.AccountNumber}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {selectedYear} Protest
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {yearlyInvoice?.NoticeMarketValue}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {yearlyInvoice?.FinalMarketValue}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {yearlyInvoice?.MarketValueReduction}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {yearlyInvoice?.NoticeAppraisedValue}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {yearlyInvoice?.FinalAppraisedValue}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {yearlyInvoice?.ValueAppraisedValueReduction}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {yearlyInvoice?.ValueOverallTaxRate}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {yearlyInvoice?.ValueTaxSavings}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {yearlyInvoice?.Contingency}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {yearlyInvoice?.ContingencyFeeDue}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
               <tfoot>
                 <tr>
@@ -196,7 +231,7 @@ const InvoiceDetails: React.FC<{ invoice?: InvoiceData }> = ({ invoice }) => {
                     Total
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-right">
-                    ${totalFees}
+                    ${totalFees.toFixed(2)}
                   </td>
                 </tr>
               </tfoot>

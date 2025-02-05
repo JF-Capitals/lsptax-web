@@ -31,6 +31,24 @@ export const getSingleClient = async ({ clientId }: { clientId?: string }) => {
   }
 };
 
+export const getSingleProspect = async ({ prospectId }: { prospectId?: string }) => {
+  console.log({ prospectId });
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/prospect?prospectId=${prospectId}`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch prospect");
+    }
+    const prospect = await response.json();
+    console.log({ prospect });
+    return prospect;
+  } catch (error) {
+    console.log(error);
+    return [{}];
+  }
+};
+
 export const getArchiveClients = async () => {
   try {
     const response = await fetch(

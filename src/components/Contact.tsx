@@ -45,7 +45,7 @@ const Contact = () => {
         values.MAILINGADDRESSCITYTXZIP || ""
       );
       toast({
-        title: "Received your Interest!",
+        title: "Great! We'll be in touch soon to start your savings journey.",
       });
       form.reset();
     } catch (error) {
@@ -67,13 +67,48 @@ const Contact = () => {
   }
 
   return (
-    <div id="contact" className="bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center p-8 m-4 rounded-xl shadow-lg" >
-      <h1 className="text-3xl font-semibold text-gray-800 mb-6">Contact Us</h1>
+    <div
+      id="contact"
+      className="bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center p-8 m-4 rounded-xl shadow-lg"
+    >
+      <div className="text-center max-w-2xl mb-8">
+        <h1 className="text-3xl font-semibold text-blue-800 mb-4">
+          Start Your Property Tax Savings Journey
+        </h1>
+        <p className="text-gray-600 mb-4">
+          Join thousands of property owners who have successfully reduced their
+          tax burden
+        </p>
+        <div className="flex justify-center flex-wrap gap-4 text-sm text-gray-700 mb-6">
+          <span className="flex items-center bg-white px-4 py-2 rounded-full shadow-sm">
+            ✓ No Win, No Fee
+          </span>
+          <span className="flex items-center bg-white px-4 py-2 rounded-full shadow-sm">
+            ✓ Average Savings 12-15%
+          </span>
+          <span className="flex items-center bg-white px-4 py-2 rounded-full shadow-sm">
+            ✓ Expert Representation
+          </span>
+        </div>
+      </div>
+
       <div className="w-full max-w-3xl">
+        <div className="bg-blue-50 p-6 rounded-t-xl border-b border-blue-100">
+          <h4 className="font-medium text-blue-800 mb-3">
+            Why Choose Our Services?
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-blue-700">
+            <div>• Professional ARB hearing representation</div>
+            <div>• Detailed property value analysis</div>
+            <div>• Proven success track record</div>
+            <div>• Transparent process & updates</div>
+          </div>
+        </div>
+
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 bg-white p-10 rounded-xl shadow-md border border-gray-200"
+            className="space-y-6 bg-white p-10 rounded-b-xl shadow-md border border-gray-200"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <FormField
@@ -136,10 +171,10 @@ const Contact = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-gray-700 font-medium">
-                      Mailing Address
+                      Property Address
                     </FormLabel>
                     <Input
-                      placeholder="Enter Mailing Address"
+                      placeholder="Enter Property Address"
                       {...field}
                       className="border-gray-300 focus:ring-2 focus:ring-blue-400 transition"
                     />
@@ -148,12 +183,17 @@ const Contact = () => {
                 )}
               />
             </div>
+
+            <div className="text-center text-sm text-gray-600 mt-4">
+              Get your free property tax assessment today!
+            </div>
+
             <Button
-              variant="blue"
+              // variant="blue"
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow-md transition-all"
             >
-              Submit
+              Start Saving on Property Taxes
             </Button>
           </form>
         </Form>

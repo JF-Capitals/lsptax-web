@@ -30,8 +30,8 @@ export const invoicesColumn: ColumnDef<InvoiceSummary>[] = [
       return (
         <div>
           <div className="flex flex-wrap">
-            {row.original.propertyNumbers.map((property) => (
-              <h1 className="bg-green-200 p-1 m-1 text-green-800 font-bold w-max border rounded-xl">
+            {row.original.propertyNumbers.map((property,index) => (
+              <h1 key={index} className="bg-green-200 p-1 m-1 text-green-800 font-bold w-max border rounded-xl">
                 {property}
               </h1>
             ))}
@@ -40,10 +40,10 @@ export const invoicesColumn: ColumnDef<InvoiceSummary>[] = [
       );
     },
   },
-  {
-    accessorKey: "type",
-    header: "Type",
-  },
+  // {
+  //   accessorKey: "type",
+  //   header: "Type",
+  // },
   {
     accessorKey: "amount",
     header: "Amount",

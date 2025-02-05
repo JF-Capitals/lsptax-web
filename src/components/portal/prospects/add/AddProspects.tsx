@@ -44,35 +44,23 @@ export default function AddProspectForm() {
         values.MAILINGADDRESS || "",
         values.MAILINGADDRESSCITYTXZIP || ""
       );
-     toast({
-       title: "Prospect added successfully!",
-      //  description: "Login Success",
-     });
-      // toast.success("Prospect added successfully!");
+
+      toast({
+        title: "✓ Prospect added successfully",
+      });
+
       form.reset();
     } catch (error) {
-      console.error("Error submitting form:", error);
-
-      let errorMessage = "Failed to add prospect. Please try again.";
-
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
-      if (errorMessage === "Email Already Present") {
+      if (error instanceof Error && error.message === "Email Already Present") {
         toast({
           variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: "This email is already registered. Try a different one.",
+          title: "Email already exists",
           action: <ToastAction altText="Try again">Try again</ToastAction>,
         });
-
-        // toast.error("This email is already registered. Try a different one.");
       } else {
         toast({
           variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: "There was a problem with your request.",
+          title: "Failed to add prospect",
           action: <ToastAction altText="Try again">Try again</ToastAction>,
         });
       }
@@ -83,20 +71,20 @@ export default function AddProspectForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 m-3 py-10 px-6 bg-white rounded-lg shadow-lg"
+        className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border p-8"
       >
-        <h1 className="text-xl font-semibold text-gray-800 mb-6">
-          Add a New Prospect
-        </h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-xl font-semibold text-gray-900">New Prospect</h1>
+        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="ProspectName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Prospect Name</FormLabel>
-                <Input placeholder="Enter Prospect Name" {...field} />
+                <FormLabel>Name</FormLabel>
+                <Input {...field} placeholder="Full name" />
                 <FormMessage />
               </FormItem>
             )}
@@ -108,21 +96,23 @@ export default function AddProspectForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
-                <Input placeholder="Enter Email" type="email" {...field} />
+                <Input
+                  {...field}
+                  type="email"
+                  placeholder="email@example.com"
+                />
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           <FormField
             control={form.control}
             name="PHONENUMBER"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone Number</FormLabel>
-                <Input placeholder="Enter Phone Number" {...field} />
+                <FormLabel>Phone</FormLabel>
+                <Input {...field} placeholder="+1 (555) 000-0000" />
                 <FormMessage />
               </FormItem>
             )}
@@ -133,8 +123,8 @@ export default function AddProspectForm() {
             name="MAILINGADDRESS"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Mailing Address</FormLabel>
-                <Input placeholder="Enter Mailing Address" {...field} />
+                <FormLabel>Street Address</FormLabel>
+                <Input {...field} placeholder="Street address" />
                 <FormMessage />
               </FormItem>
             )}
@@ -145,17 +135,19 @@ export default function AddProspectForm() {
             name="MAILINGADDRESSCITYTXZIP"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Mailing Address (City, TX, ZIP)</FormLabel>
-                <Input placeholder="Enter City, TX, ZIP" {...field} />
+                <FormLabel>City, State, ZIP</FormLabel>
+                <Input {...field} placeholder="City, TX ZIP" />
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <Button type="submit" className="mt-6 w-64">
-          Submit
-        </Button>
+        <div className="mt-8">
+          <Button type="submit" className="w-full md:w-auto">
+            Add Prospect
+          </Button>
+        </div>
       </form>
     </Form>
   );

@@ -11,17 +11,12 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+
 import { Button } from "@/components/ui/button";
 import { getProperties, getArchiveProperties } from "@/store/data"; // Import both data-fetching functions
 import TableBuilder from "../TableBuilder";
-import { Archive, ChevronDown, LoaderCircle } from "lucide-react";
+import { Archive, LoaderCircle } from "lucide-react";
 import { Properties } from "./columns";
 import { Input } from "@/components/ui/input";
 
@@ -37,11 +32,10 @@ const PropertiesTable = <TData extends Properties, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [filter, setFilter] = useState("All Properties");
+  // const [filter, setFilter] = useState("All Properties");
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -63,18 +57,18 @@ const PropertiesTable = <TData extends Properties, TValue>({
   }, [archived]); // Refetch data when switching between archived and active properties
 
   // Filter properties based on the selected filter
-  const filteredProperties = properties.filter((property) => {
-    if (filter === "All Properties") {
-      return true;
-    }
-    // Filter based on the 'type' field in the 'propertyDetails' object
-    return (
-      property?.propertyDetails?.type?.toLowerCase() === filter.toLowerCase()
-    );
-  });
+  // const filteredProperties = properties.filter((property) => {
+  //   if (filter === "All Properties") {
+  //     return true;
+  //   }
+  //   // Filter based on the 'type' field in the 'propertyDetails' object
+  //   return (
+  //     property?.propertyDetails?.type?.toLowerCase() === filter.toLowerCase()
+  //   );
+  // });
 
   const table = useReactTable({
-    data: filteredProperties,
+    data: properties,
     columns,
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
@@ -83,12 +77,10 @@ const PropertiesTable = <TData extends Properties, TValue>({
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection,
     },
   });
 
@@ -112,7 +104,7 @@ const PropertiesTable = <TData extends Properties, TValue>({
     <div className="overflow-y-auto ">
       <div className="flex flex-col md:flex-row border rounded-xl items-center gap-4 bg-white m-4 p-4 border-red-100 ">
         <div className="w-full">
-          <h2 className="text-2xl font-bold ">{filteredProperties.length}</h2>
+          <h2 className="text-2xl font-bold ">{properties.length}</h2>
           <h3>{archived ? "Archived Properties" : "Active Properties"}</h3>
         </div>
         <div className="flex flex-col gap-2 w-full">
@@ -132,7 +124,7 @@ const PropertiesTable = <TData extends Properties, TValue>({
             className="max-w-sm"
           />
         </div>
-        <div className="flex gap-2 w-full">
+        {/* <div className="flex gap-2 w-full">
           <div className="w-full">
             <h2>Filter Properties</h2>
             <DropdownMenu>
@@ -159,11 +151,11 @@ const PropertiesTable = <TData extends Properties, TValue>({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
+        </div> */}
 
         <div className="flex gap-2 w-full">
           <Button
-            variant={"blue"}
+            // variant={"blue"}
             className=""
             onClick={() => setArchived(!archived)}
           >
@@ -180,7 +172,7 @@ const PropertiesTable = <TData extends Properties, TValue>({
         </div>
       </div>
       <TableBuilder
-        data={filteredProperties}
+        data={properties}
         columns={columns}
         label={archived ? "Archived Properties" : "All Properties"}
         columnFilters={columnFilters}

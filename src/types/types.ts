@@ -110,11 +110,21 @@ export interface InvoiceData {
 }
 interface InvoiceProperty{
   propertyDetails: Property;
-  invoice: Invoice;
+  invoice: Invoice[];
 }
 
 export interface PropertyData {
   clientDetails: ClientData;
   propertyDetails: Property;
   invoices: Invoice[];
+}
+
+export interface Prospect {
+  id: number;
+  ProspectName: string;
+  Email: string;
+  PHONENUMBER: string;
+  MAILINGADDRESS: string;
+  MAILINGADDRESSCITYTXZIP: string;
+  IsArchived: boolean;
 }

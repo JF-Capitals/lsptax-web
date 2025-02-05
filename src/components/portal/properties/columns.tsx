@@ -5,8 +5,6 @@ import formatDate from "@/utils/formatDate";
 
 import { NavLink } from "react-router-dom";
 
-
-
 export type PropertyDetails = {
   type: string;
   class: string;
@@ -36,6 +34,12 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
   {
     accessorKey: "clientId",
     header: "Client #",
+    cell: ({ row }) => {
+      // const id = row.original.clientId;
+      const clientNum = row.original.clientId;
+
+      return <div className="text-blue-400 font-bold">#{clientNum}</div>;
+    },
   },
   {
     accessorKey: "propertyAccount",
@@ -48,7 +52,7 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
         <NavLink
           to={`/portal/property?propertyId=${row.original.propertyAccount}`}
         >
-          <div className="text-blue-400 font-bold">#{propertyAccount}</div>
+          <div className="text-green-400 font-bold">#{propertyAccount}</div>
         </NavLink>
       );
     },
