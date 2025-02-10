@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,38 +12,42 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { getSingleProperty } from "@/store/data";
 import { PropertyData } from "@/types/types";
 import { editProperty } from "@/api/api";
 
-// Table Row Type Definition
 type TableRow = {
   year: number;
   "Protested Date": string;
   "BPP Rendered": string;
-  "Prelim Land": string;
-  "Prelim Building": string;
-  "Prelim Total": string;
-  "Assessed Prelim": string;
-  "Final Land": string;
-  "Final Building": string;
-  "Final Total": string;
-  "Assessed Final": string;
-  "Hearing Date": string;
-  "Invoice Date": string;
+  "BPP Invoice": string;
+  "BPP Invoice Paid": string;
+  "Notice Market Value": string;
+  "Assessed Prelim": string | undefined;
+  "Final Prelim": string;
+  "Final Market Value": string;
+  "Market Value Reduction": string;
+  "Hearing Date": string | undefined;
+  "Invoice Date": string | undefined;
   "Under Litigation": boolean;
   "Under Arbitration": boolean;
-  Reduction: string;
-  "Tax Rate": string;
-  "Taxes Saved": string;
   "Contingency Fee": string;
   "Invoice Amount": string;
-  "Paid Date": string;
-  "Payment Notes": string;
+  "Paid Date": string | undefined;
+  "Payment Notes": string | undefined;
 };
 
-// Form Schema
 const formSchema = z.object({
   StatusNotes: z.string().optional(),
   OtherNotes: z.string().optional(),
@@ -64,14 +68,18 @@ const formSchema = z.object({
   IsArchived: z.boolean().default(false),
 });
 
-// Complete Submission Type
 interface CompleteSubmission {
   propertyDetails: z.infer<typeof formSchema>;
   yearlyData: Record<number, Omit<TableRow, "year">>;
 }
 
 export default function EditProperty() {
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingValues, setPendingValues] = useState<z.infer<
+    typeof formSchema
+  > | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [property, setProperty] = useState<PropertyData | null>(null);
@@ -85,6 +93,36 @@ export default function EditProperty() {
     },
   });
 
+  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    setPendingValues(values);
+    setIsDialogOpen(true);
+  };
+
+  const handleConfirm = async () => {
+    if (!pendingValues) return;
+
+    try {
+      const completeSubmission: CompleteSubmission = {
+        propertyDetails: pendingValues,
+        yearlyData: tableData.reduce((acc, row) => {
+          const { year, ...rowWithoutYear } = row;
+          acc[year] = rowWithoutYear;
+          return acc;
+        }, {} as Record<number, Omit<TableRow, "year">>),
+      };
+
+      await editProperty(
+        propertyId!,
+        completeSubmission.propertyDetails,
+        completeSubmission.yearlyData
+      );
+
+      toast({ title: "Property updated successfully!" });
+      setIsDialogOpen(false);
+    } catch (error) {
+      toast({ title: "Failed to update property", variant: "destructive" });
+    }
+  };
   useEffect(() => {
     const fetchProperty = async () => {
       if (!propertyId) {
@@ -97,7 +135,7 @@ export default function EditProperty() {
         const property = await getSingleProperty({ propertyId });
         if (property) {
           setProperty(property);
-          form.reset(property[0]);
+          form.reset(property.propertyDetails);
         } else {
           setError("Property not found");
         }
@@ -111,37 +149,38 @@ export default function EditProperty() {
     fetchProperty();
   }, [propertyId, form]);
 
-  const invoices = property?.invoices;
+  const getInitialTableData = (invoices: any[] = []) => {
+    return years.map((year) => {
+      const yearData = invoices?.find((invoice) => invoice.year === year);
+      return {
+        year,
+        "Protested Date": yearData?.protestedDate || "-",
+        "BPP Rendered": "-",
+        "BPP Invoice": yearData?.BPPInvoice || "-",
+        "BPP Invoice Paid": yearData?.BPPInvoicePaid || "-",
+        "Notice Market Value": yearData?.NoticeMarketValue || "-",
+        "Assessed Prelim": yearData?.NoticeAppraisedValue || "-",
+        "Final Prelim": yearData?.FinalAppraisedValue || "-",
+        "Final Market Value": yearData?.FinalMarketValue || "-",
+        "Market Value Reduction": yearData?.MarketValueReduction || "-",
+        "Hearing Date": yearData?.hearingDate || "-",
+        "Invoice Date": yearData?.invoiceDate || "-",
+        "Under Litigation": yearData?.underLitigation || false,
+        "Under Arbitration": yearData?.underArbitration || false,
+        "Contingency Fee": yearData?.ArbitrationContingencyFee || "-",
+        "Invoice Amount": yearData?.TotalDue || "-",
+        "Paid Date": yearData?.paidDate || "-",
+        "Payment Notes": yearData?.paymentNotes || "-",
+      };
+    });
+  };
+  useEffect(() => {
+    if (property?.invoices) {
+      setTableData(getInitialTableData(property.invoices));
+    }
+  }, [property]);
 
-  const initialTableData: TableRow[] = years.map((year) => {
-    const yearData = invoices?.find((invoice) => invoice.year === year);
-    return {
-      year,
-      "Protested Date": "-",
-      "BPP Rendered": "",
-      "Prelim Land": yearData?.BPPInvoice || "N/A",
-      "Prelim Building": yearData?.BPPInvoicePaid || "N/A",
-      "Prelim Total": yearData?.NoticeMarketValue || "N/A",
-      "Assessed Prelim": "",
-      "Final Land": "",
-      "Final Building": "",
-      "Final Total": "",
-      "Assessed Final": "",
-      "Hearing Date": "",
-      "Invoice Date": "",
-      "Under Litigation": false,
-      "Under Arbitration": false,
-      Reduction: "",
-      "Tax Rate": "",
-      "Taxes Saved": "",
-      "Contingency Fee": yearData?.ArbitrationContingencyFee || "N/A",
-      "Invoice Amount": yearData?.TotalDue || "N/A",
-      "Paid Date": "",
-      "Payment Notes": "",
-    };
-  });
-
-  const [tableData, setTableData] = useState<TableRow[]>(initialTableData);
+  const [tableData, setTableData] = useState<TableRow[]>(getInitialTableData());
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -169,49 +208,14 @@ export default function EditProperty() {
     );
   };
 
-const onSubmit = async (values: z.infer<typeof formSchema>): Promise<void> => {
-  try {
-    const completeSubmission: CompleteSubmission = {
-      propertyDetails: values,
-      yearlyData: tableData.reduce((acc, row) => {
-        const { year, ...rowWithoutYear } = row;
-        acc[year] = rowWithoutYear;
-        return acc;
-      }, {} as Record<number, Omit<TableRow, "year">>),
-    };
-
-    // Call the editProperty API function
-    await editProperty(
-      propertyId!, // Add non-null assertion since we check for propertyId earlier
-      completeSubmission.propertyDetails,
-      completeSubmission.yearlyData
-    );
-
-    toast.success("Property updated successfully!");
-  } catch (error) {
-    console.error("Submission error:", error);
-    toast.error(
-      error instanceof Error
-        ? error.message
-        : "Failed to update property. Please try again."
-    );
-  }
-};
-
-  // const revertChanges = () => {
-  //   if (property) {
-  //     form.reset(property[0]);
-  //     setTableData(initialTableData);
-  //   }
-  // };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <div className="text-center py-4">Loading...</div>;
+  if (error)
+    return <div className="text-center text-red-500 py-4">{error}</div>;
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-8 m-2 py-10 px-6 bg-white rounded-lg shadow-lg"
       >
         <div className="border-b pb-4">
@@ -326,7 +330,11 @@ const onSubmit = async (values: z.infer<typeof formSchema>): Promise<void> => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Client Number</FormLabel>
-                  <Input placeholder="Enter Client Number" {...field} />
+                  <Input
+                    readOnly
+                    placeholder="Enter Client Number"
+                    {...field}
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -420,100 +428,97 @@ const onSubmit = async (values: z.infer<typeof formSchema>): Promise<void> => {
           </div>
         </div>
 
-        {/* Yearly Invoice Data Table */}
-        <div className="container mx-auto p-6">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-            Editable Yearly Invoices Summary
-          </h2>
-          <div className="overflow-x-auto rounded-lg shadow-md">
-            <table className="min-w-full text-left border-collapse bg-white rounded-lg">
-              <thead>
-                <tr className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white">
-                  <th className="px-6 py-3 text-sm font-medium uppercase"></th>
-                  {years.map((year) => (
-                    <th
-                      key={year}
-                      className="px-6 py-3 text-sm font-medium uppercase"
-                    >
-                      {year}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {Object.keys(tableData[0]).map((key) => {
-                  if (key === "year") return null;
-                  return (
-                    <tr
-                      key={key}
-                      className="hover:bg-gray-100 even:bg-gray-50 odd:bg-white"
-                    >
-                      <td className="px-6 py-3 text-sm font-medium text-gray-800">
-                        {key}
+        {/* Yearly Data Table */}
+        <div className="overflow-x-auto mt-8">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th></th>
+                {years.map((year) => (
+                  <th
+                    key={year}
+                    className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    {year}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {Object.keys(tableData[0]).map((key) => {
+                if (key === "year") return null;
+                return (
+                  <tr key={key}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {key}
+                    </td>
+                    {tableData.map((row, rowIndex) => (
+                      <td
+                        key={`${row.year}-${key}`}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                      >
+                        {key === "Under Litigation" ||
+                        key === "Under Arbitration" ? (
+                          <input
+                            type="checkbox"
+                            checked={row[key as keyof TableRow] as boolean}
+                            onChange={(e) =>
+                              handleCheckboxChange(
+                                e,
+                                rowIndex,
+                                key as keyof TableRow
+                              )
+                            }
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            value={row[key as keyof TableRow] as string}
+                            onChange={(e) =>
+                              handleInputChange(
+                                e,
+                                rowIndex,
+                                key as keyof TableRow
+                              )
+                            }
+                            className="block w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                        )}
                       </td>
-                      {tableData.map((row, rowIndex) => (
-                        <td
-                          key={`${row.year}-${key}`}
-                          className="px-6 py-3 text-sm text-gray-700"
-                        >
-                          {key === "Under Litigation" ||
-                          key === "Under Arbitration" ? (
-                            <div className="flex gap-4 justify-center items-center">
-                              <input
-                                type="checkbox"
-                                checked={row[key as keyof TableRow] as boolean}
-                                onChange={(e) =>
-                                  handleCheckboxChange(
-                                    e,
-                                    rowIndex,
-                                    key as keyof TableRow
-                                  )
-                                }
-                                className="form-checkbox h-5 w-5 text-indigo-600"
-                              />
-                              <span>Yes</span>
-                            </div>
-                          ) : (
-                            <input
-                              type="text"
-                              value={row[key as keyof TableRow] as string}
-                              onChange={(e) =>
-                                handleInputChange(
-                                  e,
-                                  rowIndex,
-                                  key as keyof TableRow
-                                )
-                              }
-                              className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                            />
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
-        {/* Submit and Revert Buttons */}
-        <div className="flex justify-between mt-6">
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full sm:w-[240px] text-gray-600"
-            // onClick={revertChanges}
-          >
-            Revert Changes
+        {/* Submit Buttons */}
+        <div className="flex justify-end gap-4 mt-6">
+          <Button type="button" variant="outline" onClick={() => form.reset()}>
+            Reset
           </Button>
-          <Button
-            type="submit"
-            className="w-full sm:w-[240px] bg-blue-600 text-white hover:bg-blue-700"
-          >
-            Save Changes
-          </Button>
+          <Button type="submit">Save Changes</Button>
         </div>
+
+        <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Changes</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to save these changes? This action cannot
+                be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirm}>
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </form>
     </Form>
   );

@@ -94,7 +94,7 @@ const InvoiceSummary: React.FC<{
               Invoice Date: {new Date().toLocaleDateString()}
             </p>
             <p className="font-bold">
-              Invoice Number: INV-{invoice?.client.CLIENTNAME}-{selectedYear}
+              Invoice Number: INV-{invoice?.client.CLIENTNumber}-{selectedYear}
             </p>
           </div>
         </div>

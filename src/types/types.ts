@@ -93,6 +93,13 @@ export interface Invoice {
   PastDuePaid?: string;
   IsArchived: boolean;
   year: number;
+  underLitigation?: boolean;
+  underArbitration?: boolean;
+  paidDate?: string;
+  paymentNotes?: string;
+  protestedDate?: string;
+  hearingDate?: string;
+  invoiceDate?: string;
   createdAt: string;
   updatedAt: string;
 }

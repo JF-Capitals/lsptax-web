@@ -173,27 +173,6 @@ const ViewProperty = () => {
       <div className="p-6 bg-gray-50 border rounded-lg my-2 p-4">
         <h2 className="text-2xl font-bold mb-6">Invoice Details</h2>
         <YearTable invoices={property.invoices}/>
-        {/* {property.invoices ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {groups.map((group, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg shadow">
-                <h3 className="text-xl font-semibold mb-4">{group.title}</h3>
-                <ul className="space-y-2">
-                  {group.fields.map(
-                    (field, idx) =>
-                      field.value && (
-                        <li key={idx} className="text-sm">
-                          <strong>{field.label}:</strong> {field.value}
-                        </li>
-                      )
-                  )}
-                </ul>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-500">No invoice data available.</p>
-        )} */}
       </div>
     </div>
   );

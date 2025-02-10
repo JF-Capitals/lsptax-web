@@ -115,22 +115,22 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
       );
     },
   },
-  {
-    accessorKey: "hearingDate",
-    header: "Hearing Date",
-    cell: ({ row }) => {
-      const hearingDate = row.original.hearingDate;
-      return <div className="">{formatDate(hearingDate)}</div>;
-    },
-  },
-  {
-    accessorKey: "aoaSigned",
-    header: "AOA Signed",
-    cell: ({ row }) => {
-      const aoaSigned = row.original.aoaSigned;
-      return <div>{formatDate(aoaSigned)}</div>;
-    },
-  },
+  // {
+  //   accessorKey: "hearingDate",
+  //   header: "Hearing Date",
+  //   cell: ({ row }) => {
+  //     const hearingDate = row.original.hearingDate;
+  //     return <div className="">{(hearingDate)}</div>;
+  //   },
+  // },
+  // {
+  //   accessorKey: "aoaSigned",
+  //   header: "AOA Signed",
+  //   cell: ({ row }) => {
+  //     const aoaSigned = row.original.aoaSigned;
+  //     return <div>{(aoaSigned)}</div>;
+  //   },
+  // },
   {
     accessorKey: "addedOn",
     header: "Added On",

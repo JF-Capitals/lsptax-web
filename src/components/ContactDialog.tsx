@@ -86,7 +86,7 @@ const ContactDialog = ({
           <DialogTitle className="text-2xl font-semibold text-center text-blue-600">
             Start Saving on Your Property Taxes Today
           </DialogTitle>
-          <div className="text-center space-y-2 mt-4">
+          <div className="text-center space-y-2 mt-4  hidden md:block">
             <p className="text-gray-600 font-medium">
               Join thousands of satisfied property owners who have saved big on
               their taxes
@@ -100,7 +100,7 @@ const ContactDialog = ({
             </div>
           </div>
         </DialogHeader>
-        <div className="bg-blue-50 p-4 rounded-lg mb-4">
+        <div className="bg-blue-50 p-4 rounded-lg mb-4 hidden md:block">
           <h4 className="font-medium text-blue-800 mb-2">
             Why Register With Us?
           </h4>

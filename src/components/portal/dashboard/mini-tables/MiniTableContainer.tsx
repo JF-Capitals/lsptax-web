@@ -1,11 +1,12 @@
 import { Clients } from "../../clients/list/columns";
 // import { ContractOwner } from "../../contract-owner/columns";
 import { Properties } from "../../properties/columns";
-import { prospectColumn, Prospects } from "../../prospects/list/columns";
+import { Prospects } from "../../prospects/list/columns";
 import DonutChart from "../Chart";
 import MiniTableBuilder from "./MiniTableBuilder";
 import { clientsColumn } from "./columns/clientColumns";
 import { propertiesColumn } from "./columns/propColumns";
+import { prospectColumn } from "./columns/prospectColumns";
 // import { contractOwnerColumns } from "./columns/contractOwnerColumns";
 
 type MiniTableContainerProps = {
