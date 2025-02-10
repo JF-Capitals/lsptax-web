@@ -73,7 +73,7 @@ const MiniTableBuilder = ({
             </Button>
           </NavLink>
         </div>
-        <div className="overflow-x-auto h-64">
+        <div className="overflow-x-auto h-48">
           <Table className="table-auto min-w-full">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (

@@ -1,67 +1,69 @@
-"use client";
-
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Form,
-  FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { format } from "date-fns";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { addProspect } from "@/api/api";
 
 const formSchema = z.object({
-  salutation: z.string(),
-  firstName: z.string(),
-  lastName: z.string(),
-  clientNumber: z.string(),
-  clientName: z.string(),
-  jobTitle: z.string(),
-  dob: z.coerce.date(),
-  email: z.string(),
+  ProspectName: z.string().min(1, "Prospect name is required"),
+  Email: z.string().email("Invalid email address"),
+  PHONENUMBER: z.string().optional(),
+  MAILINGADDRESS: z.string().optional(),
+  MAILINGADDRESSCITYTXZIP: z.string().optional(),
 });
 
-export default function AddProspect() {
+export default function AddProspectForm() {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      dob: new Date(),
+      ProspectName: "",
+      Email: "",
+      PHONENUMBER: "",
+      MAILINGADDRESS: "",
+      MAILINGADDRESSCITYTXZIP: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
+      await addProspect(
+        values.ProspectName,
+        values.Email,
+        values.PHONENUMBER || "",
+        values.MAILINGADDRESS || "",
+        values.MAILINGADDRESSCITYTXZIP || ""
       );
+
+      toast({
+        title: "✓ Prospect added successfully",
+      });
+
+      form.reset();
     } catch (error) {
-      console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
+      if (error instanceof Error && error.message === "Email Already Present") {
+        toast({
+          variant: "destructive",
+          title: "Email already exists",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Failed to add prospect",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
+      }
     }
   }
 
@@ -69,193 +71,83 @@ export default function AddProspect() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 max-w-3xl mx-auto py-10"
+        className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border p-8"
       >
-        <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-4">
-            <FormField
-              control={form.control}
-              name="salutation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Salutation</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an Option" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="m@example.com">
-                        m@example.com
-                      </SelectItem>
-                      <SelectItem value="m@google.com">m@google.com</SelectItem>
-                      <SelectItem value="m@support.com">
-                        m@support.com
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="col-span-4">
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel></FormLabel>
-                  <FormControl>
-                    <Input placeholder="First Name" type="" {...field} />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="col-span-4">
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel></FormLabel>
-                  <FormControl>
-                    <Input placeholder="Last Name" type="" {...field} />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-xl font-semibold text-gray-900">New Prospect</h1>
         </div>
 
-        <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-4">
-            <FormField
-              control={form.control}
-              name="clientNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel></FormLabel>
-                  <FormControl>
-                    <Input placeholder="Client Number" type="text" {...field} />
-                  </FormControl>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="ProspectName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <Input {...field} placeholder="Full name" />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="Email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  {...field}
+                  type="email"
+                  placeholder="email@example.com"
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-          <div className="col-span-4">
-            <FormField
-              control={form.control}
-              name="clientName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel></FormLabel>
-                  <FormControl>
-                    <Input placeholder="Client Name" type="" {...field} />
-                  </FormControl>
+          <FormField
+            control={form.control}
+            name="PHONENUMBER"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone</FormLabel>
+                <Input {...field} placeholder="+1 (555) 000-0000" />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="MAILINGADDRESS"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Street Address</FormLabel>
+                <Input {...field} placeholder="Street address" />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-          <div className="col-span-4">
-            <FormField
-              control={form.control}
-              name="jobTitle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel></FormLabel>
-                  <FormControl>
-                    <Input placeholder="Job Title" type="" {...field} />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="MAILINGADDRESSCITYTXZIP"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>City, State, ZIP</FormLabel>
+                <Input {...field} placeholder="City, TX ZIP" />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
-        <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-6">
-            <FormField
-              control={form.control}
-              name="dob"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Date of birth</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-[240px] pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormDescription>
-                    Your date of birth is used to calculate your age.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="col-span-6">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel></FormLabel>
-                  <FormControl>
-                    <Input placeholder="Email" type="" {...field} />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+        <div className="mt-8">
+          <Button type="submit" className="w-full md:w-auto">
+            Add Prospect
+          </Button>
         </div>
-        <Button type="submit">Submit</Button>
       </form>
     </Form>
   );

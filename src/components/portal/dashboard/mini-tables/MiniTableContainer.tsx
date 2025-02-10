@@ -1,19 +1,22 @@
 import { Clients } from "../../clients/list/columns";
-import { ContractOwner } from "../../contract-owner/columns";
+// import { ContractOwner } from "../../contract-owner/columns";
 import { Properties } from "../../properties/columns";
+import { Prospects } from "../../prospects/list/columns";
 import DonutChart from "../Chart";
 import MiniTableBuilder from "./MiniTableBuilder";
 import { clientsColumn } from "./columns/clientColumns";
 import { propertiesColumn } from "./columns/propColumns";
-import { contractOwnerColumns } from "./columns/contractOwnerColumns";
+import { prospectColumn } from "./columns/prospectColumns";
+// import { contractOwnerColumns } from "./columns/contractOwnerColumns";
 
 type MiniTableContainerProps = {
   propData: Properties;
   clientData: Clients;
-  contractOwnersData: ContractOwner;
+  prospectData: Prospects;
+  // contractOwnersData: ContractOwner;
 };
 
-const MiniTableContainer = ({ propData,clientData,contractOwnersData }: MiniTableContainerProps) => {
+const MiniTableContainer = ({ propData,clientData,prospectData }: MiniTableContainerProps) => {
   return (
     <div className="m-2 flex flex-col gap-2">
       <div className="flex flex-col md:flex-row gap-2">
@@ -22,10 +25,10 @@ const MiniTableContainer = ({ propData,clientData,contractOwnersData }: MiniTabl
         </div>
         <div className="md:w-1/2">
           <MiniTableBuilder
-            data={contractOwnersData}
-            columns={contractOwnerColumns}
-            label="Contract Owners"
-            link="/portal/contract-owner"
+            data={prospectData}
+            columns={prospectColumn}
+            label="Prospects"
+            link="/portal/prospect/list-prospect"
           />
         </div>
       </div>
@@ -35,7 +38,7 @@ const MiniTableContainer = ({ propData,clientData,contractOwnersData }: MiniTabl
             data={propData}
             columns={propertiesColumn}
             label="Properties"
-            link="/portal/property"
+            link="/portal/properties"
           />
         </div>
         <div className="md:w-1/2">

@@ -12,8 +12,6 @@ import {
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-
-
 import { Input } from "@/components/ui/input";
 import { getClients } from "@/store/data";
 import { getArchiveClients } from "@/store/data"; // Import the function
@@ -99,23 +97,34 @@ const ClientTable = <TData, TValue>({
             value={
               (table.getColumn("clientName")?.getFilterValue() as string) ?? ""
             }
-            onChange={(event) =>
-              table.getColumn("clientName")?.setFilterValue(event.target.value)
-            }
+            onChange={(event) => {
+              table
+                .getColumn("clientName")
+                ?.setFilterValue(event.target.value || undefined);
+            }}
             className="max-w-sm"
           />
         </div>
         <div className="w-full flex gap-2 justify-end">
           <Button variant={"blue"} onClick={() => setArchived((prev) => !prev)}>
-            <Archive/>
+            <Archive />
             {archived ? "View Active Clients" : "View Archive"}
           </Button>
           <NavLink to={`/portal/clients/add-client`}>
-            <Button variant={"blue"}> <UserRoundPlus/> Add New Client</Button>
+            <Button variant={"blue"}>
+              {" "}
+              <UserRoundPlus /> Add New Client
+            </Button>
           </NavLink>
         </div>
       </div>
-      <TableBuilder data={clients} columns={columns} label="Clients" />
+      <TableBuilder
+        data={clients}
+        columns={columns}
+        label="Clients"
+        columnFilters={columnFilters}
+        setColumnFilters={setColumnFilters}
+      />
     </div>
   );
 };

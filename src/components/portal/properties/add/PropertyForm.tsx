@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
+import { addProperty } from "@/api/api";
 
 const formSchema = z.object({
   StatusNotes: z.string().optional(),
@@ -36,20 +37,45 @@ const formSchema = z.object({
 export default function AddPropertyForm() {
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get("clientId");
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       IsArchived: false,
+      CLIENTNumber: clientId || "", // Pre-fill client number from URL
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      console.log(values);
-      toast.success("Property added successfully!");
+      const propertyData = {
+        StatusNotes: values.StatusNotes,
+        OtherNotes: values.OtherNotes,
+        NAMEONCAD: values.NAMEONCAD,
+        MAILINGADDRESS: values.MAILINGADDRESS,
+        MAILINGADDRESSCITYTXZIP: values.MAILINGADDRESSCITYTXZIP,
+        CADMailingADDRESS: values.CADMailingADDRESS,
+        CADCITY: values.CADCITY,
+        CADZIPCODE: values.CADZIPCODE,
+        CADCOUNTY: values.CADCOUNTY,
+        AccountNumber: values.AccountNumber,
+        CONTACTOWNER: values.CONTACTOWNER,
+        SUBCONTRACTOWNER: values.SUBCONTRACTOWNER,
+        BPPFEE: values.BPPFEE,
+        CONTINGENCYFee: values.CONTINGENCYFee,
+        FlatFee: values.FlatFee,
+      };
+
+      await addProperty({
+        CLIENTNumber: clientId!,
+        propertyData,
+      });
+
+      toast.success("Property added successfully with 5 invoices!");
+      form.reset();
     } catch (error) {
-      console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
+      console.error("Error adding property:", error);
+      toast.error("Failed to add property. Please try again.");
     }
   }
 
@@ -157,7 +183,7 @@ export default function AddPropertyForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Account Number</FormLabel>
-                <Input placeholder="Enter Account Number" {...field} />
+                <Input required placeholder="Enter Account Number" {...field} />
                 <FormMessage />
               </FormItem>
             )}
@@ -169,7 +195,12 @@ export default function AddPropertyForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Client Number</FormLabel>
-                <Input placeholder="Enter Client Number" {...field} />
+                <Input
+                  {...field}
+                  readOnly
+                  value={clientId || ""}
+                  className="bg-gray-50"
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -180,8 +211,8 @@ export default function AddPropertyForm() {
             name="CONTACTOWNER"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Contact Owner</FormLabel>
-                <Input placeholder="Enter Contact Owner" {...field} />
+                <FormLabel>Contract Owner</FormLabel>
+                <Input placeholder="Enter Contract Owner" {...field} />
                 <FormMessage />
               </FormItem>
             )}

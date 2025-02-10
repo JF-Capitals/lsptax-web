@@ -22,6 +22,10 @@ const formatDate = (isoDate: string): string => {
   const day = date.getDate();
   const year = date.getFullYear();
 
+  if (!month || !day || !year) {
+    return `-`
+  }
+
   return `${month} ${day}, ${year}`;
 };
 

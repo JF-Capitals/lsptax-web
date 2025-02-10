@@ -17,7 +17,7 @@ const SideMenu: React.FC = () => {
     { id: "invoices", label: "Invoices" },
     // { id: "contract-owner", label: "Contract Owner" },
     { id: "clients/list-client", label: "Clients" },
-    // { id: "prospects/list-prospect", label: "Prospects" },
+    { id: "prospects/list-prospect", label: "Prospects" },
     { id: "forms/contract", label: "Contracts" },
     // { id: "forms/agent", label: "Agents" },
   ];

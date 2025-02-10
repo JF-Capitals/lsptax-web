@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import clientsLogo from "@/assets/dashboard/client-logo.svg";
-import protestLogo from "@/assets/dashboard/protest-logo.svg";
+// import protestLogo from "@/assets/dashboard/protest-logo.svg";
 import prospectLogo from "@/assets/dashboard/prospects-logo.svg";
-import agentsLogo from "@/assets/dashboard/agents-logo.svg";
+// import agentsLogo from "@/assets/dashboard/agents-logo.svg";
 import { dashboardData } from "@/store/data";
 import { NavLink } from "react-router-dom";
 import { LoaderCircle } from "lucide-react";
@@ -15,13 +15,13 @@ const statsItemData = [
     desc: "",
     link: "/portal/clients/list-client",
   },
-  {
-    label: "Total Protests",
-    icon: protestLogo,
-    number: 100,
-    desc: "",
-    link: "/portal/clients/list-protest",
-  },
+  // {
+  //   label: "Total Protests",
+  //   icon: protestLogo,
+  //   number: 100,
+  //   desc: "",
+  //   link: "/portal/clients/list-protest",
+  // },
   {
     label: "New Prospects",
     icon: prospectLogo,
@@ -29,13 +29,13 @@ const statsItemData = [
     desc: "",
     link: "/portal/prospects/list-prospect",
   },
-  {
-    label: "Total Agents",
-    icon: agentsLogo,
-    number: 10,
-    desc: "",
-    link: "/portal/forms/agent",
-  },
+  // {
+  //   label: "Total Agents",
+  //   icon: agentsLogo,
+  //   number: 10,
+  //   desc: "",
+  //   link: "/portal/forms/agent",
+  // },
 ];
 
 interface StatsItemProps {
@@ -75,7 +75,7 @@ const DashboardStats = () => {
   // Update statsItemData with the fetched stats
   const updatedStatsItemData = statsItemData.map((item) => {
     if (item.label === "Active Clients") item.number = stats.numOfClients;
-    if (item.label === "Total Protests") item.number = stats.numOfProspects;
+    // if (item.label === "Total Protests") item.number = stats.numOfProspects;
     if (item.label === "New Prospects") item.number = stats.numOfProspects;
     // if (item.label === "Total Agents") item.number = stats.numOfAgents;
     return item;

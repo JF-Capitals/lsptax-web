@@ -93,6 +93,13 @@ export interface Invoice {
   PastDuePaid?: string;
   IsArchived: boolean;
   year: number;
+  underLitigation?: boolean;
+  underArbitration?: boolean;
+  paidDate?: string;
+  paymentNotes?: string;
+  protestedDate?: string;
+  hearingDate?: string;
+  invoiceDate?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -110,11 +117,21 @@ export interface InvoiceData {
 }
 interface InvoiceProperty{
   propertyDetails: Property;
-  invoice: Invoice;
+  invoice: Invoice[];
 }
 
 export interface PropertyData {
   clientDetails: ClientData;
   propertyDetails: Property;
   invoices: Invoice[];
+}
+
+export interface Prospect {
+  id: number;
+  ProspectName: string;
+  Email: string;
+  PHONENUMBER: string;
+  MAILINGADDRESS: string;
+  MAILINGADDRESSCITYTXZIP: string;
+  IsArchived: boolean;
 }

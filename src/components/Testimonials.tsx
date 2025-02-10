@@ -29,7 +29,7 @@ const testimonials = [
   },
   {
     avatar: avatar,
-    starRating: 3,
+    starRating: 4,
     comment:
       "“They made the entire process simple and stress-free. Highly recommended for property tax services.”",
   },
@@ -37,15 +37,15 @@ const testimonials = [
 
 const testimonialButtons = [
   {
-    name: "Robert Downey",
+    name: "Naeem Charolia",
     position: "Chairman, Downer Group of Companies",
   },
   {
-    name: "Joel Rogan",
+    name: "Rahemtulla Maredia",
     position: "Chairman, Roganr Group of Companies",
   },
   {
-    name: "Sudhir Budhaa",
+    name: "Ali Muhammed",
     position: "MD, Sudhirr Hero",
   },
 ];
@@ -93,7 +93,7 @@ const TestimonialItem: React.FC<TestimonialItemProps> = ({
       <img
         src={avatar}
         alt="avatar"
-        className="w-24 h-24 rounded-full border-2 border-blue-500 mb-4"
+        className="w-48 h-48 rounded-full border-2 border-blue-500 mb-4"
       />
       <div className="bg-white w-full p-8 shadow-lg rounded-lg">
         <StarRating rating={starRating} />
