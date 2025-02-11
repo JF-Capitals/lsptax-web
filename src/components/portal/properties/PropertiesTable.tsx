@@ -14,9 +14,9 @@ import {
 
 
 import { Button } from "@/components/ui/button";
-import { getProperties, getArchiveProperties } from "@/store/data"; // Import both data-fetching functions
+import { getProperties, getArchiveProperties, downloadPropertiesCSV } from "@/store/data"; // Import both data-fetching functions
 import TableBuilder from "../TableBuilder";
-import { Archive, LoaderCircle } from "lucide-react";
+import { Archive, Download, LoaderCircle } from "lucide-react";
 import { Properties } from "./columns";
 import { Input } from "@/components/ui/input";
 
@@ -161,6 +161,9 @@ const PropertiesTable = <TData extends Properties, TValue>({
           >
             <Archive />
             {archived ? "View Active" : "View Archived"}
+          </Button>
+          <Button onClick={downloadPropertiesCSV}>
+            <Download/>
           </Button>
 
           {/* <NavLink to={`/portal/add-properties`}>

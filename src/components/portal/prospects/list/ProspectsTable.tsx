@@ -11,11 +11,12 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 
-import { getProspects } from "@/store/data";
+import { downloadProspectsCSV, getProspects } from "@/store/data";
 import TableBuilder from "../../TableBuilder";
 import { Input } from "@/components/ui/input";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 interface ProspectTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -37,7 +38,7 @@ const ProspectTable = <TData, TValue>({
         setLoading(true); // Set loading to true while fetching
         const data = await getProspects(); // Call your data-fetching function
         setProspects(data); // Set the fetched data into the state
-        console.log({data})
+        console.log({ data });
       } catch (err) {
         console.error("Error fetching prospects:", err);
         setError("Failed to load prospects. Please try again later."); // Set the error state
@@ -106,6 +107,9 @@ const ProspectTable = <TData, TValue>({
         <NavLink to={`/portal/prospect/add-prospect`}>
           <Button className="w-full">Add New Prospect</Button>
         </NavLink>
+        <Button onClick={downloadProspectsCSV}>
+          <Download />
+        </Button>
       </div>
       <TableBuilder
         data={prospects}

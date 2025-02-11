@@ -1,3 +1,15 @@
+const getFormattedDate = () => {
+  const date = new Date();
+  const day = date.getDate();
+  const month = date.toLocaleString("default", { month: "short" });
+  const year = date.getFullYear();
+
+  // Add the ordinal suffix to the day (e.g., 1st, 2nd, 3rd, 4th, etc.)
+  const ordinalSuffix =
+    day === 1 ? "st" : day === 2 ? "nd" : day === 3 ? "rd" : "th";
+  return `${day}${ordinalSuffix}${month}${year}`;
+};
+
 export const getClients = async () => {
   try {
     const response = await fetch(
@@ -23,7 +35,7 @@ export const getSingleClient = async ({ clientId }: { clientId?: string }) => {
       throw new Error("Failed to fetch clients");
     }
     const client = await response.json();
-    console.log({client})
+    console.log({ client });
     return client;
   } catch (error) {
     console.log(error);
@@ -31,11 +43,17 @@ export const getSingleClient = async ({ clientId }: { clientId?: string }) => {
   }
 };
 
-export const getSingleProspect = async ({ prospectId }: { prospectId?: string }) => {
+export const getSingleProspect = async ({
+  prospectId,
+}: {
+  prospectId?: string;
+}) => {
   console.log({ prospectId });
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/prospect?prospectId=${prospectId}`
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }/api/prospect?prospectId=${prospectId}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch prospect");
@@ -317,5 +335,93 @@ export const dashboardData = async (): Promise<Stats | null> => {
   } catch (error) {
     console.log(error);
     return null; // Returning null in case of error to align with Stats | null type
+  }
+};
+
+export const downloadClientsCSV = async () => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/download-clients-csv`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to download clients CSV");
+    }
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `clients_${getFormattedDate()}.csv`; // Include today's date in the filename
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error downloading clients CSV:", error);
+  }
+};
+
+export const downloadProspectsCSV = async () => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/download-prospects-csv`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to download prospects CSV");
+    }
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `prospects_${getFormattedDate()}.csv`; // Include today's date in the filename
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error downloading prospects CSV:", error);
+  }
+};
+
+export const downloadPropertiesCSV = async () => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/download-properties-csv`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to download properties CSV");
+    }
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `properties_${getFormattedDate()}.csv`; // Include today's date in the filename
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error downloading properties CSV:", error);
+  }
+};
+
+export const downloadInvoicesCSV = async () => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/download-invoices-csv`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to download invoices CSV");
+    }
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `invoices_${getFormattedDate()}.csv`; // Include today's date in the filename
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error downloading invoices CSV:", error);
   }
 };

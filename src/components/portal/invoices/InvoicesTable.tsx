@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
+  downloadInvoicesCSV,
   getAllInvoices,
 } from "@/store/data";
 import TableBuilder from "../TableBuilder";
-import { Archive, LoaderCircle } from "lucide-react";
+import { Archive, Download, LoaderCircle } from "lucide-react";
 
 interface InvoicesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -70,6 +71,7 @@ const InvoicesTable = <TData, TValue>({
           <Archive />
           {archived ? "View Active Invoices" : "View Archive"}
         </Button>
+        <Button onClick={downloadInvoicesCSV}><Download/></Button>
       </div>
       <TableBuilder
         data={invoices}

@@ -13,9 +13,9 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getClients } from "@/store/data";
+import { downloadClientsCSV, getClients } from "@/store/data";
 import { getArchiveClients } from "@/store/data"; // Import the function
-import { Archive, LoaderCircle, UserRoundPlus } from "lucide-react";
+import { Archive, Download, LoaderCircle, UserRoundPlus } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import TableBuilder from "../../TableBuilder";
 
@@ -116,6 +116,9 @@ const ClientTable = <TData, TValue>({
               <UserRoundPlus /> Add New Client
             </Button>
           </NavLink>
+          <Button onClick={downloadClientsCSV}>
+            <Download />
+          </Button>
         </div>
       </div>
       <TableBuilder
