@@ -84,14 +84,6 @@ const PropertiesTable = <TData extends Properties, TValue>({
     },
   });
 
-  if (loading) {
-    return (
-      <div className="flex justify-center h-full items-center py-20">
-        <LoaderCircle className="animate-spin w-16 h-16" />
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="flex justify-center items-center py-20 text-red-500">
@@ -163,7 +155,7 @@ const PropertiesTable = <TData extends Properties, TValue>({
             {archived ? "View Active" : "View Archived"}
           </Button>
           <Button onClick={downloadPropertiesCSV}>
-            <Download/>
+            <Download />
           </Button>
 
           {/* <NavLink to={`/portal/add-properties`}>
@@ -174,13 +166,19 @@ const PropertiesTable = <TData extends Properties, TValue>({
           </NavLink> */}
         </div>
       </div>
-      <TableBuilder
-        data={properties}
-        columns={columns}
-        label={archived ? "Archived Properties" : "All Properties"}
-        columnFilters={columnFilters}
-        setColumnFilters={setColumnFilters}
-      />
+      {loading ? (
+        <div className="flex justify-center h-96 align-center items-center py-20">
+           <LoaderCircle className="animate-spin w-16 h-16" />
+        </div>
+      ) : (
+        <TableBuilder
+          data={properties}
+          columns={columns}
+          label={archived ? "Archived Properties" : "All Properties"}
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+        />
+      )}
     </div>
   );
 };

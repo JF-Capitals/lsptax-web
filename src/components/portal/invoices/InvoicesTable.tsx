@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 // import { useLocation } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import {
-  downloadInvoicesCSV,
-  getAllInvoices,
-} from "@/store/data";
+import { downloadInvoicesCSV, getAllInvoices } from "@/store/data";
 import TableBuilder from "../TableBuilder";
 import { Archive, Download, LoaderCircle } from "lucide-react";
 
@@ -30,23 +27,22 @@ const InvoicesTable = <TData, TValue>({
         const response = await getAllInvoices();
         setInvoices(response);
         setLoading(false);
-        console.log({response})
+        console.log({ response });
       } catch (error) {
         setError("Failed to load clients. Please try again later.");
         console.error("Error fetching invoice data:", error);
       }
     };
-      fetchInvoiceData();
-
+    fetchInvoiceData();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center h-full items-center py-20">
-        <LoaderCircle className="animate-spin w-16 h-16" />
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center h-full items-center py-20">
+  //       <LoaderCircle className="animate-spin w-16 h-16" />
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     return (
@@ -71,13 +67,21 @@ const InvoicesTable = <TData, TValue>({
           <Archive />
           {archived ? "View Active Invoices" : "View Archive"}
         </Button>
-        <Button onClick={downloadInvoicesCSV}><Download/></Button>
+        <Button onClick={downloadInvoicesCSV}>
+          <Download />
+        </Button>
       </div>
-      <TableBuilder
-        data={invoices}
-        columns={columns}
-        label="Filtered Invoices"
-      />
+      {loading ? (
+        <div className="flex justify-center h-full items-center py-20">
+          <LoaderCircle className="animate-spin w-16 h-16" />
+        </div>
+      ) : (
+        <TableBuilder
+          data={invoices}
+          columns={columns}
+          label="Filtered Invoices"
+        />
+      )}
     </div>
   );
 };

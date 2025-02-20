@@ -48,7 +48,7 @@ const Footer = () => {
                 to="/portal/dashboard"
                 className="text-white hover:text-blue-400 transition-all duration-300 hover:translate-x-2"
               >
-                Client Portal
+                Admin Portal
               </NavLink>
               <NavLink
                 to="#service"

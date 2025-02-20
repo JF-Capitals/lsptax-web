@@ -68,13 +68,6 @@ const ClientTable = <TData, TValue>({
     },
   });
 
-  if (loading) {
-    return (
-      <div className="flex justify-center h-full items-center py-20">
-        <LoaderCircle className="animate-spin w-16 h-16" />
-      </div>
-    );
-  }
   if (error) {
     return (
       <div className="flex justify-center items-center py-20 text-red-500">
@@ -121,13 +114,19 @@ const ClientTable = <TData, TValue>({
           </Button>
         </div>
       </div>
-      <TableBuilder
-        data={clients}
-        columns={columns}
-        label="Clients"
-        columnFilters={columnFilters}
-        setColumnFilters={setColumnFilters}
-      />
+      {loading ? (
+        <div className="flex justify-center h-full items-center py-20">
+          <LoaderCircle className="animate-spin w-16 h-16" />
+        </div>
+      ) : (
+        <TableBuilder
+          data={clients}
+          columns={columns}
+          label="Clients"
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+        />
+      )}
     </div>
   );
 };

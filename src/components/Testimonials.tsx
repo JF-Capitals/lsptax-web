@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import avatar from "@/assets/icons/avatar.svg";
-
+import avatar2 from "@/assets/icons/avatar2.png";
+import avatar3 from "@/assets/icons/avatar3.png";
 interface TestimonialItemProps {
   avatar: string;
   starRating: number;
@@ -22,13 +23,13 @@ const testimonials = [
       "“Excellent service! They took care of everything, and we saw real savings on our property taxes. Worth every penny!”",
   },
   {
-    avatar: avatar,
+    avatar: avatar2,
     starRating: 5,
     comment:
       "“Fantastic! I’m thrilled with their professional service and the significant savings we achieved!”",
   },
   {
-    avatar: avatar,
+    avatar: avatar3,
     starRating: 4,
     comment:
       "“They made the entire process simple and stress-free. Highly recommended for property tax services.”",

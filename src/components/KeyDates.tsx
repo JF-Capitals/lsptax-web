@@ -32,7 +32,7 @@ const KeyDates = () => {
   return (
     <div
       id="keydates"
-      className="flex flex-col md:flex-row justify-center items-center align-center p-8 gap-16 my-8"
+      className="flex flex-col  justify-center items-center align-center p-8 gap-16 my-8"
     >
       <div className="" data-aos="zoom-in-right">
         <img src={keyDateLogo} alt="Key Dates" className="w-32" />
