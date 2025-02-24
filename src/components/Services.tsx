@@ -69,7 +69,7 @@ const ServiceBox: React.FC<ServiceBoxProps> = ({
       <p className="text-center mb-4">{desc}</p>
       <a
         href={ctaLink}
-        className="bg-red-400 text-white text-xs rounded-3xl p-2 px-4 my-4 hover:bg-red-500 transition-colors duration-300"
+        className="bg-red-400 text-white text-xs rounded-3xl p-2 px-4 mt-auto hover:bg-red-500 transition-colors duration-300"
       >
         Get Started Now
       </a>

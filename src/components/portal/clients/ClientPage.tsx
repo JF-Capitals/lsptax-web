@@ -48,16 +48,12 @@ const ClientPage = () => {
       <div className="flex justify-between">
         <h1 className="text-4xl font-bold text-center mb-6">Client Details</h1>
         <div className="flex gap-4">
-          <NavLink
-            to={`/portal/edit-client?clientId=${clientData.client.id}`}
-          >
+          <NavLink to={`/portal/edit-client?clientId=${clientData.client.id}`}>
             <Button variant={"blue"} className="w-full">
               Edit Client Details
             </Button>
           </NavLink>
-          <NavLink
-            to={`/portal/invoice?clientId=${clientData.client.id}`}
-          >
+          <NavLink to={`/portal/invoice?clientId=${clientData.client.id}`}>
             <Button variant={"blue"} className="w-full">
               Invoice
             </Button>
@@ -113,22 +109,27 @@ const ClientPage = () => {
             </Button>
           </NavLink>
         </div>
-        {clientData.properties.length ?  <div className="flex flex-col gap-4">
-          {clientData.properties.map((property) => (
-            <div className="">
-              <PropertyBox
-                key={property.id}
-                AccountNumber={property.AccountNumber}
-                NAMEONCAD={property.NAMEONCAD}
-                id={property.id}
-                IsArchived={property.IsArchived}
-                createdAt={property.createdAt}
-                updatedAt={property.updatedAt}
-              />
-            </div>
-          ))}
-        </div> : <h1 className="text-center ">No Properties found for this Client...</h1> }
-      
+        {clientData.properties.length ? (
+          <div className="flex flex-col gap-4">
+            {clientData.properties.map((property) => (
+              <div className="">
+                <PropertyBox
+                  key={property.id}
+                  AccountNumber={property.AccountNumber}
+                  NAMEONCAD={property.NAMEONCAD}
+                  id={property.id}
+                  IsArchived={property.IsArchived}
+                  createdAt={property.createdAt}
+                  updatedAt={property.updatedAt}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <h1 className="text-center ">
+            No Properties found for this Client...
+          </h1>
+        )}
       </div>
     </div>
   );
@@ -136,12 +137,12 @@ const ClientPage = () => {
 
 export default ClientPage;
 
-const PropertyBox: React.FC<Property> = ({ AccountNumber, NAMEONCAD }) => {
+const PropertyBox: React.FC<Property> = ({ id, AccountNumber, NAMEONCAD }) => {
   return (
     <div className="flex border border-red-100 rounded-xl p-4 align-center items-center gap-4 w-max">
       <House />
       <div className="flex flex-col ">
-        <NavLink to={`/portal/property?propertyId=${AccountNumber}`}>
+        <NavLink to={`/portal/property?propertyId=${id}`}>
           <h2 className="text-xl font-bold text-green-800">{AccountNumber}</h2>
         </NavLink>
         <div>CAD Details: {NAMEONCAD}</div>

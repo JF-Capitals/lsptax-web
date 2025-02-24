@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useSearchParams } from "react-router-dom";
-import {
-  getSingleProperty,
-} from "@/store/data";
+import { getSingleProperty } from "@/store/data";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PropertyData } from "@/types/types";
@@ -13,6 +11,11 @@ const ViewProperty = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchParams] = useSearchParams();
+  const propertyId = parseInt(searchParams.get("propertyId") || "1");
+
+  const handleNavigation = (newId: number) => {
+    window.location.href = `/portal/property?propertyId=${newId}`;
+  };
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -27,8 +30,8 @@ const ViewProperty = () => {
       try {
         const propertyData = await getSingleProperty({ propertyId });
         setProperty(propertyData);
-        setLoading(false)
-        console.log({propertyData})
+        setLoading(false);
+        console.log({ propertyData });
       } catch (err) {
         console.error("Error:", err);
         setError("Failed to fetch property details");
@@ -39,7 +42,7 @@ const ViewProperty = () => {
 
     fetchProperty();
     console.log({ property });
-  }, [searchParams]); // Trigger when searchParams changes
+  }, [searchParams, propertyId]); // Trigger when searchParams changes
 
   if (loading) {
     return (
@@ -58,7 +61,7 @@ const ViewProperty = () => {
   }
 
   if (!property) {
-    console.log({property})
+    console.log({ property });
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg font-semibold text-gray-700">
@@ -165,6 +168,10 @@ const ViewProperty = () => {
                   {property.propertyDetails.CADZIPCODE + " "}
                 </td>
               </tr>
+              <tr>
+                <td className="font-medium">County:</td>
+                <td>{property.propertyDetails.CADCOUNTY}</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -172,7 +179,16 @@ const ViewProperty = () => {
 
       <div className="p-6 bg-gray-50 border rounded-lg my-2 p-4">
         <h2 className="text-2xl font-bold mb-6">Invoice Details</h2>
-        <YearTable invoices={property.invoices}/>
+        <YearTable invoices={property.invoices} />
+      </div>
+      <div className="flex w-full justify-between">
+        <Button
+          onClick={() => handleNavigation(propertyId - 1)}
+          disabled={propertyId <= 1}
+        >
+          Prev
+        </Button>
+        <Button onClick={() => handleNavigation(propertyId + 1)}>Next</Button>
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ export type CADOwner = {
 };
 
 export type Properties = {
-  propertyId: string;
+  propertyId: number;
   clientId: string;
   propertyAccount: string;
   propertyDetails: PropertyDetails;
@@ -50,7 +50,7 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
 
       return (
         <NavLink
-          to={`/portal/property?propertyId=${row.original.propertyAccount}`}
+          to={`/portal/property?propertyId=${row.original.propertyId}`}
         >
           <div className="text-green-400 font-bold">#{propertyAccount}</div>
         </NavLink>

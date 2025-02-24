@@ -11,7 +11,7 @@ const Footer = () => {
           <div className="flex flex-col space-y-2">
             <h3 className="text-lg font-bold flex items-center gap-2 text-[#0093FF]">
               <MapPin className="w-4 h-4" />
-              <span>Registered Office</span>
+              <span>Mailing Address</span>
             </h3>
             <div className="text-white hover:text-blue-400 transition-all duration-300 leading-tight">
               <p>16107 Kensington Dr. #194,</p>
