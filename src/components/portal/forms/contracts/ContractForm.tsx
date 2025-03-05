@@ -3,8 +3,8 @@ import { ClientData, Property } from "@/types/types";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
-import Logo from "@/assets/logo.svg";
-import AppointmentForm from "./AppointmentForm";
+// import Logo from "@/assets/logo.svg";
+// import AppointmentForm from "./AppointmentForm";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 
@@ -229,14 +229,14 @@ export default function ContractForm() {
               </table>
             </div>
           </div>
-          <div
+          {/* <div
             className="absolute inset-0 opacity-10 pointer-events-none  bg-repeat-y bg-center bg-contain"
             style={{ backgroundImage: `url(${Logo})` }}
-          />
+          /> */}
           {/* Appointment Page */}
-          <div className="mt-16 page-break">
+          {/* <div className="mt-16 page-break">
             <AppointmentForm></AppointmentForm>
-          </div>
+          </div> */}
         </div>
       </div>
     </>

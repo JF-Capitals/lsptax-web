@@ -34,9 +34,10 @@ const KeyDates = () => {
       id="keydates"
       className="flex flex-col  justify-center items-center align-center p-8 gap-16 my-8"
     >
-      <div className="" data-aos="zoom-in-right">
+      {/* <div className="" data-aos="zoom-in-right">
         <img src={keyDateLogo} alt="Key Dates" className="w-32" />
-      </div>
+      </div> */}
+      <h2 className="text-4xl font-bold mt-2">Key Dates</h2>
       <div className="w-full md:w-2/3">
         {keyDateData.map((item, index) => (
           <KeyDateItem key={index} date={item.date} desc={item.desc} />

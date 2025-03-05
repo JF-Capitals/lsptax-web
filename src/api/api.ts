@@ -1,4 +1,3 @@
-
 export const loginUser = async (email: string, password: string) => {
   try {
     const response = await fetch(
@@ -27,7 +26,7 @@ export const loginUser = async (email: string, password: string) => {
     // Save token and username in localStorage
     const { token, user } = data;
     localStorage.setItem("token", token);
-    localStorage.setItem("username", user.name)
+    localStorage.setItem("username", user.name);
     localStorage.setItem("email", email); // Save username
     localStorage.setItem("user", JSON.stringify(user)); // Save user info
 
@@ -233,18 +232,15 @@ export const addProperty = async ({
 
 export const deleteClient = async (id: Number) => {
   try {
-    await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/action/delete-client`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id,
-        }),
-      }
-    );
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/action/delete-client`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id,
+      }),
+    });
   } catch (error: unknown) {
     let errorMessage = "Client Deletion Failed. Please try again.";
 
@@ -259,18 +255,15 @@ export const deleteClient = async (id: Number) => {
 
 export const deleteProspect = async (id: Number) => {
   try {
-    await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/action/delete-prospect`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id,
-        }),
-      }
-    );
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/action/delete-prospect`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id,
+      }),
+    });
   } catch (error: unknown) {
     let errorMessage = "Prospect Deletion Failed. Please try again.";
 
@@ -285,20 +278,50 @@ export const deleteProspect = async (id: Number) => {
 
 export const moveProspectToClient = async (id: Number) => {
   try {
-   await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/action/move-to-client`,
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/action/move-to-client`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id,
+      }),
+    });
+  } catch (error: unknown) {
+    let errorMessage = "Client Deletion Failed. Please try again.";
+
+    if (error instanceof Error) {
+      console.log({ error });
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
+export const changeProspectStatus = async ({
+  prospectId,
+  newStatus,
+}: {
+  prospectId: Number;
+  newStatus: String;
+}) => {
+  try {
+    await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/change-prospect-status`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id,
+          prospectId,
+          newStatus,
         }),
       }
     );
   } catch (error: unknown) {
-    let errorMessage = "Client Deletion Failed. Please try again.";
+    let errorMessage = "Prospect Status Updation Failed. Please try again.";
 
     if (error instanceof Error) {
       console.log({ error });

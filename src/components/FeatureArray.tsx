@@ -16,7 +16,7 @@ const features = [
     logo: f1,
   },
   {
-    label: "Financial Freedom",
+    label: "Strategic Wealth Growth",
     logo: f2,
   },
   {
@@ -24,7 +24,7 @@ const features = [
     logo: f3,
   },
   {
-    label: "Property Tax Relief",
+    label: "Expert Property Tax Reduction",
     logo: f4,
   },
 ];

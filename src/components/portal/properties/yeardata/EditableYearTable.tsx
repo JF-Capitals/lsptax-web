@@ -6,32 +6,39 @@ type TableRow = {
   year: number;
   "Protested Date": string;
   "BPP Rendered": string;
-  "Prelim Land": string;
-  "Prelim Building": string;
-  "Prelim Total": string;
-  "Assessed Prelim": string;
-  "Final Land": string;
-  "Final Building": string;
-  "Final Total": string;
-  "Assessed Final": string;
-  "Hearing Date": string;
-  "Invoice Date": string;
+  "BPP Invoice": string;
+  "BPP Paid": string;
+  "Notice Land Value": string;
+  "Notice Improvement Value": string;
+  "Notice Market Value": string;
+  "Notice Appraised Value": string;
+  "Final Land Value": string;
+  "Final Improvement Value": string;
+  "Final Market Value": string;
+  "Final Appraised Value": string;
+  "Market Reduction": string;
+  "Appraised Reduction": string;
+  "Hearing Date"?: string;
+  "Invoice Date"?: string;
   "Under Litigation": boolean;
   "Under Arbitration": boolean;
-  Reduction: string;
   "Tax Rate": string;
-  "Taxes Saved": string;
-  "Contingency Fee": string;
-  "Invoice Amount": string;
-  "Paid Date": string;
-  "Payment Notes": string;
+  "Taxable Savings": string;
+  "Contingency Fee"?: string;
+  "Invoice Amount"?: string;
+  "Paid Date"?: string;
+  "Payment Notes"?: string;
+  "Beginning Market": string;
+  "Ending Market": string;
+  "Beginning Appraised": string;
+  "Ending Appraised": string;
 };
 
 const EditableYearTable: React.FC<{ invoices?: Invoice[] }> = ({
   invoices,
 }) => {
   const years = [2021, 2022, 2023, 2024, 2025];
-
+  console.log({ invoices });
   // Prepare initial table data from invoices
   const initialTableData: TableRow[] = years.map((year) => {
     const yearData = invoices?.find((invoice) => invoice.year === year);
@@ -40,25 +47,32 @@ const EditableYearTable: React.FC<{ invoices?: Invoice[] }> = ({
       year,
       "Protested Date": "-",
       "BPP Rendered": "",
-      "Prelim Land": yearData?.BPPInvoice || "N/A",
-      "Prelim Building": yearData?.BPPInvoicePaid || "N/A",
-      "Prelim Total": yearData?.NoticeMarketValue || "N/A",
-      "Assessed Prelim": "",
-      "Final Land": "",
-      "Final Building": "",
-      "Final Total": "",
-      "Assessed Final": "",
-      "Hearing Date": "",
-      "Invoice Date": "",
-      "Under Litigation": false, // Default for checkboxes
-      "Under Arbitration": false, // Default for checkboxes
-      Reduction: "",
-      "Tax Rate": "",
-      "Taxes Saved": "",
-      "Contingency Fee": yearData?.ArbitrationContingencyFee || "N/A",
-      "Invoice Amount": yearData?.TotalDue || "N/A",
-      "Paid Date": "",
-      "Payment Notes": "",
+      "BPP Invoice": yearData?.bppInvoice || "-",
+      "BPP Paid": yearData?.bppPaid || "-",
+      "Notice Land Value": yearData?.noticeLandValue || "-",
+      "Notice Improvement Value": yearData?.noticeImprovementValue || "-",
+      "Notice Market Value": yearData?.noticeMarketValue || "-",
+      "Notice Appraised Value": yearData?.noticeAppraisedValue || "-",
+      "Final Land Value": yearData?.finalLandValue || "-",
+      "Final Improvement Value": yearData?.finalImprovementValue || "-",
+      "Final Market Value": yearData?.finalMarketValue || "-",
+      "Final Appraised Value": yearData?.finalAppraisedValue || "-",
+      "Market Reduction": yearData?.marketReduction || "-",
+      "Appraised Reduction": yearData?.appraisedReduction || "-",
+      "Hearing Date": yearData?.hearingDate || "-",
+      "Invoice Date": yearData?.invoiceDate || "-",
+      "Under Litigation": yearData?.underLitigation || false,
+      "Under Arbitration": yearData?.underArbitration || false,
+      "Tax Rate": yearData?.taxRate || "-",
+      "Taxable Savings": yearData?.taxableSavings || "-",
+      "Contingency Fee": yearData?.contingencyFee || "N/A",
+      "Invoice Amount": yearData?.invoiceAmount || "N/A",
+      "Paid Date": yearData?.paidDate || "-",
+      "Payment Notes": yearData?.paymentNotes || "-",
+      "Beginning Market": yearData?.beginningMarket || "-",
+      "Ending Market": yearData?.endingMarket || "-",
+      "Beginning Appraised": yearData?.beginningAppraised || "-",
+      "Ending Appraised": yearData?.endingAppraised || "-",
     };
   });
 
@@ -142,8 +156,8 @@ const EditableYearTable: React.FC<{ invoices?: Invoice[] }> = ({
                               )
                             }
                             className="form-checkbox h-5 w-5 text-indigo-600"
-                                      />
-                                      <span>Yes</span>
+                          />
+                          <span>Yes</span>
                         </div>
                       ) : (
                         <input

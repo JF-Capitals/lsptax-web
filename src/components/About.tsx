@@ -4,7 +4,7 @@ import checkboxIcon from "@/assets/icons/checkbox.svg";
 const points = [
   { title: "Unlock Significant Savings on Your Property Taxes" },
   { title: "Achieve Fair and Accurate Property Tax Assessments" },
-  { title: "Maximize Your Savings with Expert Tax Protests" },
+  { title: "Maximise Your Savings with Expert Tax Consultants" },
   { title: "Realize Substantial Property Tax Savings" },
 ];
 

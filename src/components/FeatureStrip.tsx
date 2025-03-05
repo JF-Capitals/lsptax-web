@@ -12,7 +12,7 @@ interface FeatureEleProps {
 
 const features = [
   { logo: fs1, figure: "900+", label: "Satisfied Clients" },
-  { logo: fs2, figure: "50+", label: "Expert Agents" },
+  { logo: fs2, figure: "50+", label: "Businesses Assisted " },
   { logo: fs3, figure: "10 years+", label: "Professional Experience" },
   { logo: fs4, figure: "2000+", label: "Protests Filed" },
 ];

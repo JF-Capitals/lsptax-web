@@ -2,9 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { Trash2, UserRoundPlus } from "lucide-react";
-import { deleteProspect } from "@/api/api";
+import { changeProspectStatus, deleteProspect } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,15 +16,17 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { NavLink } from "react-router-dom";
-
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; // Import RadioGroup components
+import { Label } from "@/components/ui/label"; // Import Label for RadioGroup items
+import React from "react";
 
 export type Prospects = {
   id: string;
   name: string;
   email: string;
   mobile: string;
+  status: string;
 };
-
 
 export const prospectColumn: ColumnDef<Prospects>[] = [
   {
@@ -43,6 +44,100 @@ export const prospectColumn: ColumnDef<Prospects>[] = [
   {
     accessorKey: "mobile",
     header: "Mobile",
+  },
+  {
+    header: "Status",
+    id: "status",
+    cell: ({ row }) => {
+      const prospect = row.original;
+      const { toast } = useToast();
+      const [selectedStatus, setSelectedStatus] = React.useState(
+        prospect.status
+      );
+
+      const handleStatusChange = async (newStatus: string) => {
+        try {
+          await changeProspectStatus({
+            prospectId: parseInt(prospect.id),
+            newStatus,
+          });
+          toast({
+            title: "Status updated successfully",
+            description: `Prospect status changed to ${newStatus}`,
+          });
+          window.location.reload();
+        } catch (error) {
+          toast({
+            variant: "destructive",
+            title: "Failed to update status",
+            description: "Please try again",
+          });
+        }
+      };
+
+      // Define status colors
+      const statusColors = {
+        NOT_CONTACTED: "bg-red-100 text-red-800 hover:bg-red-200", // Light red
+        CONTACTED: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200", // Light yellow
+        IN_PROGRESS: "bg-green-100 text-green-800 hover:bg-green-200", // Light green
+      };
+
+      return (
+        <div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className={
+                  statusColors[prospect.status as keyof typeof statusColors] ||
+                  "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                }
+              >
+                {prospect.status || "Set Status"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Select the Current Status</AlertDialogTitle>
+                <AlertDialogDescription>
+                  <RadioGroup
+                    defaultValue={prospect.status}
+                    onValueChange={(value) => setSelectedStatus(value)}
+                    className="mt-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value="NOT_CONTACTED"
+                        id="not_contacted"
+                      />
+                      <Label htmlFor="not_contacted">Not Contacted</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="CONTACTED" id="contacted" />
+                      <Label htmlFor="contacted">Contacted</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="IN_PROGRESS" id="in-progress" />
+                      <Label htmlFor="in-progress">In Progress</Label>
+                    </div>
+                  </RadioGroup>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => handleStatusChange(selectedStatus)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Save Status
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      );
+    },
   },
   {
     header: "Actions",
@@ -67,23 +162,6 @@ export const prospectColumn: ColumnDef<Prospects>[] = [
           });
         }
       };
-
-      // const handleMove = async () => {
-      //   try {
-      //     await moveProspectToClient(Number(prospect.id));
-      //     toast({
-      //       title: "Prospect converted successfully",
-      //       description: "The prospect has been moved to clients",
-      //     });
-      //     window.location.reload();
-      //   } catch (error) {
-      //     toast({
-      //       variant: "destructive",
-      //       title: "Failed to convert prospect",
-      //       description: "Please try again",
-      //     });
-      //   }
-      // };
 
       return (
         <div className="flex gap-2">
@@ -130,8 +208,10 @@ export const prospectColumn: ColumnDef<Prospects>[] = [
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction>
-                  <NavLink to={`/portal/move_to_client?prospectId=${prospect.id}`}>
-                  Convert to Client
+                  <NavLink
+                    to={`/portal/move_to_client?prospectId=${prospect.id}`}
+                  >
+                    Convert to Client
                   </NavLink>
                 </AlertDialogAction>
               </AlertDialogFooter>

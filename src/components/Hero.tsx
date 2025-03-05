@@ -18,10 +18,7 @@ const Hero = () => {
             Offering the best tax reduction services
           </h4>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold my-4">
-            Maximize <br />
-            Your Property Saving <br />
-            with Expert Tax
-            Consultants
+            Maximise Your<br/> Property Savings
           </h1>
           <h3 className="text-lg md:text-xl">
             Trusted Professionals Committed To Reducing

@@ -15,7 +15,7 @@ import EditClient from "@/components/portal/clients/edit/EditClient";
 import AddProspect from "@/components/portal/prospects/add/AddProspects";
 // import AgentTable from "@/components/portal/forms/agent/AgentsTable";
 import ProspectTable from "@/components/portal/prospects/list/ProspectsTable";
-import AgentForm from "@/components/portal/forms/agent/AgentForm";
+// import AgentForm from "@/components/portal/forms/agent/AgentForm";
 import ContractForm from "@/components/portal/forms/contracts/ContractForm";
 import InvoicePage from "@/components/portal/clients/invoice/InvoicePage";
 import { propertiesColumn } from "@/components/portal/properties/columns";
@@ -27,6 +27,7 @@ import { clientsColumn } from "@/components/portal/clients/list/columns";
 import { prospectColumn } from "@/components/portal/prospects/list/columns";
 import ProtectedRoute from "@/utils/ProtectedRoute";
 import MoveFromProspect from "@/components/portal/clients/add/MoveFromProspect";
+import AppointmentForm from "@/components/portal/forms/contracts/AppointmentForm";
 
 const AdminRoutes = () => {
   return (
@@ -70,7 +71,7 @@ const AdminRoutes = () => {
           element={<ProspectTable columns={prospectColumn} />}
         />
         <Route path="/prospect/add-prospect" element={<AddProspect />} />
-        <Route path="/agent-form" element={<AgentForm />} />
+        <Route path="/agent" element={<AppointmentForm />} />
         <Route path="/contract" element={<ContractForm />} />
         <Route path="/invoice" element={<InvoicePage />} />
       </Routes>

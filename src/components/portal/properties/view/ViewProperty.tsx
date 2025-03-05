@@ -79,7 +79,7 @@ const ViewProperty = () => {
         </h1>
         <div className="flex gap-4 flex-col md:flex-row w-full md:w-auto">
           <NavLink
-            to={`/portal/edit-properties?propertyId=${property.propertyDetails.AccountNumber}`}
+            to={`/portal/edit-properties?propertyId=${property.propertyDetails.id}`}
           >
             <Button className="w-full">Edit Property</Button>
           </NavLink>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { NavLink } from "react-router-dom";
 
@@ -37,5 +38,24 @@ export const contractsColumn: ColumnDef<Clients>[] = [
   {
     accessorKey: "mobile",
     header: "Mobile",
+  },
+  {
+    accessorKey: "Forms",
+    // header: "Mobile",
+    cell: ({ row }) => {
+      // const id = row.original.clientId;
+      const clientNum = row.original.clientNumber;
+
+      return (
+        <div>
+          <NavLink to={`/portal/contract?clientId=${clientNum}`}>
+          <Button>AOA</Button>
+          </NavLink>
+          <NavLink to={`/portal/agent?clietId=${clientNum}`}>
+          <Button>Agent</Button>
+          </NavLink>
+       </div>
+      );
+    },
   },
 ];

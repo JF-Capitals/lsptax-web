@@ -8,20 +8,31 @@ type TableRow = {
   "Protested Date": string;
   "BPP Rendered": string;
   "BPP Invoice": string;
-  "BPP Invoice Paid": string;
+  "BPP Paid": string;
+  "Notice Land Value": string;
+  "Notice Improvement Value": string;
   "Notice Market Value": string;
-  "Assessed Prelim": string | undefined;
-  "Final Prelim": string;
+  "Notice Appraised Value": string;
+  "Final Land Value": string;
+  "Final Improvement Value": string;
   "Final Market Value": string;
-  "Market Value Reduction": string;
-  "Hearing Date": string | undefined;
-  "Invoice Date": string | undefined;
+  "Final Appraised Value": string;
+  "Market Reduction": string;
+  "Appraised Reduction": string;
+  "Hearing Date"?: string;
+  "Invoice Date"?: string;
   "Under Litigation": boolean;
   "Under Arbitration": boolean;
-  "Contingency Fee": string|undefined;
-  "Invoice Amount": string|undefined;
-  "Paid Date": string | undefined;
-  "Payment Notes": string | undefined;
+  "Tax Rate": string;
+  "Taxable Savings": string;
+  "Contingency Fee"?: string;
+  "Invoice Amount"?: string;
+  "Paid Date"?: string;
+  "Payment Notes"?: string;
+  "Beginning Market": string;
+  "Ending Market": string;
+  "Beginning Appraised": string;
+  "Ending Appraised": string;
 };
 
 const YearTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
@@ -35,21 +46,32 @@ const YearTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
       year,
       "Protested Date": "-",
       "BPP Rendered": "",
-      "BPP Invoice": yearData?.BPPInvoice || "-",
-      "BPP Invoice Paid": yearData?.BPPInvoicePaid || "-",
-      "Notice Market Value": yearData?.NoticeMarketValue || "-",
-      "Assessed Prelim": yearData?.NoticeAppraisedValue,
-      "Final Prelim": yearData?.FinalAppraisedValue || "-",
-      "Final Market Value": yearData?.FinalMarketValue || "-",
-      "Market Value Reduction": yearData?.MarketValueReduction || "-",
-      "Hearing Date": yearData?.hearingDate,
-      "Invoice Date": yearData?.invoiceDate,
+      "BPP Invoice": yearData?.bppInvoice || "-",
+      "BPP Paid": yearData?.bppPaid || "-",
+      "Notice Land Value": yearData?.noticeLandValue || "-",
+      "Notice Improvement Value": yearData?.noticeImprovementValue || "-",
+      "Notice Market Value": yearData?.noticeMarketValue || "-",
+      "Notice Appraised Value": yearData?.noticeAppraisedValue || "-",
+      "Final Land Value": yearData?.finalLandValue || "-",
+      "Final Improvement Value": yearData?.finalImprovementValue || "-",
+      "Final Market Value": yearData?.finalMarketValue || "-",
+      "Final Appraised Value": yearData?.finalAppraisedValue || "-",
+      "Market Reduction": yearData?.marketReduction || "-",
+      "Appraised Reduction": yearData?.appraisedReduction || "-",
+      "Hearing Date": yearData?.hearingDate || "-",
+      "Invoice Date": yearData?.invoiceDate || "-",
       "Under Litigation": yearData?.underLitigation || false,
       "Under Arbitration": yearData?.underArbitration || false,
-      "Contingency Fee": yearData ? yearData.ArbitrationContingencyFee : "N/A",
-      "Invoice Amount": yearData ? yearData.TotalDue : "N/A",
-      "Paid Date": yearData?.paidDate,
-      "Payment Notes": yearData?.paymentNotes,
+      "Tax Rate": yearData?.taxRate || "-",
+      "Taxable Savings": yearData?.taxableSavings || "-",
+      "Contingency Fee": yearData?.contingencyFee || "N/A",
+      "Invoice Amount": yearData?.invoiceAmount || "N/A", 
+      "Paid Date": yearData?.paidDate || "-",
+      "Payment Notes": yearData?.paymentNotes || "-",
+      "Beginning Market": yearData?.beginningMarket || "-",
+      "Ending Market": yearData?.endingMarket || "-",
+      "Beginning Appraised": yearData?.beginningAppraised || "-",
+      "Ending Appraised": yearData?.endingAppraised || "-",
     };
   });
 
@@ -74,29 +96,49 @@ const YearTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
             </tr>
           </thead>
           <tbody>
-            {Object.keys(rowData[0]).map((key, idx) => {
-              if (key === "year") return null;
-              return (
-                <tr
-                  key={idx}
-                  className={`hover:bg-gray-100 ${
-                    idx % 2 === 0 ? "bg-gray-50" : "bg-white"
-                  }`}
-                >
-                  <td className="px-6 py-3 text-sm font-medium text-gray-800">
-                    {key}
-                  </td>
-                  {rowData.map((data) => (
-                    <td
-                      key={data.year}
-                      className="px-6 py-3 text-sm text-gray-700"
-                    >
-                      {data[key as keyof TableRow]}
+            {Object.keys(rowData[0])
+              .filter((key) => {
+                const isConditionalField = [
+                  "Beginning Market",
+                  "Ending Market",
+                  "Beginning Appraised",
+                  "Ending Appraised",
+                ].includes(key);
+
+                if (!isConditionalField) return true; // Show all normal fields
+
+                return rowData.some(
+                  (data) =>
+                    data["Under Litigation"] || data["Under Arbitration"]
+                ); // Show conditional fields only if any row has litigation/arbitration
+              })
+              .map((key, idx) => {
+                if (key === "year") return null;
+                return (
+                  <tr
+                    key={idx}
+                    className={`hover:bg-gray-100 ${
+                      idx % 2 === 0 ? "bg-gray-50" : "bg-white"
+                    }`}
+                  >
+                    <td className="px-6 py-3 text-sm font-medium text-gray-800">
+                      {key}
                     </td>
-                  ))}
-                </tr>
-              );
-            })}
+                    {rowData.map((data) => (
+                      <td
+                        key={data.year}
+                        className="px-6 py-3 text-sm text-gray-700"
+                      >
+                        {typeof data[key as keyof TableRow] === "boolean"
+                          ? data[key as keyof TableRow]
+                            ? "Yes"
+                            : "No"
+                          : data[key as keyof TableRow]}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>

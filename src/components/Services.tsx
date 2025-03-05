@@ -34,7 +34,7 @@ const services = [
 const Services = () => {
   return (
     <div className="flex flex-col items-center">
-      <h2 className="font-bold text-2xl p-8 text-center">Our Core Services</h2>
+      <h2 className="text-4xl font-bold p-4 m-4">Our Core Services</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 m-8 mb-16">
         {services.map((item, index) => (
           <ServiceBox
