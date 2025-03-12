@@ -5,12 +5,12 @@ import { Properties } from "./properties/columns";
 import { getClients, getProperties, getProspects } from "@/store/data";
 import { Clients } from "./clients/list/columns";
 import { LoaderCircle } from "lucide-react";
-import { Prospects } from "./prospects/list/columns";
+import { Prospect } from "@/types/types";
 
 const Dashboard = () => {
   const [propData, setPropData] = useState<Properties | null>(null);
   const [clientData, setClientData] = useState<Clients | null>(null);
-  const [prospectData, setProspectData] = useState<Prospects | null>(null);
+  const [prospectData, setProspectData] = useState<Prospect | null>(null);
   useEffect(() => {
     // Fetch stats from dashboardData function
     const fetchData = async () => {
