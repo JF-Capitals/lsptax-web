@@ -91,6 +91,7 @@ const DashboardStats = () => {
             number={item.number}
             desc={item.desc}
             link={item.link}
+            key={item.label}
           />
         ))}
       </div>

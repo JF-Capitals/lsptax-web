@@ -25,9 +25,8 @@ const InvoiceSummary: React.FC<{
     if (!invoice) return 0;
     return invoice.properties.reduce((total, property) => {
       const yearlyInvoice = getYearlyInvoiceData(property);
-      const feeString = yearlyInvoice?.ContingencyFeeDue || "$0";
-      const numericValue = parseFloat(feeString.replace(/[^0-9.]/g, ""));
-      return total + (isNaN(numericValue) ? 0 : numericValue);
+      const fee = yearlyInvoice?.invoiceAmount;
+      return total + (isNaN(fee) ? 0 : fee);
     }, 0);
   };
 
@@ -144,7 +143,7 @@ const InvoiceSummary: React.FC<{
                       {selectedYear} Protest
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-right">
-                      {yearlyInvoice?.ContingencyFeeDue || "$0.00"}
+                      ${yearlyInvoice?.invoiceAmount.toFixed(2) || "0.00"}
                     </td>
                   </tr>
                 );
@@ -176,7 +175,9 @@ const InvoiceSummary: React.FC<{
               <p>SUGARLAND, TX 77479</p>
             </div>
             <div className="text-left border-2 border-black p-4 bg-gray-200">
-              <p>Amount Enclosed: $_________________</p>
+              <p>
+                Amount Enclosed: <span className="underline">${totalFees.toFixed(2)}</span>
+              </p>
               <p>OR</p>
               <p>ZELLE: 713-505-6806</p>
               <p>(Lone Star Property Tax)</p>

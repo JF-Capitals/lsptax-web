@@ -16,7 +16,29 @@ import TableBuilder from "../../TableBuilder";
 import { Input } from "@/components/ui/input";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import {
+  Download,
+  // ChevronDown
+} from "lucide-react";
+// import {
+//   DropdownMenu,
+//   DropdownMenuItem,
+//   DropdownMenuContent,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu"; // Import dropdown components
+
+// enum ProspectStatus {
+//   NOT_CONTACTED = "NOT_CONTACTED",
+//   CONTACTED = "CONTACTED",
+//   IN_PROGRESS = "IN_PROGRESS",
+//   SIGNED = "SIGNED",
+// }
+
+// interface Prospect {
+//   id: string;
+//   name: string;
+//   status: ProspectStatus;
+// }
 
 interface ProspectTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -25,30 +47,45 @@ interface ProspectTableProps<TData, TValue> {
 const ProspectTable = <TData, TValue>({
   columns,
 }: ProspectTableProps<TData, TValue>) => {
-  const [prospects, setProspects] = useState<TData[]>([]); // Data state for properties
+  const [prospects, setProspects] = useState<TData[]>([]); // const [filteredProspects, setFilteredProspects] = useState<Prospect[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [loading, setLoading] = useState(true); // Track loading state
-  const [error, setError] = useState<string | null>(null); // Track error state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  // const [selectedStatus, setSelectedStatus] = useState<ProspectStatus | null>(
+  //   null
+  // );
+
   useEffect(() => {
     const fetchProspects = async () => {
       try {
-        setLoading(true); // Set loading to true while fetching
-        const data = await getProspects(); // Call your data-fetching function
-        setProspects(data); // Set the fetched data into the state
-        console.log({ data });
+        setLoading(true);
+        const data = await getProspects();
+        setProspects(data);
+        // setFilteredProspects(data); // Initially, show all prospects
       } catch (err) {
         console.error("Error fetching prospects:", err);
-        setError("Failed to load prospects. Please try again later."); // Set the error state
+        setError("Failed to load prospects. Please try again later.");
       } finally {
-        setLoading(false); // Set loading to false once fetching is done
+        setLoading(false);
       }
     };
 
     fetchProspects();
   }, []);
+
+  // useEffect(() => {
+  //   if (selectedStatus) {
+  //     setFilteredProspects(
+  //       prospects.filter((p) => p.status === selectedStatus)
+  //     );
+  //   } else {
+  //     setFilteredProspects(prospects); // Ensure it stays an array of `Prospect`
+  //   }
+  // }, [selectedStatus, prospects]);
+
   const table = useReactTable({
     data: prospects,
     columns,
@@ -67,7 +104,7 @@ const ProspectTable = <TData, TValue>({
       rowSelection,
     },
   });
-  // Render loading state
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -75,7 +112,7 @@ const ProspectTable = <TData, TValue>({
       </div>
     );
   }
-  // Render error state
+
   if (error) {
     return (
       <div className="flex justify-center items-center py-20 text-red-500">
@@ -83,12 +120,12 @@ const ProspectTable = <TData, TValue>({
       </div>
     );
   }
+
   return (
     <div>
       <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
         <div className="flex flex-col p-4 w-full">
           <h1>Quick search a Prospect</h1>
-
           <Input
             placeholder="Search Client Name..."
             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -98,6 +135,29 @@ const ProspectTable = <TData, TValue>({
             className="max-w-sm"
           />
         </div>
+
+        {/* Status Filter Dropdown
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              {selectedStatus ? selectedStatus : "Filter by Status"}{" "}
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => setSelectedStatus(null)}>
+              All
+            </DropdownMenuItem>
+            {Object.values(ProspectStatus).map((status) => (
+              <DropdownMenuItem
+                key={status}
+                onClick={() => setSelectedStatus(status)}
+              >
+                {status}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu> */}
 
         <div className="w-full">
           <h2 className="text-2xl font-bold ">{prospects.length}</h2>

@@ -21,6 +21,7 @@ const AppointmentForm: React.FC = () => {
         if (clientId) {
           const response = await getSingleClient({ clientId: clientId });
           setClientData(response);
+          console.log("RESPONSE:", response)
         }
       } catch (error) {
         console.error("Error fetching client data:", error);
@@ -33,6 +34,13 @@ const AppointmentForm: React.FC = () => {
   }, [clientId]);
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
+
+  if (!clientData) {
+    return (
+      <div className="text-center text-gray-500">Loading client data...</div>
+    );
+  }
+
   return (
     <div>
       <Button
@@ -118,7 +126,7 @@ const AppointmentForm: React.FC = () => {
                 <div className="m-2">
                   <p className="text-sm border-b border-[#3285ca]">
                     {" "}
-                   {clientData?.client.MAILINGADDRESSCITYTXZIP}
+                    {clientData?.client.MAILINGADDRESSCITYTXZIP}
                   </p>
                   <p className="text-xs">City, State, Zip Code</p>
                 </div>

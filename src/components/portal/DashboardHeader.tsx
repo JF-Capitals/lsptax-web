@@ -5,7 +5,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLocation } from "react-router-dom";
-import { BellIcon, ChevronDown, Menu, User2 } from "lucide-react";
+import { BellIcon, Menu, User2 } from "lucide-react";
 import { logoutUser } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -121,10 +121,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
   const location = useLocation();
   const currentPath = location.pathname.split("/portal/")[1];
 
-  const name = localStorage.getItem("username");
-
-
-  console.log("USER:", name)
+  const username = localStorage.getItem("username");
 
   async function logoutHandler() {
     try {
@@ -133,7 +130,6 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
       toast({
         title: "Logged Out!",
       });
-console.log("hi")
       navigate("/login"); // Relative routejhg
     } catch (error) {}
   }
@@ -142,13 +138,6 @@ console.log("hi")
   const isDashboard = !currentPath;
 
   const currentHeader = headerData.find((item) => item.id === currentPath);
-  // const [username, setUsername] = useState<string | null>("Hussain");
-
-  // useEffect(() => {
-  //   // Retrieve the username from localStorage
-  //   const storedUsername = localStorage.getItem("username");
-  //   setUsername(storedUsername);
-  // }, []);
 
   return (
     <div className="flex justify-between p-4">
@@ -180,16 +169,14 @@ console.log("hi")
         )}
       </div>
       <div className="flex justify-center align-center items-center gap-4">
-        <BellIcon />
+        <BellIcon size={20} />
         <div className="flex justify-center align-center items-center gap-4">
-          <User2 />
-          <div className="">
-            <h1>{name}</h1>
-            {/* <h2 className="font-thin text-sm">userType</h2> */}
-          </div>
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <ChevronDown />
+              <div className="text-sm flex gap-1 border p-1 rounded-lg">
+                <User2 size={20}/>
+                <h1>{username}</h1>
+              </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="p-4 font-semibold">
               <DropdownMenuItem>Profile</DropdownMenuItem>
@@ -209,8 +196,8 @@ const HeaderDescriptionItem = ({ icon, label, desc }: DashboardHeaderProps) => {
   return (
     <div className="">
       {icon && <img src={icon} alt="" />}
-      <h2 className="font-extrabold text-xl">{label}</h2>
-      <h3 className="text-sm font-thin">{desc ? desc : <CurrentDate />}</h3>
+      <p className="font-extrabold text-xl">{label}</p>
+      <p className="text-sm font-thin">{desc ? desc : <CurrentDate />}</p>
     </div>
   );
 };

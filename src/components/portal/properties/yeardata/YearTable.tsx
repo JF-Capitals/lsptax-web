@@ -5,8 +5,8 @@ import React from "react";
 // Define the type for table row data
 type TableRow = {
   year: number;
-  "Protested Date": string;
-  "BPP Rendered": string;
+  "Protest Date"?: string;
+  "BPP Rendered"?: string;
   "BPP Invoice": string;
   "BPP Paid": string;
   "Notice Land Value": string;
@@ -25,10 +25,10 @@ type TableRow = {
   "Under Arbitration": boolean;
   "Tax Rate": string;
   "Taxable Savings": string;
-  "Contingency Fee"?: string;
-  "Invoice Amount"?: string;
-  "Paid Date"?: string;
-  "Payment Notes"?: string;
+  "Contingency Fee": string;
+  "Invoice Amount": string;
+  "Paid Date": string;
+  "Payment Notes": string;
   "Beginning Market": string;
   "Ending Market": string;
   "Beginning Appraised": string;
@@ -44,8 +44,8 @@ const YearTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
 
     return {
       year,
-      "Protested Date": "-",
-      "BPP Rendered": "",
+      "Protest Date": yearData?.protestDate,
+      "BPP Rendered": yearData?.bppRendered,
       "BPP Invoice": yearData?.bppInvoice || "-",
       "BPP Paid": yearData?.bppPaid || "-",
       "Notice Land Value": yearData?.noticeLandValue || "-",

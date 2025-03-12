@@ -201,6 +201,46 @@ export const editProperty = async (
   }
 };
 
+export const editProspectProperty = async (
+  propertyId: string,
+  propertyDetails: any
+) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/edit-prospect-property`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          propertyId,
+          propertyDetails,
+        }),
+      }
+    );
+
+    // Check if response is OK before trying to parse JSON
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to update property");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error: unknown) {
+    let errorMessage = "Property Update Failed. Please try again.";
+
+    if (error instanceof Error) {
+      console.log({ error });
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
 export const addProperty = async ({
   CLIENTNumber,
   propertyData,
@@ -217,6 +257,35 @@ export const addProperty = async ({
       },
       body: JSON.stringify({
         CLIENTNumber,
+        propertyData,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to add property");
+  }
+
+  return response.json();
+};
+
+export const addProspectProperty = async ({
+  id,
+  propertyData,
+}: {
+  id: string;
+  propertyData: any;
+}) => {
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/action/add-prospect-property`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id,
         propertyData,
       }),
     }
@@ -329,5 +398,63 @@ export const changeProspectStatus = async ({
     }
 
     throw new Error(errorMessage);
+  }
+};
+
+export const sendContract = async ({ prospectId }: { prospectId: Number }) => {
+  try {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/action/sign-aoa`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prospectId
+      }),
+    });
+  } catch (error: unknown) {
+    let errorMessage =
+      "Not able to send Contract to prospect. Please try again.";
+
+    if (error instanceof Error) {
+      console.log({ error });
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
+export const downloadSignedPDF = async ({ prospectId }: { prospectId: Number }) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/download-signed-pdf`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prospectId,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download PDF");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `signed_aoa_${prospectId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error downloading PDF:", error);
+    throw new Error("Error downloading PDF. Please try again.");
   }
 };

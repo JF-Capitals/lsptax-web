@@ -31,6 +31,9 @@ export const getSingleClient = async ({ clientId }: { clientId?: string }) => {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/client?clientId=${clientId}`
     );
+    if (response.status == 404) {
+      return {};
+    }
     if (!response.ok) {
       throw new Error("Failed to fetch clients");
     }
@@ -132,6 +135,29 @@ export const getSingleProperty = async ({
     }
     const property = await response.json();
     // console.log("PROPERTY:", property);
+    return property;
+  } catch (error) {
+    console.log(error);
+    return {};
+  }
+};
+
+export const getProspectProperty = async ({
+  propertyId,
+}: {
+  propertyId: string;
+}) => {
+  try {
+    const response = await fetch(
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }/api/prospect-property?id=${propertyId}`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch properties");
+    }
+    const property = await response.json();
+    console.log("PROPERTY:", property);
     return property;
   } catch (error) {
     console.log(error);
@@ -363,7 +389,7 @@ export const downloadClientsCSV = async () => {
 export const downloadProspectsCSV = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/download-prospects-csv`
+      `${import.meta.env.VITE_BACKEND_URL}/api/download-prospects-csv`
     );
     if (!response.ok) {
       throw new Error("Failed to download prospects CSV");
@@ -385,7 +411,7 @@ export const downloadProspectsCSV = async () => {
 export const downloadPropertiesCSV = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/download-properties-csv`
+      `${import.meta.env.VITE_BACKEND_URL}/api/download-properties-csv`
     );
     if (!response.ok) {
       throw new Error("Failed to download properties CSV");
@@ -407,7 +433,7 @@ export const downloadPropertiesCSV = async () => {
 export const downloadInvoicesCSV = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/download-invoices-csv`
+      `${import.meta.env.VITE_BACKEND_URL}/api/download-invoices-csv`
     );
     if (!response.ok) {
       throw new Error("Failed to download invoices CSV");

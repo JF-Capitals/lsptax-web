@@ -19,19 +19,23 @@ import { NavLink } from "react-router-dom";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; // Import RadioGroup components
 import { Label } from "@/components/ui/label"; // Import Label for RadioGroup items
 import React from "react";
+import { Prospect } from "@/types/types";
 
-export type Prospects = {
-  id: string;
-  name: string;
-  email: string;
-  mobile: string;
-  status: string;
-};
 
-export const prospectColumn: ColumnDef<Prospects>[] = [
+export const prospectColumn: ColumnDef<Prospect,any>[] = [
   {
     accessorKey: "id",
     header: "Prospect #",
+    cell: ({ row }) => {
+      // const id = row.original.clientId;
+      const prospectId = row.original.id;
+
+      return (
+        <NavLink to={`/portal/prospect?id=${prospectId}`}>
+          <div className="text-blue-400 font-bold">#{prospectId}</div>
+        </NavLink>
+      );
+    },
   },
   {
     accessorKey: "name",
@@ -58,7 +62,7 @@ export const prospectColumn: ColumnDef<Prospects>[] = [
       const handleStatusChange = async (newStatus: string) => {
         try {
           await changeProspectStatus({
-            prospectId: parseInt(prospect.id),
+            prospectId: prospect.id,
             newStatus,
           });
           toast({
@@ -66,6 +70,7 @@ export const prospectColumn: ColumnDef<Prospects>[] = [
             description: `Prospect status changed to ${newStatus}`,
           });
           window.location.reload();
+          // setSelectedStatus(newStatus);
         } catch (error) {
           toast({
             variant: "destructive",
@@ -75,11 +80,14 @@ export const prospectColumn: ColumnDef<Prospects>[] = [
         }
       };
 
-      // Define status colors
+      const isStatusChangeAllowed =
+        prospect.status === "NOT_CONTACTED" || prospect.status === "CONTACTED";
+
       const statusColors = {
-        NOT_CONTACTED: "bg-red-100 text-red-800 hover:bg-red-200", // Light red
-        CONTACTED: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200", // Light yellow
-        IN_PROGRESS: "bg-green-100 text-green-800 hover:bg-green-200", // Light green
+        NOT_CONTACTED: "bg-red-100 text-red-800 hover:bg-red-200",
+        CONTACTED: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+        IN_PROGRESS: "bg-green-100 text-green-800 hover:bg-green-200",
+        SIGNED: "bg-blue-100 text-blue-800 hover:bg-blue-200",
       };
 
       return (
@@ -93,59 +101,59 @@ export const prospectColumn: ColumnDef<Prospects>[] = [
                   statusColors[prospect.status as keyof typeof statusColors] ||
                   "bg-gray-100 text-gray-800 hover:bg-gray-200"
                 }
+                disabled={!isStatusChangeAllowed} // Disable button if status change is not allowed
               >
                 {prospect.status || "Set Status"}
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Select the Current Status</AlertDialogTitle>
-                <AlertDialogDescription>
-                  <RadioGroup
-                    defaultValue={prospect.status}
-                    onValueChange={(value) => setSelectedStatus(value)}
-                    className="mt-4"
+            {isStatusChangeAllowed && (
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Select the Current Status</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    <RadioGroup
+                      defaultValue={prospect.status}
+                      onValueChange={setSelectedStatus}
+                      className="mt-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="NOT_CONTACTED"
+                          id="not_contacted"
+                        />
+                        <Label htmlFor="not_contacted">Not Contacted</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="CONTACTED" id="contacted" />
+                        <Label htmlFor="contacted">Contacted</Label>
+                      </div>
+                    </RadioGroup>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => handleStatusChange(selectedStatus)}
+                    className="bg-blue-600 hover:bg-blue-700"
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem
-                        value="NOT_CONTACTED"
-                        id="not_contacted"
-                      />
-                      <Label htmlFor="not_contacted">Not Contacted</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="CONTACTED" id="contacted" />
-                      <Label htmlFor="contacted">Contacted</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="IN_PROGRESS" id="in-progress" />
-                      <Label htmlFor="in-progress">In Progress</Label>
-                    </div>
-                  </RadioGroup>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => handleStatusChange(selectedStatus)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  Save Status
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
+                    Save Status
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            )}
           </AlertDialog>
         </div>
       );
     },
   },
+
   {
     header: "Actions",
     id: "actions",
     cell: ({ row }) => {
       const prospect = row.original;
       const { toast } = useToast();
-  
+
       const handleDelete = async () => {
         try {
           await deleteProspect(Number(prospect.id));
@@ -175,7 +183,7 @@ export const prospectColumn: ColumnDef<Prospects>[] = [
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Prospect</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to delete prospect {prospect.name}? This
+                  Are you sure you want to delete prospect {prospect.ProspectName}? This
                   action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -201,7 +209,7 @@ export const prospectColumn: ColumnDef<Prospects>[] = [
               <AlertDialogHeader>
                 <AlertDialogTitle>Move to Client</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Convert {prospect.name} to a client? This will move all
+                  Convert {prospect.ProspectName} to a client? This will move all
                   prospect information to a new client record.
                 </AlertDialogDescription>
               </AlertDialogHeader>

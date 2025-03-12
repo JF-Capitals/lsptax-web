@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -29,23 +29,34 @@ import { editProperty } from "@/api/api";
 
 type TableRow = {
   year: number;
-  "Protested Date": string;
+  "Protest Date": string;
   "BPP Rendered": string;
   "BPP Invoice": string;
-  "BPP Invoice Paid": string;
+  "BPP Paid": string;
+  "Notice Land Value": string;
+  "Notice Improvement Value": string;
   "Notice Market Value": string;
-  "Assessed Prelim": string | undefined;
-  "Final Prelim": string;
+  "Notice Appraised Value": string;
+  "Final Land Value": string;
+  "Final Improvement Value": string;
   "Final Market Value": string;
-  "Market Value Reduction": string;
-  "Hearing Date": string | undefined;
-  "Invoice Date": string | undefined;
+  "Final Appraised Value": string;
+  "Market Reduction": string;
+  "Appraised Reduction": string;
+  "Hearing Date"?: string;
+  "Invoice Date"?: string;
   "Under Litigation": boolean;
   "Under Arbitration": boolean;
-  "Contingency Fee": string;
-  "Invoice Amount": string;
-  "Paid Date": string | undefined;
-  "Payment Notes": string | undefined;
+  "Tax Rate": string;
+  "Taxable Savings": string;
+  "Contingency Fee"?: string;
+  "Invoice Amount"?: string;
+  "Paid Date"?: string;
+  "Payment Notes"?: string;
+  "Beginning Market": string;
+  "Ending Market": string;
+  "Beginning Appraised": string;
+  "Ending Appraised": string;
 };
 
 const formSchema = z.object({
@@ -84,6 +95,7 @@ export default function EditProperty() {
   const [error, setError] = useState<string | null>(null);
   const [property, setProperty] = useState<PropertyData | null>(null);
   const propertyId = searchParams.get("propertyId");
+   const navigate = useNavigate();
   const years = [2021, 2022, 2023, 2024, 2025];
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -110,7 +122,6 @@ export default function EditProperty() {
           return acc;
         }, {} as Record<number, Omit<TableRow, "year">>),
       };
-
       await editProperty(
         propertyId!,
         completeSubmission.propertyDetails,
@@ -119,6 +130,7 @@ export default function EditProperty() {
 
       toast({ title: "Property updated successfully!" });
       setIsDialogOpen(false);
+      navigate(`/portal/property?propertyId=${propertyId}`);
     } catch (error) {
       toast({ title: "Failed to update property", variant: "destructive" });
     }
@@ -149,31 +161,77 @@ export default function EditProperty() {
     fetchProperty();
   }, [propertyId, form]);
 
-  const getInitialTableData = (invoices: any[] = []) => {
-    return years.map((year) => {
-      const yearData = invoices?.find((invoice) => invoice.year === year);
-      return {
-        year,
-        "Protested Date": yearData?.protestedDate || "-",
-        "BPP Rendered": "-",
-        "BPP Invoice": yearData?.BPPInvoice || "-",
-        "BPP Invoice Paid": yearData?.BPPInvoicePaid || "-",
-        "Notice Market Value": yearData?.NoticeMarketValue || "-",
-        "Assessed Prelim": yearData?.NoticeAppraisedValue || "-",
-        "Final Prelim": yearData?.FinalAppraisedValue || "-",
-        "Final Market Value": yearData?.FinalMarketValue || "-",
-        "Market Value Reduction": yearData?.MarketValueReduction || "-",
-        "Hearing Date": yearData?.hearingDate || "-",
-        "Invoice Date": yearData?.invoiceDate || "-",
-        "Under Litigation": yearData?.underLitigation || false,
-        "Under Arbitration": yearData?.underArbitration || false,
-        "Contingency Fee": yearData?.ArbitrationContingencyFee || "-",
-        "Invoice Amount": yearData?.TotalDue || "-",
-        "Paid Date": yearData?.paidDate || "-",
-        "Payment Notes": yearData?.paymentNotes || "-",
-      };
-    });
-  };
+const getInitialTableData = (invoices: any[] = []) => {
+  return years.map((year) => {
+    const yearData = invoices?.find((invoice) => invoice.year === year);
+
+    const noticeLandValue = parseFloat(yearData?.noticeLandValue) || 0;
+    const noticeImprovementValue =
+      parseFloat(yearData?.noticeImprovementValue) || 0;
+    const noticeAppraisedValue =
+      parseFloat(yearData?.noticeAppraisedValue) || 0;
+    const finalLandValue = parseFloat(yearData?.finalLandValue) || 0;
+    const finalImprovementValue =
+      parseFloat(yearData?.finalImprovementValue) || 0;
+    const finalAppraisedValue = parseFloat(yearData?.finalAppraisedValue) || 0;
+    const taxRate = parseFloat(yearData?.taxRate) || 0;
+    const endingMarket = parseFloat(yearData?.endingMarket) || 0;
+    const endingAppraised = parseFloat(yearData?.endingAppraised) || 0;
+
+    // Parse contingency fee from string (e.g., "25%" -> 0.25)
+    const contingencyFeeString = property?.propertyDetails.CONTINGENCYFee || "0%"; // Default to "0%" if not provided
+    const contingencyFeePercentage = parseFloat(contingencyFeeString); // Extract the numeric value
+    const contingencyFee = contingencyFeePercentage / 100; // Convert to decimal (e.g., 25% -> 0.25)
+
+    const noticeMarketValue = noticeLandValue + noticeImprovementValue;
+    const finalMarketValue = finalLandValue + finalImprovementValue;
+    const marketReduction = noticeMarketValue - finalMarketValue;
+    const appraisedReduction = noticeAppraisedValue - finalAppraisedValue;
+    const taxableSavings = marketReduction * (taxRate / 100);
+    const invoiceAmount = taxableSavings * contingencyFee;
+
+    const beginningMarket =
+      yearData?.underLitigation || yearData?.underArbitration
+        ? finalMarketValue
+        : 0;
+    const beginningAppraised =
+      yearData?.underLitigation || yearData?.underArbitration
+        ? finalAppraisedValue
+        : 0;
+
+    return {
+      year,
+      "Protest Date": yearData?.protestDate || "",
+      "BPP Rendered": yearData?.bppRendered || "",
+      "BPP Invoice": yearData?.bppInvoice || "",
+      "BPP Paid": yearData?.bppPaid || "",
+      "Notice Land Value": noticeLandValue.toString(),
+      "Notice Improvement Value": noticeImprovementValue.toString(),
+      "Notice Market Value": noticeMarketValue.toString(),
+      "Notice Appraised Value": noticeAppraisedValue.toString(),
+      "Final Land Value": finalLandValue.toString(),
+      "Final Improvement Value": finalImprovementValue.toString(),
+      "Final Market Value": finalMarketValue.toString(),
+      "Final Appraised Value": finalAppraisedValue.toString(),
+      "Market Reduction": marketReduction.toString(),
+      "Appraised Reduction": appraisedReduction.toString(),
+      "Hearing Date": yearData?.hearingDate || "",
+      "Invoice Date": yearData?.invoiceDate || "",
+      "Under Litigation": yearData?.underLitigation || false,
+      "Under Arbitration": yearData?.underArbitration || false,
+      "Tax Rate": taxRate.toString(),
+      "Taxable Savings": taxableSavings.toString(),
+      "Contingency Fee": contingencyFeeString, // Keep as string for display
+      "Invoice Amount": invoiceAmount.toString(),
+      "Paid Date": yearData?.paidDate || "",
+      "Payment Notes": yearData?.paymentNotes || "",
+      "Beginning Market": beginningMarket.toString(),
+      "Ending Market": endingMarket.toString(),
+      "Beginning Appraised": beginningAppraised.toString(),
+      "Ending Appraised": endingAppraised.toString(),
+    };
+  });
+};
   useEffect(() => {
     if (property?.invoices) {
       setTableData(getInitialTableData(property.invoices));
@@ -188,11 +246,16 @@ export default function EditProperty() {
     columnKey: keyof TableRow
   ) => {
     const { value } = e.target;
+
+    // Update the specific field
     setTableData((prev) =>
       prev.map((row, idx) =>
         idx === rowIndex ? { ...row, [columnKey]: value } : row
       )
     );
+
+    // Recalculate dependent fields
+    recalculateFields(rowIndex);
   };
 
   const handleCheckboxChange = (
@@ -201,12 +264,75 @@ export default function EditProperty() {
     columnKey: keyof TableRow
   ) => {
     const { checked } = e.target;
+
+    // Update the checkbox field
     setTableData((prev) =>
       prev.map((row, idx) =>
         idx === rowIndex ? { ...row, [columnKey]: checked } : row
       )
     );
+
+    // Recalculate dependent fields
+    recalculateFields(rowIndex);
   };
+
+const recalculateFields = (rowIndex: number) => {
+  setTableData((prev) =>
+    prev.map((row, idx) => {
+      if (idx !== rowIndex) return row; // Only update the current row
+
+      const noticeLandValue = parseFloat(row["Notice Land Value"]) || 0;
+      const noticeImprovementValue =
+        parseFloat(row["Notice Improvement Value"]) || 0;
+      const noticeAppraisedValue =
+        parseFloat(row["Notice Appraised Value"]) || 0;
+      const finalLandValue = parseFloat(row["Final Land Value"]) || 0;
+      const finalImprovementValue =
+        parseFloat(row["Final Improvement Value"]) || 0;
+      const finalAppraisedValue = parseFloat(row["Final Appraised Value"]) || 0;
+      const taxRate = parseFloat(row["Tax Rate"]) || 0;
+      const endingMarket = parseFloat(row["Ending Market"]) || 0;
+      const endingAppraised = parseFloat(row["Ending Appraised"]) || 0;
+
+      // Parse contingency fee from string (e.g., "25%" -> 0.25)
+      const contingencyFeeString = row["Contingency Fee"] || "0%"; // Default to "0%" if not provided
+      const contingencyFeePercentage = parseFloat(contingencyFeeString); // Extract the numeric value
+      const contingencyFee = contingencyFeePercentage / 100; // Convert to decimal (e.g., 25% -> 0.25)
+
+      // Calculate dependent fields
+      const noticeMarketValue = noticeLandValue + noticeImprovementValue;
+      const finalMarketValue = finalLandValue + finalImprovementValue;
+      const marketReduction = noticeMarketValue - finalMarketValue;
+      const appraisedReduction = noticeAppraisedValue - finalAppraisedValue;
+      const taxableSavings = marketReduction * (taxRate / 100);
+      const invoiceAmount = taxableSavings * contingencyFee; // Use contingencyFee as a number
+
+      const beginningMarket =
+        row["Under Litigation"] || row["Under Arbitration"]
+          ? finalMarketValue
+          : 0;
+      const beginningAppraised =
+        row["Under Litigation"] || row["Under Arbitration"]
+          ? finalAppraisedValue
+          : 0;
+
+      return {
+        ...row,
+        "Notice Market Value": noticeMarketValue.toString(),
+        "Final Market Value": finalMarketValue.toString(),
+        "Market Reduction": marketReduction.toString(),
+        "Appraised Reduction": appraisedReduction.toString(),
+        "Taxable Savings": taxableSavings.toString(),
+        "Invoice Amount": invoiceAmount.toString(),
+        "Beginning Market": beginningMarket.toString(),
+        "Beginning Appraised": beginningAppraised.toString(),
+        "Ending Market": endingMarket.toString(),
+        "Ending Appraised": endingAppraised.toString(),
+        "Contingency Fee": contingencyFeeString, // Keep as string for display
+      };
+    })
+  );
+};
 
   if (loading) return <div className="text-center py-4">Loading...</div>;
   if (error)
@@ -366,18 +492,6 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="BPPFEE"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>BPP Fee</FormLabel>
-                  <Input placeholder="Enter BPP Fee" {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="CONTINGENCYFee"
               render={({ field }) => (
                 <FormItem>
@@ -388,7 +502,7 @@ export default function EditProperty() {
               )}
             />
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="FlatFee"
               render={({ field }) => (
@@ -398,11 +512,11 @@ export default function EditProperty() {
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
           </div>
 
           {/* Status and Other Notes */}
-          <div className="flex gap-4 justify-between">
+          <div className="flex mt-4 gap-4 justify-between">
             <FormField
               control={form.control}
               name="StatusNotes"
@@ -447,6 +561,18 @@ export default function EditProperty() {
             <tbody className="bg-white divide-y divide-gray-200">
               {Object.keys(tableData[0]).map((key) => {
                 if (key === "year") return null;
+
+                const isCalculatedField = [
+                  "Notice Market Value",
+                  "Final Market Value",
+                  "Market Reduction",
+                  "Appraised Reduction",
+                  "Taxable Savings",
+                  "Invoice Amount",
+                  "Beginning Market",
+                  "Beginning Appraised",
+                ].includes(key);
+
                 return (
                   <tr key={key}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -470,6 +596,13 @@ export default function EditProperty() {
                               )
                             }
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        ) : isCalculatedField ? (
+                          <input
+                            type="text"
+                            value={row[key as keyof TableRow] as string}
+                            readOnly
+                            className="block w-full px-2 py-1 text-sm border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
                           />
                         ) : (
                           <input

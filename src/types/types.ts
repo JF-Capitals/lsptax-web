@@ -99,6 +99,7 @@ export interface PropertyData {
 }
 
 export interface Prospect {
+  envelopeId: string;
   id: number;
   ProspectName: string;
   Email: string;
@@ -106,4 +107,9 @@ export interface Prospect {
   MAILINGADDRESS: string;
   MAILINGADDRESSCITYTXZIP: string;
   IsArchived: boolean;
+  status: string;
+}
+export interface ProspectPropertyData {
+  clientDetails: Prospect;
+  propertyDetails: Property;
 }

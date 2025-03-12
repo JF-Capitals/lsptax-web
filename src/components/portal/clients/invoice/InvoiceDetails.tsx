@@ -14,16 +14,13 @@ const InvoiceDetails: React.FC<{
   };
 
   const calculateFees = () => {
-    if (!invoice?.properties) return 0;
-
+    if (!invoice) return 0;
     return invoice.properties.reduce((total, property) => {
       const yearlyInvoice = getYearlyInvoiceData(property);
-      const feeString = yearlyInvoice?.ContingencyFeeDue || "$0";
-      const numericValue = parseFloat(feeString.replace(/[^0-9.]/g, ""));
-      return total + (isNaN(numericValue) ? 0 : numericValue);
+      const fee = yearlyInvoice?.invoiceAmount;
+      return total + (isNaN(fee) ? 0 : fee);
     }, 0);
   };
-
   const totalFees = calculateFees();
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({
@@ -175,7 +172,9 @@ const InvoiceDetails: React.FC<{
                   const yearlyInvoice = getYearlyInvoiceData(property);
                   return (
                     <tr key={property.propertyDetails.id}>
-                      <td className="border border-gray-300 px-4 py-2">Real</td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {invoice.client.TypeOfAcct}
+                      </td>
                       <td className="border border-gray-300 px-4 py-2">
                         {property.propertyDetails.CADMailingADDRESS}
                       </td>
@@ -189,34 +188,34 @@ const InvoiceDetails: React.FC<{
                         {selectedYear} Protest
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {yearlyInvoice?.NoticeMarketValue}
+                        ${yearlyInvoice?.noticeMarketValue?.toFixed(2)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {yearlyInvoice?.FinalMarketValue}
+                        ${yearlyInvoice?.finalMarketValue?.toFixed(2)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {yearlyInvoice?.MarketValueReduction}
+                        ${yearlyInvoice?.marketReduction?.toFixed(2)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {yearlyInvoice?.NoticeAppraisedValue}
+                        ${yearlyInvoice?.noticeAppraisedValue?.toFixed(2)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {yearlyInvoice?.FinalAppraisedValue}
+                        ${yearlyInvoice?.finalAppraisedValue?.toFixed(2)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {yearlyInvoice?.ValueAppraisedValueReduction}
+                        ${yearlyInvoice?.appraisedReduction?.toFixed(2)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {yearlyInvoice?.ValueOverallTaxRate}
+                        ${yearlyInvoice?.taxRate?.toFixed(2)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {yearlyInvoice?.ValueTaxSavings}
+                        ${yearlyInvoice?.taxableSavings?.toFixed(2)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {yearlyInvoice?.Contingency}
+                        {yearlyInvoice?.contingency || 25}%
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {yearlyInvoice?.ContingencyFeeDue}
+                        ${yearlyInvoice?.contingencyFee?.toFixed(2)}
                       </td>
                     </tr>
                   );
