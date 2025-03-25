@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useSearchParams } from "react-router-dom";
 import { getSingleProperty } from "@/store/data";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { ChevronDown, ChevronUp, Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PropertyData } from "@/types/types";
 import { deleteProperty } from "@/api/api";
@@ -10,16 +10,76 @@ import { useToast } from "@/hooks/use-toast";
 
 const ViewProperty = () => {
   const { toast } = useToast();
-  const [property, setProperty] = useState<PropertyData>();
+  const [property, setProperty] = useState<PropertyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false); // Track deletion state
-  const [searchParams] = useSearchParams();
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false); // Track invoice section state
+  const [searchParams, setSearchParams] = useSearchParams();
   const propertyId = parseInt(searchParams.get("propertyId") || "1");
 
-  const handleNavigation = (newId: number) => {
-    window.location.href = `/portal/property?propertyId=${newId}`;
+  const fetchProperty = async (id: number) => {
+    setLoading(true);
+    setError("");
+    setProperty(null);
+
+    try {
+      const propertyData = await getSingleProperty({
+        propertyId: id.toString(),
+      });
+
+      if (!propertyData) {
+        toast({
+          variant: "destructive",
+          title: "Property Not Found",
+          description: `Property with ID ${id} not found. Fetching the next property...`,
+        });
+
+        // Automatically fetch the next property
+        setSearchParams({ propertyId: (id + 1).toString() });
+        return;
+      }
+
+      setProperty(propertyData);
+    } catch (err) {
+      console.error("Error fetching property:", err);
+      setError("Failed to fetch property details");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleNavigation = async (
+    newId: number,
+    direction: "prev" | "next"
+  ) => {
+    let currentId = newId;
+
+    while (true) {
+      const propertyData = await getSingleProperty({
+        propertyId: currentId.toString(),
+      });
+
+      if (propertyData) {
+        setSearchParams({ propertyId: currentId.toString() });
+        break;
+      }
+
+      // Adjust the ID based on the direction
+      currentId = direction === "prev" ? currentId - 1 : currentId + 1;
+
+      // Prevent infinite loops
+      if (currentId <= 0) {
+        toast({
+          variant: "destructive",
+          title: "No more properties",
+          description: "You have reached the beginning of the property list.",
+        });
+        break;
+      }
+    }
+  };
+
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this property?")) {
       return;
@@ -30,11 +90,12 @@ const ViewProperty = () => {
       await deleteProperty(propertyId.toString());
 
       toast({
-        title: "✓ Prosperty deleted successfully",
+        title: "✓ Property deleted successfully",
         description: "The property has been deleted from the system.",
       });
-      // Redirect or refresh after deletion
-      window.location.href = `/portal/client?clientId=${property?.propertyDetails.CLIENTNumber}`;
+
+      // Redirect to the next property
+      setSearchParams({ propertyId: (propertyId + 1).toString() });
     } catch (error) {
       console.error("Error deleting property:", error);
       if (error instanceof Error) {
@@ -48,32 +109,10 @@ const ViewProperty = () => {
       setIsDeleting(false);
     }
   };
+
   useEffect(() => {
-    const fetchProperty = async () => {
-      const propertyId = searchParams.get("propertyId");
-      console.log({ propertyId });
-      if (!propertyId) {
-        setError("Property ID is missing");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const propertyData = await getSingleProperty({ propertyId });
-        setProperty(propertyData);
-        setLoading(false);
-        console.log({ propertyData });
-      } catch (err) {
-        console.error("Error:", err);
-        setError("Failed to fetch property details");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProperty();
-    console.log({ property });
-  }, [searchParams, propertyId]); // Trigger when searchParams changes
+    fetchProperty(propertyId);
+  }, [propertyId]); // Refetch when propertyId changes
 
   if (loading) {
     return (
@@ -92,7 +131,6 @@ const ViewProperty = () => {
   }
 
   if (!property) {
-    console.log({ property });
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg font-semibold text-gray-700">
@@ -105,9 +143,7 @@ const ViewProperty = () => {
   return (
     <div className="w-full p-4 bg-white shadow-md rounded-lg">
       <div className="flex flex-col md:flex-row justify-between ">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2 ">
-          View Property
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">View Property</h1>
         <div className="flex gap-4 flex-col md:flex-row w-full md:w-auto">
           <NavLink
             to={`/portal/edit-properties?propertyId=${property.propertyDetails.id}`}
@@ -219,18 +255,55 @@ const ViewProperty = () => {
         </div>
       </div>
 
-      <div className="p-6 bg-gray-50 border rounded-lg my-2 p-4">
-        <h2 className="text-2xl font-bold mb-6">Invoice Details</h2>
-        <YearTable invoices={property.invoices} />
+      {/* <div className="p-6 bg-gray-50 border rounded-lg my-2">
+        <div
+          className="flex justify-between items-center cursor-pointer"
+          onClick={() => setIsInvoiceOpen(!isInvoiceOpen)}
+        >
+          <h2 className="text-2xl font-bold">Invoice Details</h2>
+          <span>{isInvoiceOpen ? "▲" : "▼"}</span>
+        </div>
+        {isInvoiceOpen && (
+          <div className="mt-4">
+            <YearTable invoices={property.invoices} />
+          </div>
+        )}
+      </div> */}
+      <div
+        className="flex justify-between items-center cursor-pointer bg-blue-100 hover:bg-blue-200 p-4 rounded-lg my-2"
+        onClick={() => setIsInvoiceOpen(!isInvoiceOpen)}
+      >
+        <h2 className="text-xl font-semibold text-blue-800">Invoice Details</h2>
+        <span className="text-blue-800">
+          {isInvoiceOpen ? <ChevronUp /> : <ChevronDown />}
+        </span>
       </div>
-      <div className="flex w-full justify-between">
+      <div
+        className={` transition-all duration-300 ease-in-out ${
+          isInvoiceOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+        }`}
+        style={{
+          maxHeight: isInvoiceOpen
+            ? `${property.invoices.length * 250}px`
+            : "0px",
+          opacity: isInvoiceOpen ? 1 : 0,
+        }}
+      >
+        <div className="mt-4">
+          <YearTable invoices={property.invoices} />
+        </div>
+      </div>
+
+      <div className="flex w-full justify-between mt-4">
         <Button
-          onClick={() => handleNavigation(propertyId - 1)}
+          onClick={() => handleNavigation(propertyId - 1, "prev")}
           disabled={propertyId <= 1}
         >
           Prev
         </Button>
-        <Button onClick={() => handleNavigation(propertyId + 1)}>Next</Button>
+        <Button onClick={() => handleNavigation(propertyId + 1, "next")}>
+          Next
+        </Button>
       </div>
     </div>
   );

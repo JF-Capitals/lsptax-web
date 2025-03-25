@@ -32,7 +32,7 @@ export const getSingleClient = async ({ clientId }: { clientId?: string }) => {
       `${import.meta.env.VITE_BACKEND_URL}/api/client?clientId=${clientId}`
     );
     if (response.status == 404) {
-      return {};
+      return null;
     }
     if (!response.ok) {
       throw new Error("Failed to fetch clients");
@@ -42,7 +42,7 @@ export const getSingleClient = async ({ clientId }: { clientId?: string }) => {
     return client;
   } catch (error) {
     console.log(error);
-    return [{}];
+    return null;
   }
 };
 
@@ -130,6 +130,10 @@ export const getSingleProperty = async ({
         import.meta.env.VITE_BACKEND_URL
       }/api/property?propertyId=${propertyId}`
     );
+    if (response.status === 404) {
+      console.warn(`Property with ID ${propertyId} not found.`);
+      return null; // Return `null` to indicate the property was not found
+    }
     if (!response.ok) {
       throw new Error("Failed to fetch properties");
     }
@@ -138,7 +142,7 @@ export const getSingleProperty = async ({
     return property;
   } catch (error) {
     console.log(error);
-    return {};
+    return null;
   }
 };
 
