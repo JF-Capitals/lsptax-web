@@ -8,26 +8,34 @@ const AdminPortal = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div className="bg-[#F8F9FD] border">
-      <div className="flex h-dvh">
+    <div className="bg-[#F8F9FD] h-screen overflow-hidden">
+      {" "}
+      {/* Full screen height and no scroll */}
+      <div className="flex h-full">
+        {" "}
+        {/* Ensure full height for flex container */}
         {/* Side Menu */}
         <div
-          className={`fixed z-40 top-0 left-0 h-full bg-white shadow-lg transition-transform transform ${
+          className={`fixed z-40 top-0 left-0 h-full bg-white shadow transition-transform transform ${
             isMenuOpen ? "translate-x-0" : "-translate-x-full"
-          } sm:relative sm:translate-x-0 sm:flex  `}
+          } sm:relative sm:translate-x-0 sm:flex`}
         >
           <SideMenu />
         </div>
-
         {/* Main Content */}
-        <div className="flex-1 h-full  overflow-y-auto">
+        <div className="flex-1 h-full overflow-hidden flex flex-col">
+          {" "}
+          {/* Prevent scrolling */}
           <DashboardHeader onMenuToggle={() => setIsMenuOpen(!isMenuOpen)} />
-          <Routes>
-            <Route path="/*" element={<AdminRoutes />} />
-          </Routes>
+          <div className="flex-1 overflow-auto">
+            {" "}
+            {/* Allow scrolling only for content */}
+            <Routes>
+              <Route path="/*" element={<AdminRoutes />} />
+            </Routes>
+          </div>
         </div>
       </div>
-
       {/* Overlay for Small Screens */}
       {isMenuOpen && (
         <div
@@ -38,5 +46,4 @@ const AdminPortal = () => {
     </div>
   );
 };
-
 export default AdminPortal;

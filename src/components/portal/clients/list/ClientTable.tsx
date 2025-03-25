@@ -34,20 +34,25 @@ const ClientTable = <TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        setLoading(true);
-        const data = archived ? await getArchiveClients() : await getClients(); // Fetch archived or active clients
-        setClients(data);
-      } catch (error) {
-        console.error("Error fetching clients:", error);
-        setError("Failed to load clients. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchClients = async () => {
+    try {
+      setLoading(true);
+      setError(null); // Reset error state before fetching
+      const data = archived ? await getArchiveClients() : await getClients(); // Fetch archived or active clients
+      setClients(data);
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      setError(
+        archived
+          ? "Failed to load archived clients. Please try again later."
+          : "Failed to load active clients. Please try again later."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchClients();
   }, [archived]); // Refetch data when archive state changes
 
@@ -68,10 +73,21 @@ const ClientTable = <TData, TValue>({
     },
   });
 
+  if (loading) {
+    return (
+      <div className="flex justify-center h-full items-center py-20">
+        <LoaderCircle className="animate-spin w-16 h-16 text-blue-500" />
+      </div>
+    );
+  }
+
   if (error) {
     return (
-      <div className="flex justify-center items-center py-20 text-red-500">
-        <span>{error}</span>
+      <div className="flex flex-col justify-center items-center py-20 text-red-500">
+        <span className="text-lg font-semibold">{error}</span>
+        <Button variant="blue" className="mt-4" onClick={fetchClients}>
+          Retry
+        </Button>
       </div>
     );
   }
@@ -105,7 +121,6 @@ const ClientTable = <TData, TValue>({
           </Button>
           <NavLink to={`/portal/clients/add-client`}>
             <Button variant={"blue"}>
-              {" "}
               <UserRoundPlus /> Add New Client
             </Button>
           </NavLink>
@@ -114,19 +129,13 @@ const ClientTable = <TData, TValue>({
           </Button>
         </div>
       </div>
-      {loading ? (
-        <div className="flex justify-center h-full items-center py-20">
-          <LoaderCircle className="animate-spin w-16 h-16" />
-        </div>
-      ) : (
-        <TableBuilder
-          data={clients}
-          columns={columns}
-          label="Clients"
-          columnFilters={columnFilters}
-          setColumnFilters={setColumnFilters}
-        />
-      )}
+      <TableBuilder
+        data={clients}
+        columns={columns}
+        label="Clients"
+        columnFilters={columnFilters}
+        setColumnFilters={setColumnFilters}
+      />
     </div>
   );
 };

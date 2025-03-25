@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { addClient } from "@/api/api";
+import { LoaderCircle } from "lucide-react";
+import { useState } from "react";
 
 const formSchema = z.object({
   TypeOfAcct: z.string().optional(),
@@ -33,6 +35,7 @@ const formSchema = z.object({
 
 export default function AddClientForm() {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -46,6 +49,7 @@ export default function AddClientForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true); // Set loading state
     try {
       await addClient(
         values.CLIENTNAME,
@@ -54,26 +58,31 @@ export default function AddClientForm() {
         values.MAILINGADDRESSCITYTXZIP,
         values.TypeOfAcct || ""
       );
-      
+
       toast({
         title: "✓ Client added successfully",
+        description: "The client has been added to the system.",
       });
-      
+
       form.reset();
     } catch (error) {
       if (error instanceof Error && error.message === "Email Already Present") {
         toast({
           variant: "destructive",
           title: "Email already exists",
+          description: "A client with this email already exists.",
           action: <ToastAction altText="Try again">Try again</ToastAction>,
         });
       } else {
         toast({
           variant: "destructive",
           title: "Failed to add client",
+          description: "An unexpected error occurred. Please try again.",
           action: <ToastAction altText="Try again">Try again</ToastAction>,
         });
       }
+    } finally {
+      setIsSubmitting(false); // Reset loading state
     }
   }
 
@@ -81,20 +90,26 @@ export default function AddClientForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border p-8"
+        className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg border p-8 space-y-6"
       >
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-xl font-semibold text-gray-900">New Client</h1>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Add New Client</h1>
         </div>
 
+        {/* Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="CLIENTNAME"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
-                <Input {...field} placeholder="Full name" />
+                <FormLabel className="text-gray-700">Name</FormLabel>
+                <Input
+                  {...field}
+                  placeholder="Full name"
+                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -104,12 +119,12 @@ export default function AddClientForm() {
             name="TypeOfAcct"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Account Type</FormLabel>
+                <FormLabel className="text-gray-700">Account Type</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-gray-300 focus:ring-blue-500 focus:border-blue-500">
                     <SelectValue placeholder="Select account type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -121,51 +136,67 @@ export default function AddClientForm() {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="Email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel className="text-gray-700">Email</FormLabel>
                 <Input
                   {...field}
                   type="email"
                   placeholder="email@example.com"
+                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="PHONENUMBER"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone</FormLabel>
-                <Input {...field} placeholder="+1 (555) 000-0000" />
+                <FormLabel className="text-gray-700">Phone</FormLabel>
+                <Input
+                  {...field}
+                  placeholder="+1 (555) 000-0000"
+                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                />
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="MAILINGADDRESSCITYTXZIP"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Address</FormLabel>
-                <Input {...field} placeholder="City, TX ZIP" />
+                <FormLabel className="text-gray-700">Address</FormLabel>
+                <Input
+                  {...field}
+                  placeholder="City, TX ZIP"
+                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                />
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="mt-8">
-          <Button variant="blue" type="submit" className="w-full md:w-auto">
-            Add Client
+        {/* Submit Button */}
+        <div className="mt-6">
+          <Button
+            variant="blue"
+            type="submit"
+            className="w-full md:w-auto flex items-center justify-center"
+            disabled={isSubmitting} // Disable button while submitting
+          >
+            {isSubmitting ? (
+              <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+            ) : (
+              "Add Client"
+            )}
           </Button>
         </div>
       </form>

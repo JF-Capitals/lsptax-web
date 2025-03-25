@@ -4,19 +4,50 @@ import { getSingleProperty } from "@/store/data";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PropertyData } from "@/types/types";
+import { deleteProperty } from "@/api/api";
 import YearTable from "../yeardata/YearTable";
+import { useToast } from "@/hooks/use-toast";
 
 const ViewProperty = () => {
+  const { toast } = useToast();
   const [property, setProperty] = useState<PropertyData>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false); // Track deletion state
   const [searchParams] = useSearchParams();
   const propertyId = parseInt(searchParams.get("propertyId") || "1");
 
   const handleNavigation = (newId: number) => {
     window.location.href = `/portal/property?propertyId=${newId}`;
   };
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this property?")) {
+      return;
+    }
 
+    setIsDeleting(true);
+    try {
+      await deleteProperty(propertyId.toString());
+
+      toast({
+        title: "✓ Prosperty deleted successfully",
+        description: "The property has been deleted from the system.",
+      });
+      // Redirect or refresh after deletion
+      window.location.href = `/portal/client?clientId=${property?.propertyDetails.CLIENTNumber}`;
+    } catch (error) {
+      console.error("Error deleting property:", error);
+      if (error instanceof Error) {
+        toast({
+          title: "Error deleting property",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsDeleting(false);
+    }
+  };
   useEffect(() => {
     const fetchProperty = async () => {
       const propertyId = searchParams.get("propertyId");
@@ -93,6 +124,17 @@ const ViewProperty = () => {
           <NavLink to={"/editProperty"}>
             <Button className="w-full">Schedule Hearing Date</Button>
           </NavLink>
+          <Button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className={`w-full ${
+              isDeleting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-red-600 hover:bg-red-700"
+            }`}
+          >
+            {isDeleting ? "Deleting..." : "Delete Property"}
+          </Button>
         </div>
       </div>
 

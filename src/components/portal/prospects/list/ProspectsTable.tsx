@@ -16,29 +16,13 @@ import TableBuilder from "../../TableBuilder";
 import { Input } from "@/components/ui/input";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Download, LoaderCircle, Filter } from "lucide-react";
 import {
-  Download,
-  // ChevronDown
-} from "lucide-react";
-// import {
-//   DropdownMenu,
-//   DropdownMenuItem,
-//   DropdownMenuContent,
-//   DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu"; // Import dropdown components
-
-// enum ProspectStatus {
-//   NOT_CONTACTED = "NOT_CONTACTED",
-//   CONTACTED = "CONTACTED",
-//   IN_PROGRESS = "IN_PROGRESS",
-//   SIGNED = "SIGNED",
-// }
-
-// interface Prospect {
-//   id: string;
-//   name: string;
-//   status: ProspectStatus;
-// }
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ProspectTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -47,44 +31,31 @@ interface ProspectTableProps<TData, TValue> {
 const ProspectTable = <TData, TValue>({
   columns,
 }: ProspectTableProps<TData, TValue>) => {
-  const [prospects, setProspects] = useState<TData[]>([]); // const [filteredProspects, setFilteredProspects] = useState<Prospect[]>([]);
+  const [prospects, setProspects] = useState<TData[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // const [selectedStatus, setSelectedStatus] = useState<ProspectStatus | null>(
-  //   null
-  // );
+
+  const fetchProspects = async () => {
+    try {
+      setLoading(true);
+      setError(null); // Reset error state before fetching
+      const data = await getProspects();
+      setProspects(data);
+    } catch (err) {
+      console.error("Error fetching prospects:", err);
+      setError("Failed to load prospects. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProspects = async () => {
-      try {
-        setLoading(true);
-        const data = await getProspects();
-        setProspects(data);
-        // setFilteredProspects(data); // Initially, show all prospects
-      } catch (err) {
-        console.error("Error fetching prospects:", err);
-        setError("Failed to load prospects. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProspects();
   }, []);
-
-  // useEffect(() => {
-  //   if (selectedStatus) {
-  //     setFilteredProspects(
-  //       prospects.filter((p) => p.status === selectedStatus)
-  //     );
-  //   } else {
-  //     setFilteredProspects(prospects); // Ensure it stays an array of `Prospect`
-  //   }
-  // }, [selectedStatus, prospects]);
 
   const table = useReactTable({
     data: prospects,
@@ -105,18 +76,33 @@ const ProspectTable = <TData, TValue>({
     },
   });
 
+  const handleFilterByStatus = (status: string) => {
+    table.getColumn("status")?.setFilterValue(status || undefined);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
-        <span>Loading...</span>
+        <LoaderCircle className="animate-spin w-16 h-16 text-blue-500" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center py-20 text-red-500">
-        <span>{error}</span>
+      <div className="flex flex-col justify-center items-center py-20 text-red-500">
+        <span className="text-lg font-semibold">{error}</span>
+        <Button
+          variant="blue"
+          className="mt-4"
+          onClick={() => {
+            setError(null); // Reset error before retrying
+            setLoading(true);
+            fetchProspects();
+          }}
+        >
+          Retry
+        </Button>
       </div>
     );
   }
@@ -127,7 +113,7 @@ const ProspectTable = <TData, TValue>({
         <div className="flex flex-col p-4 w-full">
           <h1>Quick search a Prospect</h1>
           <Input
-            placeholder="Search Client Name..."
+            placeholder="Search Prospect Name..."
             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
               table.getColumn("name")?.setFilterValue(event.target.value)
@@ -136,31 +122,8 @@ const ProspectTable = <TData, TValue>({
           />
         </div>
 
-        {/* Status Filter Dropdown
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              {selectedStatus ? selectedStatus : "Filter by Status"}{" "}
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setSelectedStatus(null)}>
-              All
-            </DropdownMenuItem>
-            {Object.values(ProspectStatus).map((status) => (
-              <DropdownMenuItem
-                key={status}
-                onClick={() => setSelectedStatus(status)}
-              >
-                {status}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu> */}
-
         <div className="w-full">
-          <h2 className="text-2xl font-bold ">{prospects.length}</h2>
+          <h2 className="text-2xl font-bold">{prospects.length}</h2>
           <h3>Total number of Prospects</h3>
         </div>
 
@@ -171,6 +134,40 @@ const ProspectTable = <TData, TValue>({
           <Download />
         </Button>
       </div>
+
+      {/* Filter Dropdown */}
+      <div className="flex justify-end mb-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Filter size={16} />
+              Filter by Status
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => handleFilterByStatus("")}>
+              All
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => handleFilterByStatus("NOT_CONTACTED")}
+            >
+              Not Contacted
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleFilterByStatus("CONTACTED")}>
+              Contacted
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => handleFilterByStatus("IN_PROGRESS")}
+            >
+              In Progress
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleFilterByStatus("SIGNED")}>
+              Signed
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       <TableBuilder
         data={prospects}
         columns={columns}

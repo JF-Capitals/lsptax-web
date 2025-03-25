@@ -1,7 +1,7 @@
 import { NavLink, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getSingleProspect } from "@/store/data";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { LoaderCircle, Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Property, Prospect } from "@/types/types";
 import {
@@ -34,6 +34,8 @@ const ProspectPage = () => {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
   const [clientData, setClientData] = useState<ProspectData | null>(null);
+  const [isSending, setIsSending] = useState(false); // Track sending state
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -65,6 +67,7 @@ const ProspectPage = () => {
     clientData.prospect.status === "SIGNED";
 
   const handleSendContract = async (id: number) => {
+    setIsSending(true);
     try {
       await sendContract({ prospectId: id });
       toast({
@@ -84,6 +87,8 @@ const ProspectPage = () => {
         title: "Failed to send contract",
         description: "Please try again",
       });
+    } finally {
+      setIsSending(false);
     }
   };
   const handleDownloadSignedPDF = async (id: number) => {
@@ -130,7 +135,14 @@ const ProspectPage = () => {
                     onClick={() => handleSendContract(clientData.prospect.id)}
                     disabled={isSendDisabled}
                   >
-                    Send Contract
+                    {isSending ? (
+                      <span className="flex items-center gap-2">
+                        <LoaderCircle className="animate-spin w-5 h-5" />
+                        Sending...
+                      </span>
+                    ) : (
+                      "Send Contract"
+                    )}
                   </Button>
                 </span>
               </TooltipTrigger>
@@ -224,6 +236,7 @@ const ProspectPage = () => {
               <ViewProspectProperty
                 key={property.id}
                 propertyId={`${property.id}`}
+                prospectId={parseInt(id!)}
               />
             ))}
           </div>

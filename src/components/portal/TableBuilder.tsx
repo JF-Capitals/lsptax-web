@@ -80,7 +80,7 @@ const TableBuilder = ({
   };
 
   return (
-    <div className="rounded-xl border m-4 bg-white p-4 flex flex-col overflow-y-auto h-[calc(100vh-230px)] ">
+    <div className="rounded-xl border m-4 bg-white p-4 flex flex-col overflow-y-auto h-[calc(100vh-260px)] ">
       <div className="pb-8 flex justify-between">
         <h2 className="text-2xl font-bold">{label}</h2>
         <div className="text-sm">

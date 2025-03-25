@@ -22,7 +22,7 @@ import React from "react";
 import { Prospect } from "@/types/types";
 
 
-export const prospectColumn: ColumnDef<Prospect,any>[] = [
+export const prospectColumn: ColumnDef<Prospect, any>[] = [
   {
     accessorKey: "id",
     header: "Prospect #",
@@ -50,6 +50,7 @@ export const prospectColumn: ColumnDef<Prospect,any>[] = [
     header: "Mobile",
   },
   {
+    accessorKey: "status",
     header: "Status",
     id: "status",
     cell: ({ row }) => {
@@ -183,8 +184,8 @@ export const prospectColumn: ColumnDef<Prospect,any>[] = [
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Prospect</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to delete prospect {prospect.ProspectName}? This
-                  action cannot be undone.
+                  Are you sure you want to delete prospect{" "}
+                  {prospect.ProspectName}? This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -209,8 +210,8 @@ export const prospectColumn: ColumnDef<Prospect,any>[] = [
               <AlertDialogHeader>
                 <AlertDialogTitle>Move to Client</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Convert {prospect.ProspectName} to a client? This will move all
-                  prospect information to a new client record.
+                  Convert {prospect.ProspectName} to a client? This will move
+                  all prospect information to a new client record.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

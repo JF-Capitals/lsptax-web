@@ -201,6 +201,37 @@ export const editProperty = async (
   }
 };
 
+export const deleteProperty = async (propertyId: string) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/delete-property`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ propertyId }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to delete property");
+    }
+
+    return response.json();
+  } catch (error: unknown) {
+    let errorMessage = "Property Deletion Failed. Please try again.";
+
+    if (error instanceof Error) {
+      console.error("Error deleting property:", error);
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
 export const editProspectProperty = async (
   propertyId: string,
   propertyDetails: any
@@ -297,6 +328,37 @@ export const addProspectProperty = async ({
   }
 
   return response.json();
+};
+
+export const deleteProspectProperty = async (propertyId: string) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/delete-prospect-property`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ propertyId }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to delete property");
+    }
+
+    return response.json();
+  } catch (error: unknown) {
+    let errorMessage = "Property Deletion Failed. Please try again.";
+
+    if (error instanceof Error) {
+      console.error("Error deleting property:", error);
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
+  }
 };
 
 export const deleteClient = async (id: Number) => {

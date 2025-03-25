@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { getSingleClient } from "@/store/data";
 import { ClientData, Property } from "@/types/types";
+import { LoaderCircle } from "lucide-react";
 
 interface Client {
   client: ClientData;
@@ -25,8 +26,10 @@ export default function EditClient() {
   const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get("clientId");
+
   useEffect(() => {
     async function loadClientData() {
       try {
@@ -50,7 +53,7 @@ export default function EditClient() {
     TypeOfAcct: z
       .string()
       .optional()
-      .default(client?.client.TypeOfAcct || "ty"),
+      .default(client?.client.TypeOfAcct || ""),
     CLIENTNumber: z.string().nonempty(client?.client.CLIENTNumber || ""),
     CLIENTNAME: z
       .string()
@@ -87,11 +90,17 @@ export default function EditClient() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsSubmitting(true); // Set loading state
     try {
       console.log("Client Data :", { values });
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       toast.success("Client updated successfully!");
     } catch (error) {
+      console.error("Failed to update client", error);
       toast.error("Failed to update client. Please try again.");
+    } finally {
+      setIsSubmitting(false); // Reset loading state
     }
   };
 
@@ -180,13 +189,23 @@ export default function EditClient() {
           />
 
           <div className="flex justify-center gap-4">
-            <Button type="submit" variant="blue" className="w-64">
-              Update Client
+            <Button
+              type="submit"
+              variant="blue"
+              className="w-64 flex items-center justify-center"
+              disabled={isSubmitting} // Disable button while submitting
+            >
+              {isSubmitting ? (
+                <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+              ) : (
+                "Update Client"
+              )}
             </Button>
             <Button
               variant="secondary"
               className="w-64"
               onClick={revertChanges}
+              disabled={isSubmitting} // Disable revert button while submitting
             >
               Revert Changes
             </Button>

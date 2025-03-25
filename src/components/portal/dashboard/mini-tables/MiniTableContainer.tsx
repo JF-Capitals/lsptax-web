@@ -28,7 +28,7 @@ const MiniTableContainer = ({ propData,clientData,prospectData }: MiniTableConta
             data={prospectData}
             columns={prospectColumn}
             label="Prospects"
-            link="/portal/prospect/list-prospect"
+            link="/portal/prospects/list-prospect"
           />
         </div>
       </div>
@@ -46,7 +46,7 @@ const MiniTableContainer = ({ propData,clientData,prospectData }: MiniTableConta
             data={clientData}
             columns={clientsColumn}
             label="Clients"
-            link="/portal/list/clients"
+            link="/portal/clients/list-clients"
           />
         </div>
       </div>

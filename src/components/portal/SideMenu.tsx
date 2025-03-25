@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  Menu,
-  X,
   LayoutDashboard,
   Building,
   FileText,
   Users,
   UserPlus,
+  ChevronLeft,
+  ChevronRight,
   // FileSignature,
 } from "lucide-react";
 import {
@@ -41,16 +41,16 @@ const SideMenu: React.FC = () => {
   return (
     <TooltipProvider>
       <div
-        className={`h-screen bg-white transition-all border-r flex flex-col items-center ${
+        className={`h-full bg-white transition-all border-r flex flex-col items-center ${
           isOpen ? "w-64" : "w-16"
         }`}
       >
         {/* Toggle Button */}
         <button
-          className="self-end mt-4 mr-4 p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition"
+          className="self-end mr-2 p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition"
           onClick={() => setIsOpen(!isOpen)}
         >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
+          {isOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
         </button>
 
         {/* Logo */}
@@ -59,7 +59,9 @@ const SideMenu: React.FC = () => {
         </div>
 
         {/* Menu Items */}
-        <div className="flex flex-col w-full mt-8">
+        <div className="flex flex-col w-full mt-8 overflow-hidden">
+          {" "}
+          {/* Prevent overflow */}
           {menuOptions.map(({ id, label, icon: Icon }) => {
             const isActive = activeOption.startsWith(id);
 

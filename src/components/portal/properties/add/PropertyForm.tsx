@@ -1,4 +1,3 @@
-import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
 import { addProperty } from "@/api/api";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   StatusNotes: z.string().optional(),
@@ -35,6 +35,7 @@ const formSchema = z.object({
 });
 
 export default function AddPropertyForm() {
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get("clientId");
 
@@ -66,16 +67,26 @@ export default function AddPropertyForm() {
         FlatFee: values.FlatFee,
       };
 
-      await addProperty({
+      const newProperty = await addProperty({
         CLIENTNumber: clientId!,
         propertyData,
       });
+      window.location.href = `/portal/property?propertyId=${newProperty?.property.id}`;
 
-      toast.success("Property added successfully with 5 invoices!");
+      toast({
+        title: "Property Added",
+        description: "The property has been successfully added.",
+      });
+
       form.reset();
     } catch (error) {
       console.error("Error adding property:", error);
-      toast.error("Failed to add property. Please try again.");
+      toast({
+        variant: "destructive",
+        title: "Failed to Add Property",
+        description:
+          "An error occurred while adding the property. Please try again.",
+      });
     }
   }
 
@@ -201,91 +212,6 @@ export default function AddPropertyForm() {
                   value={clientId || ""}
                   className="bg-gray-50"
                 />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="CONTACTOWNER"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contract Owner</FormLabel>
-                <Input placeholder="Enter Contract Owner" {...field} />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="SUBCONTRACTOWNER"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Subcontract Owner</FormLabel>
-                <Input placeholder="Enter Subcontract Owner" {...field} />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="BPPFEE"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>BPP Fee</FormLabel>
-                <Input placeholder="Enter BPP Fee" {...field} />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="CONTINGENCYFee"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contingency Fee</FormLabel>
-                <Input placeholder="Enter Contingency Fee" {...field} />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="FlatFee"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Flat Fee</FormLabel>
-                <Input placeholder="Enter Flat Fee" {...field} />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="flex gap-4 justify-between">
-          <FormField
-            control={form.control}
-            name="StatusNotes"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Status Notes</FormLabel>
-                <Input placeholder="Enter Status Notes" {...field} />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="OtherNotes"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Other Notes</FormLabel>
-                <Input placeholder="Enter Other Notes" {...field} />
                 <FormMessage />
               </FormItem>
             )}

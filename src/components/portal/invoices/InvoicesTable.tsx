@@ -13,41 +13,44 @@ interface InvoicesTableProps<TData, TValue> {
 const InvoicesTable = <TData, TValue>({
   columns,
 }: InvoicesTableProps<TData, TValue>) => {
-  // const location = useLocation();
   const [invoices, setInvoices] = useState<TData[]>([]);
   const [archived, setArchived] = useState(false);
-  // const [filteredInvoices, setFilteredInvoices] = useState<TData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchInvoiceData = async () => {
+    try {
+      setLoading(true);
+      setError(null); // Reset error state before fetching
+      const response = await getAllInvoices();
+      setInvoices(response);
+    } catch (error) {
+      console.error("Error fetching invoice data:", error);
+      setError("Failed to load invoices. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchInvoiceData = async () => {
-      try {
-        setLoading(true);
-        const response = await getAllInvoices();
-        setInvoices(response);
-        setLoading(false);
-        console.log({ response });
-      } catch (error) {
-        setError("Failed to load clients. Please try again later.");
-        console.error("Error fetching invoice data:", error);
-      }
-    };
     fetchInvoiceData();
   }, []);
 
-  // if (loading) {
-  //   return (
-  //     <div className="flex justify-center h-full items-center py-20">
-  //       <LoaderCircle className="animate-spin w-16 h-16" />
-  //     </div>
-  //   );
-  // }
+  if (loading) {
+    return (
+      <div className="flex justify-center h-full items-center py-20">
+        <LoaderCircle className="animate-spin w-16 h-16 text-blue-500" />
+      </div>
+    );
+  }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center py-20 text-red-500">
-        <span>{error}</span>
+      <div className="flex flex-col justify-center items-center py-20 text-red-500">
+        <span className="text-lg font-semibold">{error}</span>
+        <Button variant="blue" className="mt-4" onClick={fetchInvoiceData}>
+          Retry
+        </Button>
       </div>
     );
   }
@@ -59,11 +62,7 @@ const InvoicesTable = <TData, TValue>({
           <h2 className="text-2xl font-bold">{invoices.length}</h2>
           <h3>Total number of Invoices</h3>
         </div>
-        <Button
-          variant={"blue"}
-          className=""
-          onClick={() => setArchived(!archived)}
-        >
+        <Button variant={"blue"} onClick={() => setArchived(!archived)}>
           <Archive />
           {archived ? "View Active Invoices" : "View Archive"}
         </Button>
@@ -71,17 +70,11 @@ const InvoicesTable = <TData, TValue>({
           <Download />
         </Button>
       </div>
-      {loading ? (
-        <div className="flex justify-center h-full items-center py-20">
-          <LoaderCircle className="animate-spin w-16 h-16" />
-        </div>
-      ) : (
-        <TableBuilder
-          data={invoices}
-          columns={columns}
-          label="Filtered Invoices"
-        />
-      )}
+      <TableBuilder
+        data={invoices}
+        columns={columns}
+        label="Filtered Invoices"
+      />
     </div>
   );
 };
