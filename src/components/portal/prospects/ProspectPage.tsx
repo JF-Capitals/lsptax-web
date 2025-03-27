@@ -74,7 +74,16 @@ const ProspectPage = () => {
         title: "Contract Sent Successfully",
         description: `Contract Sent to id:${id}`,
       });
-
+      setClientData((prevData) => {
+        if (!prevData) return prevData;
+        return {
+          ...prevData,
+          prospect: {
+            ...prevData.prospect,
+            status: "IN_PROGRESS",
+          },
+        };
+      });
       if (clientData?.prospect.status === "CONTACTED") {
         await changeProspectStatus({
           prospectId: id,
@@ -133,9 +142,14 @@ const ProspectPage = () => {
                     variant={"blue"}
                     className="w-full"
                     onClick={() => handleSendContract(clientData.prospect.id)}
-                    disabled={isSendDisabled}
+                    disabled={
+                      isSendDisabled ||
+                      clientData.prospect.status === "IN_PROGRESS"
+                    }
                   >
-                    {isSending ? (
+                    {clientData.prospect.status === "IN_PROGRESS" ? (
+                      "Sent"
+                    ) : isSending ? (
                       <span className="flex items-center gap-2">
                         <LoaderCircle className="animate-spin w-5 h-5" />
                         Sending...

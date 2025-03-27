@@ -1,4 +1,5 @@
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -11,7 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { addProspectProperty } from "@/api/api";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
@@ -37,7 +38,10 @@ const formSchema = z.object({
 });
 
 export default function AddProspectPropertyForm() {
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
   const id = searchParams.get("id");
   const [loading, setLoading] = useState(false); // Track loading state
 
@@ -75,11 +79,18 @@ export default function AddProspectPropertyForm() {
         propertyData,
       });
 
-      toast.success("Property added successfully with 5 invoices!");
+      toast({
+        title: "Added Property to Prospect",
+      });
       form.reset();
+      navigate(`/portal/prospect?id=${id}`);
     } catch (error) {
       console.error("Error adding property:", error);
-      toast.error("Failed to add property. Please try again.");
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
     } finally {
       setLoading(false); // Set loading to false after submission
     }
