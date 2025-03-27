@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { getSingleProperty } from "@/store/data";
 import { PropertyData } from "@/types/types";
 import { editProperty } from "@/api/api";
+import { LoaderCircle } from "lucide-react";
 
 type TableRow = {
   year: number;
@@ -95,7 +96,7 @@ export default function EditProperty() {
   const [error, setError] = useState<string | null>(null);
   const [property, setProperty] = useState<PropertyData | null>(null);
   const propertyId = searchParams.get("propertyId");
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const years = [2021, 2022, 2023, 2024, 2025];
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -112,7 +113,7 @@ export default function EditProperty() {
 
   const handleConfirm = async () => {
     if (!pendingValues) return;
-
+    setLoading(true);
     try {
       const completeSubmission: CompleteSubmission = {
         propertyDetails: pendingValues,
@@ -133,6 +134,8 @@ export default function EditProperty() {
       navigate(`/portal/property?propertyId=${propertyId}`);
     } catch (error) {
       toast({ title: "Failed to update property", variant: "destructive" });
+    } finally {
+      setLoading(false); // Set loading to false after submission
     }
   };
   useEffect(() => {
@@ -161,77 +164,79 @@ export default function EditProperty() {
     fetchProperty();
   }, [propertyId, form]);
 
-const getInitialTableData = (invoices: any[] = []) => {
-  return years.map((year) => {
-    const yearData = invoices?.find((invoice) => invoice.year === year);
+  const getInitialTableData = (invoices: any[] = []) => {
+    return years.map((year) => {
+      const yearData = invoices?.find((invoice) => invoice.year === year);
 
-    const noticeLandValue = parseFloat(yearData?.noticeLandValue) || 0;
-    const noticeImprovementValue =
-      parseFloat(yearData?.noticeImprovementValue) || 0;
-    const noticeAppraisedValue =
-      parseFloat(yearData?.noticeAppraisedValue) || 0;
-    const finalLandValue = parseFloat(yearData?.finalLandValue) || 0;
-    const finalImprovementValue =
-      parseFloat(yearData?.finalImprovementValue) || 0;
-    const finalAppraisedValue = parseFloat(yearData?.finalAppraisedValue) || 0;
-    const taxRate = parseFloat(yearData?.taxRate) || 0;
-    const endingMarket = parseFloat(yearData?.endingMarket) || 0;
-    const endingAppraised = parseFloat(yearData?.endingAppraised) || 0;
+      const noticeLandValue = parseFloat(yearData?.noticeLandValue) || 0;
+      const noticeImprovementValue =
+        parseFloat(yearData?.noticeImprovementValue) || 0;
+      const noticeAppraisedValue =
+        parseFloat(yearData?.noticeAppraisedValue) || 0;
+      const finalLandValue = parseFloat(yearData?.finalLandValue) || 0;
+      const finalImprovementValue =
+        parseFloat(yearData?.finalImprovementValue) || 0;
+      const finalAppraisedValue =
+        parseFloat(yearData?.finalAppraisedValue) || 0;
+      const taxRate = parseFloat(yearData?.taxRate) || 0;
+      const endingMarket = parseFloat(yearData?.endingMarket) || 0;
+      const endingAppraised = parseFloat(yearData?.endingAppraised) || 0;
 
-    // Parse contingency fee from string (e.g., "25%" -> 0.25)
-    const contingencyFeeString = property?.propertyDetails.CONTINGENCYFee || "0%"; // Default to "0%" if not provided
-    const contingencyFeePercentage = parseFloat(contingencyFeeString); // Extract the numeric value
-    const contingencyFee = contingencyFeePercentage / 100; // Convert to decimal (e.g., 25% -> 0.25)
+      // Parse contingency fee from string (e.g., "25%" -> 0.25)
+      const contingencyFeeString =
+        property?.propertyDetails.CONTINGENCYFee || "0%"; // Default to "0%" if not provided
+      const contingencyFeePercentage = parseFloat(contingencyFeeString); // Extract the numeric value
+      const contingencyFee = contingencyFeePercentage / 100; // Convert to decimal (e.g., 25% -> 0.25)
 
-    const noticeMarketValue = noticeLandValue + noticeImprovementValue;
-    const finalMarketValue = finalLandValue + finalImprovementValue;
-    const marketReduction = noticeMarketValue - finalMarketValue;
-    const appraisedReduction = noticeAppraisedValue - finalAppraisedValue;
-    const taxableSavings = marketReduction * (taxRate / 100);
-    const invoiceAmount = taxableSavings * contingencyFee;
+      const noticeMarketValue = noticeLandValue + noticeImprovementValue;
+      const finalMarketValue = finalLandValue + finalImprovementValue;
+      const marketReduction = noticeMarketValue - finalMarketValue;
+      const appraisedReduction = noticeAppraisedValue - finalAppraisedValue;
+      const taxableSavings = marketReduction * (taxRate / 100);
+      const invoiceAmount = taxableSavings * contingencyFee;
 
-    const beginningMarket =
-      yearData?.underLitigation || yearData?.underArbitration
-        ? finalMarketValue
-        : 0;
-    const beginningAppraised =
-      yearData?.underLitigation || yearData?.underArbitration
-        ? finalAppraisedValue
-        : 0;
+      const beginningMarket =
+        yearData?.underLitigation || yearData?.underArbitration
+          ? finalMarketValue
+          : 0;
+      const beginningAppraised =
+        yearData?.underLitigation || yearData?.underArbitration
+          ? finalAppraisedValue
+          : 0;
 
-    return {
-      year,
-      "Protest Date": yearData?.protestDate || "",
-      "BPP Rendered": yearData?.bppRendered || "",
-      "BPP Invoice": yearData?.bppInvoice || "",
-      "BPP Paid": yearData?.bppPaid || "",
-      "Notice Land Value": noticeLandValue.toString(),
-      "Notice Improvement Value": noticeImprovementValue.toString(),
-      "Notice Market Value": noticeMarketValue.toString(),
-      "Notice Appraised Value": noticeAppraisedValue.toString(),
-      "Final Land Value": finalLandValue.toString(),
-      "Final Improvement Value": finalImprovementValue.toString(),
-      "Final Market Value": finalMarketValue.toString(),
-      "Final Appraised Value": finalAppraisedValue.toString(),
-      "Market Reduction": marketReduction.toString(),
-      "Appraised Reduction": appraisedReduction.toString(),
-      "Hearing Date": yearData?.hearingDate || "",
-      "Invoice Date": yearData?.invoiceDate || "",
-      "Under Litigation": yearData?.underLitigation || false,
-      "Under Arbitration": yearData?.underArbitration || false,
-      "Tax Rate": taxRate.toString(),
-      "Taxable Savings": taxableSavings.toString(),
-      "Contingency Fee": contingencyFeeString, // Keep as string for display
-      "Invoice Amount": invoiceAmount.toString(),
-      "Paid Date": yearData?.paidDate || "",
-      "Payment Notes": yearData?.paymentNotes || "",
-      "Beginning Market": beginningMarket.toString(),
-      "Ending Market": endingMarket.toString(),
-      "Beginning Appraised": beginningAppraised.toString(),
-      "Ending Appraised": endingAppraised.toString(),
-    };
-  });
-};
+      return {
+        year,
+        "Protest Date": yearData?.protestDate || "",
+        "BPP Rendered": yearData?.bppRendered || "",
+        "BPP Invoice": yearData?.bppInvoice || "",
+        "BPP Paid": yearData?.bppPaid || "",
+        "Notice Land Value": noticeLandValue.toString(),
+        "Notice Improvement Value": noticeImprovementValue.toString(),
+        "Notice Market Value": noticeMarketValue.toString(),
+        "Notice Appraised Value": noticeAppraisedValue.toString(),
+        "Final Land Value": finalLandValue.toString(),
+        "Final Improvement Value": finalImprovementValue.toString(),
+        "Final Market Value": finalMarketValue.toString(),
+        "Final Appraised Value": finalAppraisedValue.toString(),
+        "Market Reduction": marketReduction.toString(),
+        "Appraised Reduction": appraisedReduction.toString(),
+        "Hearing Date": yearData?.hearingDate || "",
+        "Invoice Date": yearData?.invoiceDate || "",
+        "Under Litigation": yearData?.underLitigation || false,
+        "Under Arbitration": yearData?.underArbitration || false,
+        "Tax Rate": taxRate.toString(),
+        "Taxable Savings": taxableSavings.toString(),
+        "Contingency Fee": contingencyFeeString, // Keep as string for display
+        "Invoice Amount": invoiceAmount.toString(),
+        "Paid Date": yearData?.paidDate || "",
+        "Payment Notes": yearData?.paymentNotes || "",
+        "Beginning Market": beginningMarket.toString(),
+        "Ending Market": endingMarket.toString(),
+        "Beginning Appraised": beginningAppraised.toString(),
+        "Ending Appraised": endingAppraised.toString(),
+      };
+    });
+  };
   useEffect(() => {
     if (property?.invoices) {
       setTableData(getInitialTableData(property.invoices));
@@ -276,63 +281,64 @@ const getInitialTableData = (invoices: any[] = []) => {
     recalculateFields(rowIndex);
   };
 
-const recalculateFields = (rowIndex: number) => {
-  setTableData((prev) =>
-    prev.map((row, idx) => {
-      if (idx !== rowIndex) return row; // Only update the current row
+  const recalculateFields = (rowIndex: number) => {
+    setTableData((prev) =>
+      prev.map((row, idx) => {
+        if (idx !== rowIndex) return row; // Only update the current row
 
-      const noticeLandValue = parseFloat(row["Notice Land Value"]) || 0;
-      const noticeImprovementValue =
-        parseFloat(row["Notice Improvement Value"]) || 0;
-      const noticeAppraisedValue =
-        parseFloat(row["Notice Appraised Value"]) || 0;
-      const finalLandValue = parseFloat(row["Final Land Value"]) || 0;
-      const finalImprovementValue =
-        parseFloat(row["Final Improvement Value"]) || 0;
-      const finalAppraisedValue = parseFloat(row["Final Appraised Value"]) || 0;
-      const taxRate = parseFloat(row["Tax Rate"]) || 0;
-      const endingMarket = parseFloat(row["Ending Market"]) || 0;
-      const endingAppraised = parseFloat(row["Ending Appraised"]) || 0;
+        const noticeLandValue = parseFloat(row["Notice Land Value"]) || 0;
+        const noticeImprovementValue =
+          parseFloat(row["Notice Improvement Value"]) || 0;
+        const noticeAppraisedValue =
+          parseFloat(row["Notice Appraised Value"]) || 0;
+        const finalLandValue = parseFloat(row["Final Land Value"]) || 0;
+        const finalImprovementValue =
+          parseFloat(row["Final Improvement Value"]) || 0;
+        const finalAppraisedValue =
+          parseFloat(row["Final Appraised Value"]) || 0;
+        const taxRate = parseFloat(row["Tax Rate"]) || 0;
+        const endingMarket = parseFloat(row["Ending Market"]) || 0;
+        const endingAppraised = parseFloat(row["Ending Appraised"]) || 0;
 
-      // Parse contingency fee from string (e.g., "25%" -> 0.25)
-      const contingencyFeeString = row["Contingency Fee"] || "0%"; // Default to "0%" if not provided
-      const contingencyFeePercentage = parseFloat(contingencyFeeString); // Extract the numeric value
-      const contingencyFee = contingencyFeePercentage / 100; // Convert to decimal (e.g., 25% -> 0.25)
+        // Parse contingency fee from string (e.g., "25%" -> 0.25)
+        const contingencyFeeString = row["Contingency Fee"] || "0%"; // Default to "0%" if not provided
+        const contingencyFeePercentage = parseFloat(contingencyFeeString); // Extract the numeric value
+        const contingencyFee = contingencyFeePercentage / 100; // Convert to decimal (e.g., 25% -> 0.25)
 
-      // Calculate dependent fields
-      const noticeMarketValue = noticeLandValue + noticeImprovementValue;
-      const finalMarketValue = finalLandValue + finalImprovementValue;
-      const marketReduction = noticeMarketValue - finalMarketValue;
-      const appraisedReduction = noticeAppraisedValue - finalAppraisedValue;
-      const taxableSavings = marketReduction * (taxRate / 100);
-      const invoiceAmount = taxableSavings * contingencyFee; // Use contingencyFee as a number
+        // Calculate dependent fields
+        const noticeMarketValue = noticeLandValue + noticeImprovementValue;
+        const finalMarketValue = finalLandValue + finalImprovementValue;
+        const marketReduction = noticeMarketValue - finalMarketValue;
+        const appraisedReduction = noticeAppraisedValue - finalAppraisedValue;
+        const taxableSavings = marketReduction * (taxRate / 100);
+        const invoiceAmount = taxableSavings * contingencyFee; // Use contingencyFee as a number
 
-      const beginningMarket =
-        row["Under Litigation"] || row["Under Arbitration"]
-          ? finalMarketValue
-          : 0;
-      const beginningAppraised =
-        row["Under Litigation"] || row["Under Arbitration"]
-          ? finalAppraisedValue
-          : 0;
+        const beginningMarket =
+          row["Under Litigation"] || row["Under Arbitration"]
+            ? finalMarketValue
+            : 0;
+        const beginningAppraised =
+          row["Under Litigation"] || row["Under Arbitration"]
+            ? finalAppraisedValue
+            : 0;
 
-      return {
-        ...row,
-        "Notice Market Value": noticeMarketValue.toString(),
-        "Final Market Value": finalMarketValue.toString(),
-        "Market Reduction": marketReduction.toString(),
-        "Appraised Reduction": appraisedReduction.toString(),
-        "Taxable Savings": taxableSavings.toString(),
-        "Invoice Amount": invoiceAmount.toString(),
-        "Beginning Market": beginningMarket.toString(),
-        "Beginning Appraised": beginningAppraised.toString(),
-        "Ending Market": endingMarket.toString(),
-        "Ending Appraised": endingAppraised.toString(),
-        "Contingency Fee": contingencyFeeString, // Keep as string for display
-      };
-    })
-  );
-};
+        return {
+          ...row,
+          "Notice Market Value": noticeMarketValue.toString(),
+          "Final Market Value": finalMarketValue.toString(),
+          "Market Reduction": marketReduction.toString(),
+          "Appraised Reduction": appraisedReduction.toString(),
+          "Taxable Savings": taxableSavings.toString(),
+          "Invoice Amount": invoiceAmount.toString(),
+          "Beginning Market": beginningMarket.toString(),
+          "Beginning Appraised": beginningAppraised.toString(),
+          "Ending Market": endingMarket.toString(),
+          "Ending Appraised": endingAppraised.toString(),
+          "Contingency Fee": contingencyFeeString, // Keep as string for display
+        };
+      })
+    );
+  };
 
   if (loading) return <div className="text-center py-4">Loading...</div>;
   if (error)
@@ -632,7 +638,20 @@ const recalculateFields = (rowIndex: number) => {
           <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>
-          <Button type="submit">Save Changes</Button>
+          <Button
+            type="submit"
+            className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+                Saving Changes...
+              </>
+            ) : (
+              "Save Changes"
+            )}
+          </Button>
         </div>
 
         <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

@@ -13,6 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
 import { addProspectProperty } from "@/api/api";
+import { useState } from "react";
+import { LoaderCircle } from "lucide-react";
 
 const formSchema = z.object({
   StatusNotes: z.string().optional(),
@@ -37,6 +39,7 @@ const formSchema = z.object({
 export default function AddProspectPropertyForm() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
+  const [loading, setLoading] = useState(false); // Track loading state
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,6 +50,7 @@ export default function AddProspectPropertyForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true); // Set loading to true
     try {
       const propertyData = {
         StatusNotes: values.StatusNotes,
@@ -76,6 +80,8 @@ export default function AddProspectPropertyForm() {
     } catch (error) {
       console.error("Error adding property:", error);
       toast.error("Failed to add property. Please try again.");
+    } finally {
+      setLoading(false); // Set loading to false after submission
     }
   }
 
@@ -294,9 +300,17 @@ export default function AddProspectPropertyForm() {
 
         <Button
           type="submit"
-          className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700"
+          className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center"
+          disabled={loading} // Disable button while loading
         >
-          Add Property
+          {loading ? (
+            <>
+              <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+              Adding Property...
+            </>
+          ) : (
+            "Add Property"
+          )}
         </Button>
       </form>
     </Form>

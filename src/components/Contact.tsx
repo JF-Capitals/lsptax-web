@@ -1,4 +1,5 @@
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react"; 
 import { ToastAction } from "@/components/ui/toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { addProspect } from "@/api/api";
+import { LoaderCircle } from "lucide-react";
 
 const formSchema = z.object({
   ProspectName: z.string().min(1, "Prospect name is required"),
@@ -24,6 +26,7 @@ const formSchema = z.object({
 
 const Contact = () => {
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false); // Track loading state
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,6 +39,7 @@ const Contact = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+     setLoading(true);
     try {
       await addProspect(
         values.ProspectName,
@@ -63,6 +67,8 @@ const Contact = () => {
             : "There was a problem with your request.",
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
+    } finally {
+      setLoading(false); // Set loading to false after submission
     }
   }
 
@@ -190,10 +196,18 @@ const Contact = () => {
 
             <Button
               // variant="blue"
+              disabled={loading}
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow-md transition-all"
             >
-              Start Saving Taxes
+              {loading ? (
+                <>
+                  <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+                  Submitting...
+                </>
+              ) : (
+                "Start Saving Taxes"
+              )}
             </Button>
           </form>
         </Form>

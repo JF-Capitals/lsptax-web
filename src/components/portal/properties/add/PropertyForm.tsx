@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react"; // Add this import
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
 import { addProperty } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
+import { LoaderCircle } from "lucide-react";
 
 const formSchema = z.object({
   StatusNotes: z.string().optional(),
@@ -38,6 +40,7 @@ export default function AddPropertyForm() {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get("clientId");
+  const [loading, setLoading] = useState(false); // Track loading state
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,6 +51,7 @@ export default function AddPropertyForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true); // Set loading to true
     try {
       const propertyData = {
         StatusNotes: values.StatusNotes,
@@ -87,6 +91,8 @@ export default function AddPropertyForm() {
         description:
           "An error occurred while adding the property. Please try again.",
       });
+    } finally {
+      setLoading(false); // Set loading to false after submission
     }
   }
 
@@ -221,8 +227,16 @@ export default function AddPropertyForm() {
         <Button
           type="submit"
           className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700"
+          disabled={loading}
         >
-          Add Property
+          {loading ? (
+            <>
+              <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+              Adding Property...
+            </>
+          ) : (
+            "Add Property"
+          )}
         </Button>
       </form>
     </Form>

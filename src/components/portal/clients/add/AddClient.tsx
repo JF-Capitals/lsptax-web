@@ -193,7 +193,10 @@ export default function AddClientForm() {
             disabled={isSubmitting} // Disable button while submitting
           >
             {isSubmitting ? (
-              <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+              <>
+                <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+                Adding Client...
+              </>
             ) : (
               "Add Client"
             )}

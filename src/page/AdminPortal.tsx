@@ -8,12 +8,13 @@ const AdminPortal = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div className="bg-[#F8F9FD] h-screen overflow-hidden">
-      {" "}
-      {/* Full screen height and no scroll */}
+    <div
+      className="h-screen overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #F8F9FD, #E3F2FD)", // Light bluish gradient
+      }}
+    >
       <div className="flex h-full">
-        {" "}
-        {/* Ensure full height for flex container */}
         {/* Side Menu */}
         <div
           className={`fixed z-40 top-0 left-0 h-full bg-white shadow transition-transform transform ${
@@ -24,12 +25,8 @@ const AdminPortal = () => {
         </div>
         {/* Main Content */}
         <div className="flex-1 h-full overflow-hidden flex flex-col">
-          {" "}
-          {/* Prevent scrolling */}
           <DashboardHeader onMenuToggle={() => setIsMenuOpen(!isMenuOpen)} />
           <div className="flex-1 overflow-auto">
-            {" "}
-            {/* Allow scrolling only for content */}
             <Routes>
               <Route path="/*" element={<AdminRoutes />} />
             </Routes>

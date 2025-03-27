@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { getProspectProperty } from "@/store/data";
 import { PropertyData } from "@/types/types";
 import { editProspectProperty } from "@/api/api";
-
+import { LoaderCircle } from "lucide-react";
 
 const formSchema = z.object({
   StatusNotes: z.string().optional(),
@@ -60,6 +60,7 @@ export default function EditProspectProperty() {
     typeof formSchema
   > | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
   const [error, setError] = useState<string | null>(null);
   const [, setProperty] = useState<PropertyData | null>(null);
   const propertyId = searchParams.get("id");
@@ -78,21 +79,24 @@ export default function EditProspectProperty() {
 
   const handleConfirm = async () => {
     if (!pendingValues) return;
+    setIsSubmitting(true);
 
     try {
       const completeSubmission: CompleteSubmission = {
         propertyDetails: pendingValues,
       };
 
-      await editProspectProperty (
+      await editProspectProperty(
         propertyId!,
-        completeSubmission.propertyDetails,
+        completeSubmission.propertyDetails
       );
 
       toast({ title: "Property updated successfully!" });
       setIsDialogOpen(false);
     } catch (error) {
       toast({ title: "Failed to update property", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false); // Reset submitting state
     }
   };
   useEffect(() => {
@@ -120,7 +124,6 @@ export default function EditProspectProperty() {
 
     fetchProperty();
   }, [propertyId, form]);
-
 
   if (loading) return <div className="text-center py-4">Loading...</div>;
   if (error)
@@ -347,7 +350,20 @@ export default function EditProspectProperty() {
           <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>
-          <Button type="submit">Save Changes</Button>
+          <Button
+            type="submit"
+            className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center"
+            disabled={isSubmitting} // Disable button while submitting
+          >
+            {isSubmitting ? (
+              <>
+                <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+                Saving Changes...
+              </>
+            ) : (
+              "Save Changes"
+            )}
+          </Button>
         </div>
 
         <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -361,8 +377,18 @@ export default function EditProspectProperty() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleConfirm}>
-                Continue
+              <AlertDialogAction
+                onClick={handleConfirm}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  "Continue"
+                )}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

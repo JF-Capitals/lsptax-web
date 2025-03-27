@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { addProspect } from "@/api/api";
+import { useState } from "react";
+import { LoaderCircle } from "lucide-react";
 
 const formSchema = z.object({
   ProspectName: z.string().min(1, "Prospect name is required"),
@@ -24,6 +26,7 @@ const formSchema = z.object({
 
 export default function AddProspectForm() {
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false); // Track loading state
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,6 +39,7 @@ export default function AddProspectForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true); // Set loading to true
     try {
       await addProspect(
         values.ProspectName,
@@ -64,6 +68,8 @@ export default function AddProspectForm() {
           action: <ToastAction altText="Try again">Try again</ToastAction>,
         });
       }
+    } finally {
+      setLoading(false); // Set loading to false after submission
     }
   }
 
@@ -144,8 +150,19 @@ export default function AddProspectForm() {
         </div>
 
         <div className="mt-8">
-          <Button type="submit" className="w-full md:w-auto">
-            Add Prospect
+          <Button
+            type="submit"
+            className="w-full md:w-auto flex items-center justify-center bg-blue-600 text-white hover:bg-blue-700"
+            disabled={loading} // Disable button while loading
+          >
+            {loading ? (
+              <>
+                <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+                Adding Prospect...
+              </>
+            ) : (
+              "Add Prospect"
+            )}
           </Button>
         </div>
       </form>
