@@ -40,6 +40,7 @@ const formSchema = z.object({
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false); // Track loading state
+  const [showPassword, setShowPassword] = useState(false); // Track password visibility
   const { toast } = useToast();
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -50,41 +51,41 @@ export default function LoginPage() {
     },
   });
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
-      setLoading(true); // Set loading to true
-      try {
-        const { email, password } = values;
-        console.log({ email, password });
-        const response = await loginUser(email, password);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true); // Set loading to true
+    try {
+      const { email, password } = values;
+      console.log({ email, password });
+      const response = await loginUser(email, password);
 
-        // Assuming response contains token and user info
-        const { token, user } = response;
+      // Assuming response contains token and user info
+      const { token, user } = response;
 
-        // Store the token in localStorage or cookies
-        localStorage.setItem("token", token);
+      // Store the token in localStorage or cookies
+      localStorage.setItem("token", token);
 
-        // Optionally store user info if you need it
-        localStorage.setItem("user", JSON.stringify(user));
+      // Optionally store user info if you need it
+      localStorage.setItem("user", JSON.stringify(user));
 
-        // Show success toast
-        toast({
-          title: "Welcome Back!",
-          description: "Login Success",
-        });
+      // Show success toast
+      toast({
+        title: "Welcome Back!",
+        description: "Login Success",
+      });
 
-        navigate("/portal/dashboard"); // Relative route
-      } catch (error) {
-        console.error("Login failed", error);
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: "There was a problem with your request.",
-          action: <ToastAction altText="Try again">Try again</ToastAction>,
-        });
-      } finally {
-        setLoading(false); // Set loading to false after submission
-      }
+      navigate("/portal/dashboard"); // Relative route
+    } catch (error) {
+      console.error("Login failed", error);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+    } finally {
+      setLoading(false); // Set loading to false after submission
     }
+  }
 
   return (
     <div className="flex h-screen w-full items-center justify-center overflow-hidden">
@@ -138,9 +139,17 @@ export default function LoginPage() {
                           <FormItem className="grid gap-2">
                             <div className="flex justify-between items-center">
                               <FormLabel htmlFor="password">Password</FormLabel>
+                              <button
+                                type="button"
+                                className="text-sm text-blue-600 hover:underline"
+                                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                              >
+                                {showPassword ? "Hide" : "Show"}
+                              </button>
                             </div>
                             <FormControl>
                               <Input
+                                type={showPassword ? "text" : "password"} // Toggle input type
                                 className="w-full"
                                 id="password"
                                 placeholder="******"
