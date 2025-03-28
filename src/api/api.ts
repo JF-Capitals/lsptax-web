@@ -409,17 +409,25 @@ export const deleteProspect = async (id: Number) => {
 
 export const moveProspectToClient = async (id: Number) => {
   try {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/action/move-to-client`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id,
-      }),
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/move-to-client`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+        }),
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to move prospect to client.");
+    }
+    const data = await response.json();
+    return data.client;
   } catch (error: unknown) {
-    let errorMessage = "Client Deletion Failed. Please try again.";
+    let errorMessage = "Prospect Moving Failed. Please try again.";
 
     if (error instanceof Error) {
       console.log({ error });
@@ -471,7 +479,7 @@ export const sendContract = async ({ prospectId }: { prospectId: Number }) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prospectId
+        prospectId,
       }),
     });
   } catch (error: unknown) {
@@ -487,7 +495,11 @@ export const sendContract = async ({ prospectId }: { prospectId: Number }) => {
   }
 };
 
-export const downloadSignedPDF = async ({ prospectId }: { prospectId: Number }) => {
+export const downloadSignedPDF = async ({
+  prospectId,
+}: {
+  prospectId: Number;
+}) => {
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/action/download-signed-pdf`,

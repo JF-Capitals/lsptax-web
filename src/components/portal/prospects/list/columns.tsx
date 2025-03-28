@@ -2,7 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { Trash2, UserRoundPlus } from "lucide-react";
-import { changeProspectStatus, deleteProspect } from "@/api/api";
+import {
+  changeProspectStatus,
+  deleteProspect,
+  moveProspectToClient,
+} from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -15,12 +19,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; // Import RadioGroup components
 import { Label } from "@/components/ui/label"; // Import Label for RadioGroup items
 import React from "react";
 import { Prospect } from "@/types/types";
-
 
 export const prospectColumn: ColumnDef<Prospect, any>[] = [
   {
@@ -154,7 +157,7 @@ export const prospectColumn: ColumnDef<Prospect, any>[] = [
     cell: ({ row }) => {
       const prospect = row.original;
       const { toast } = useToast();
-
+      const navigate = useNavigate();
       const handleDelete = async () => {
         try {
           await deleteProspect(Number(prospect.id));
@@ -216,12 +219,35 @@ export const prospectColumn: ColumnDef<Prospect, any>[] = [
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction>
-                  <NavLink
-                    to={`/portal/move_to_client?prospectId=${prospect.id}`}
-                  >
-                    Convert to Client
-                  </NavLink>
+                <AlertDialogAction
+                  onClick={async () => {
+                    try {
+                      const newClient = await moveProspectToClient(prospect.id); // Call the function with the prospect ID
+                      toast({
+                        title: "Success",
+                        description:
+                          "Prospect successfully converted to client.",
+                      });
+
+                      // Redirect to the new client's page
+                      navigate(
+                        `/portal/client?clientId=${newClient.CLIENTNumber}`
+                      ); // Use the returned client ID
+                    } catch (error) {
+                      console.error(
+                        "Error converting prospect to client:",
+                        error
+                      );
+                      toast({
+                        variant: "destructive",
+                        title: "Conversion Failed",
+                        description:
+                          "Could not convert prospect to client. Please try again.",
+                      });
+                    }
+                  }}
+                >
+                  Convert to Client
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
