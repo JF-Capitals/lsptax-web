@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useSearchParams } from "react-router-dom";
 import { getSingleProperty } from "@/store/data";
-import { ChevronDown, ChevronUp, Mail, MapPin, Phone } from "lucide-react";
+import { LoaderCircle, Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PropertyData } from "@/types/types";
 import { deleteProperty } from "@/api/api";
@@ -17,6 +17,9 @@ const ViewProperty = () => {
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false); // Track invoice section state
   const [searchParams, setSearchParams] = useSearchParams();
   const propertyId = parseInt(searchParams.get("propertyId") || "1");
+  const [isNavigating, setIsNavigating] = useState<"prev" | "next" | null>(
+    null
+  ); // Track navigation state
 
   const fetchProperty = async (id: number) => {
     setLoading(true);
@@ -49,12 +52,11 @@ const ViewProperty = () => {
     }
   };
 
-  const handleNavigation = async (
-    newId: number,
-    direction: "prev" | "next"
-  ) => {
-    let currentId = newId;
+const handleNavigation = async (newId: number, direction: "prev" | "next") => {
+  setIsNavigating(direction); // Set the navigation state
+  let currentId = newId;
 
+  try {
     while (true) {
       const propertyData = await getSingleProperty({
         propertyId: currentId.toString(),
@@ -78,7 +80,17 @@ const ViewProperty = () => {
         break;
       }
     }
-  };
+  } catch (error) {
+    console.error("Error navigating properties:", error);
+    toast({
+      variant: "destructive",
+      title: "Navigation Failed",
+      description: "Could not navigate to the property. Please try again.",
+    });
+  } finally {
+    setIsNavigating(null); // Reset the navigation state
+  }
+};
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this property?")) {
@@ -274,20 +286,20 @@ const ViewProperty = () => {
         onClick={() => setIsInvoiceOpen(!isInvoiceOpen)}
       >
         <h2 className="text-xl font-semibold text-blue-800">Invoice Details</h2>
-        <span className="text-blue-800">
+        {/* <span className="text-blue-800">
           {isInvoiceOpen ? <ChevronUp /> : <ChevronDown />}
-        </span>
+        </span> */}
       </div>
       <div
-        className={` transition-all duration-300 ease-in-out ${
-          isInvoiceOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-        }`}
-        style={{
-          maxHeight: isInvoiceOpen
-            ? `${property.invoices.length * 250}px`
-            : "0px",
-          opacity: isInvoiceOpen ? 1 : 0,
-        }}
+        // className={` transition-all duration-300 ease-in-out ${
+        //   isInvoiceOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+        // }`}
+        // style={{
+        //   maxHeight: isInvoiceOpen
+        //     ? `${property.invoices.length * 250}px`
+        //     : "0px",
+        //   opacity: isInvoiceOpen ? 1 : 0,
+        // }}
       >
         <div className="mt-4">
           <YearTable invoices={property.invoices} />
@@ -297,12 +309,31 @@ const ViewProperty = () => {
       <div className="flex w-full justify-between mt-4">
         <Button
           onClick={() => handleNavigation(propertyId - 1, "prev")}
-          disabled={propertyId <= 1}
+          disabled={propertyId <= 1 || isNavigating === "prev"} // Disable while navigating
+          className="flex items-center justify-center"
         >
-          Prev
+          {isNavigating === "prev" ? (
+            <>
+              <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+              Loading...
+            </>
+          ) : (
+            "Prev"
+          )}
         </Button>
-        <Button onClick={() => handleNavigation(propertyId + 1, "next")}>
-          Next
+        <Button
+          onClick={() => handleNavigation(propertyId + 1, "next")}
+          disabled={isNavigating === "next"} // Disable while navigating
+          className="flex items-center justify-center"
+        >
+          {isNavigating === "next" ? (
+            <>
+              <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+              Loading...
+            </>
+          ) : (
+            "Next"
+          )}
         </Button>
       </div>
     </div>
