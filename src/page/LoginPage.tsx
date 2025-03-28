@@ -27,6 +27,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { useState } from "react";
+import { LoaderCircle } from "lucide-react";
 
 // Improved schema with additional validation rules
 const formSchema = z.object({
@@ -37,129 +39,148 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
-    const { toast } = useToast();
-    const navigate = useNavigate();
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            email: "",
-            password: "",
-        },
-    });
+  const [loading, setLoading] = useState(false); // Track loading state
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        try {
-            const { email, password } = values;
-            console.log({ email, password });
-            const response = await loginUser(email, password);
+      setLoading(true); // Set loading to true
+      try {
+        const { email, password } = values;
+        console.log({ email, password });
+        const response = await loginUser(email, password);
 
-            // Assuming response contains token and user info
-            const { token, user } = response;
+        // Assuming response contains token and user info
+        const { token, user } = response;
 
-            // Store the token in localStorage or cookies
-            localStorage.setItem("token", token);
+        // Store the token in localStorage or cookies
+        localStorage.setItem("token", token);
 
-            // Optionally store user info if you need it
-            localStorage.setItem("user", JSON.stringify(user));
+        // Optionally store user info if you need it
+        localStorage.setItem("user", JSON.stringify(user));
 
-            // Show success toast
-            toast({
-                title: "Welcome Back!",
-                description: "Login Success",
-            });
+        // Show success toast
+        toast({
+          title: "Welcome Back!",
+          description: "Login Success",
+        });
 
-            navigate("/portal/dashboard"); // Relative route
-        } catch (error) {
-            console.error("Login failed", error);
-            toast({
-                variant: "destructive",
-                title: "Uh oh! Something went wrong.",
-                description: "There was a problem with your request.",
-                action: <ToastAction altText="Try again">Try again</ToastAction>,
-            });
-        }
+        navigate("/portal/dashboard"); // Relative route
+      } catch (error) {
+        console.error("Login failed", error);
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: "There was a problem with your request.",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
+      } finally {
+        setLoading(false); // Set loading to false after submission
+      }
     }
 
-    return (
-        <div className="flex h-screen w-full items-center justify-center overflow-hidden">
-            {/* Left Side  */}
-            <div className="flex-1 flex flex-col mt-32 md:justify-center items-center min-h-screen ">
-                <div className="md:w-[350px] md:h-[562px] ">
-                    <div className="flex justify-between items-center w-full mb-12 ">
-                        <div>
-                            <NavLink to={'/'}>
-                            <img className="" src={Logo} alt="" />
-                            </NavLink>
-                        </div>
-                    </div>
-                    <div>
-                        <Card className="w-full max-w-md border-none  ">
-                            <CardHeader className="mb-12">
-                                <CardDescription>
-                                    Welcome back!
-                                </CardDescription>
-                                <CardTitle className="text-2xl">Please Login</CardTitle>
-
-                            </CardHeader>
-                            <CardContent>
-                                <Form {...form}>
-                                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                                        <div className="grid gap-4">
-                                            <FormField
-                                                control={form.control}
-                                                name="email"
-                                                render={({ field }) => (
-                                                    <FormItem className="grid gap-2">
-                                                        <FormLabel htmlFor="email">Email Address</FormLabel>
-                                                        <FormControl>
-                                                            <Input
-                                                                className="w-full"
-                                                                id="username"
-                                                                placeholder="johndoe@mail.com"
-                                                                type="username"
-                                                                autoComplete="username"
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="password"
-                                                render={({ field }) => (
-                                                    <FormItem className="grid gap-2">
-                                                        <div className="flex justify-between items-center">
-                                                            <FormLabel htmlFor="password">Password</FormLabel>
-                                                        </div>
-                                                        <FormControl>
-                                                            <Input
-                                                                className="w-full"
-                                                                id="password"
-                                                                placeholder="******"
-                                                                autoComplete="current-password"
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <Button type="submit" className="w-full bg-gradient-to-r from-[#14ADD6]  to-[#384295]">
-                                                Login
-                                            </Button>
-                                        </div>
-                                    </form>
-                                </Form>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
+  return (
+    <div className="flex h-screen w-full items-center justify-center overflow-hidden">
+      {/* Left Side  */}
+      <div className="flex-1 flex flex-col mt-32 md:justify-center items-center min-h-screen ">
+        <div className="md:w-[350px] md:h-[562px] ">
+          <div className="flex justify-between items-center w-full mb-12 ">
+            <div>
+              <NavLink to={"/"}>
+                <img className="" src={Logo} alt="" />
+              </NavLink>
             </div>
-            {/* Right Side  */}
-            <img className="flex-1 hidden lg:block min-h-screen " src={Image} alt="" />
+          </div>
+          <div>
+            <Card className="w-full max-w-md border-none  ">
+              <CardHeader className="mb-12">
+                <CardDescription>Welcome back!</CardDescription>
+                <CardTitle className="text-2xl">Please Login</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-8"
+                  >
+                    <div className="grid gap-4">
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem className="grid gap-2">
+                            <FormLabel htmlFor="email">Email Address</FormLabel>
+                            <FormControl>
+                              <Input
+                                className="w-full"
+                                id="username"
+                                placeholder="johndoe@mail.com"
+                                type="username"
+                                autoComplete="username"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem className="grid gap-2">
+                            <div className="flex justify-between items-center">
+                              <FormLabel htmlFor="password">Password</FormLabel>
+                            </div>
+                            <FormControl>
+                              <Input
+                                className="w-full"
+                                id="password"
+                                placeholder="******"
+                                autoComplete="current-password"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-[#14ADD6] to-[#384295] flex items-center justify-center"
+                        disabled={loading} // Disable button while loading
+                      >
+                        {loading ? (
+                          <>
+                            <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+                            Logging In...
+                          </>
+                        ) : (
+                          "Login"
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-    );
+      </div>
+      {/* Right Side  */}
+      <img
+        className="flex-1 hidden lg:block min-h-screen "
+        src={Image}
+        alt=""
+      />
+    </div>
+  );
 }
 
