@@ -85,13 +85,9 @@ const MoveFromProspect = () => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await addClient(
-        values.CLIENTNAME,
-        values.Email,
-        values.PHONENUMBER,
-        values.MAILINGADDRESSCITYTXZIP,
-        values.TypeOfAcct || ""
-      );
+      if (!values) { 
+        await addClient(values);
+      }
 
       toast({
         title: "✓ Client added successfully",
