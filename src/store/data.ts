@@ -10,19 +10,18 @@ const getFormattedDate = () => {
   return `${day}${ordinalSuffix}${month}${year}`;
 };
 
-export const getClients = async () => {
+export const getClients = async (limit = 10) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/clients`
+      `${import.meta.env.VITE_BACKEND_URL}/api/clients?limit=${limit}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch clients");
     }
-    const clients = await response.json();
-    return clients;
+    return await response.json();
   } catch (error) {
-    console.log(error);
-    return [{}];
+    console.error("Error fetching clients:", error);
+    return [];
   }
 };
 
@@ -46,7 +45,7 @@ export const getSingleClient = async ({ clientId }: { clientId?: string }) => {
 };
 
 export const getSingleProspect = async ({
-  prospectId,
+  prospectId
 }: {
   prospectId?: string;
 }) => {
@@ -56,9 +55,9 @@ export const getSingleProspect = async ({
         import.meta.env.VITE_BACKEND_URL
       }/api/prospect?prospectId=${prospectId}`
     );
-    if (response.status == 404) {
-      return null;
-    }
+     if (response.status == 404) {
+       return null;
+     }
     if (!response.ok) {
       throw new Error("Failed to fetch prospect");
     }
@@ -66,7 +65,7 @@ export const getSingleProspect = async ({
     return prospect;
   } catch (error) {
     console.log(error);
-    return null;
+     return null;
   }
 };
 
@@ -86,20 +85,18 @@ export const getArchiveClients = async () => {
   }
 };
 
-export const getProperties = async () => {
+export const getProperties = async (limit = 10) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/properties`
+      `${import.meta.env.VITE_BACKEND_URL}/api/properties?limit=${limit}`
     );
-    console.log(response);
     if (!response.ok) {
       throw new Error("Failed to fetch properties");
     }
-    const properties = await response.json();
-    return properties;
+    return await response.json();
   } catch (error) {
-    console.log(error);
-    return [{}];
+    console.error("Error fetching properties:", error);
+    return [];
   }
 };
 
@@ -237,19 +234,18 @@ export const getArchiveInvoices = async () => {
   }
 };
 
-export const getProspects = async () => {
+export const getProspects = async (limit = 10) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/prospects`
+      `${import.meta.env.VITE_BACKEND_URL}/api/prospects?limit=${limit}`
     );
     if (!response.ok) {
-      throw new Error("Failed to fetch Prospects");
+      throw new Error("Failed to fetch prospects");
     }
-    const prospects = await response.json();
-    return prospects;
+    return await response.json();
   } catch (error) {
-    console.log(error);
-    return [{}];
+    console.error("Error fetching prospects:", error);
+    return [];
   }
 };
 
@@ -344,26 +340,21 @@ interface Stats {
 // Function to fetch data and return stats
 export const dashboardData = async (): Promise<Stats | null> => {
   try {
-    const clients = await getClients();
-    const prospects = await getProspects();
-    const agents = await getAgents();
+    // Fetch stats from the new /stats endpoint
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/stats`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch dashboard stats");
+    }
 
-    // Assuming getClients(), getProspects(), getAgents() return arrays
-    const numOfClients = clients.length;
-    const numOfProspects = prospects.length;
-    const numOfAgents = agents.length;
-
-    const stats: Stats = {
-      numOfClients,
-      numOfProspects,
-      numOfAgents,
-    };
+    const stats: Stats = await response.json(); // Assuming the response is { numOfClients, numOfProspects, numOfAgents }
 
     console.log({ stats });
 
     return stats;
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching dashboard stats:", error);
     return null; // Returning null in case of error to align with Stats | null type
   }
 };

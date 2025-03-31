@@ -48,7 +48,6 @@ interface StatsItemProps {
 interface Stats {
   numOfClients: number;
   numOfProspects: number;
-  numOfAgents: number;
 }
 
 const DashboardStats = () => {
