@@ -25,8 +25,8 @@ export const getClients = async () => {
     return [{}];
   }
 };
+
 export const getSingleClient = async ({ clientId }: { clientId?: string }) => {
-  console.log({ clientId });
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/client?clientId=${clientId}`
@@ -38,7 +38,6 @@ export const getSingleClient = async ({ clientId }: { clientId?: string }) => {
       throw new Error("Failed to fetch clients");
     }
     const client = await response.json();
-    console.log({ client });
     return client;
   } catch (error) {
     console.log(error);
@@ -51,22 +50,23 @@ export const getSingleProspect = async ({
 }: {
   prospectId?: string;
 }) => {
-  console.log({ prospectId });
   try {
     const response = await fetch(
       `${
         import.meta.env.VITE_BACKEND_URL
       }/api/prospect?prospectId=${prospectId}`
     );
+    if (response.status == 404) {
+      return null;
+    }
     if (!response.ok) {
       throw new Error("Failed to fetch prospect");
     }
     const prospect = await response.json();
-    console.log({ prospect });
     return prospect;
   } catch (error) {
     console.log(error);
-    return [{}];
+    return null;
   }
 };
 
@@ -224,7 +224,7 @@ export const getAllInvoices = async () => {
 export const getArchiveInvoices = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/archive_invoices`
+      `${import.meta.env.VITE_BACKEND_URL}/api/archive-invoices`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch Invoices");

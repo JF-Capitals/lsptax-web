@@ -168,7 +168,7 @@ const ProspectPage = () => {
             </Tooltip>
           </TooltipProvider>
           <NavLink
-            to={`/portal/edit-client?clientId=${clientData.prospect.id}`}
+            to={`/portal/edit-prospect?prospectId=${clientData.prospect.id}`}
           >
             <Button variant={"blue"} className="w-full">
               Edit Prospect Details
@@ -199,12 +199,24 @@ const ProspectPage = () => {
                   {clientData.prospect.Email}
                 </td>
               </tr>
+              {clientData.prospect.BillingEmail &&
+                clientData.prospect.BillingEmail !==
+                  clientData.prospect.Email && (
+                  <tr>
+                    <td className="font-medium">Secondary Email:</td>
+                    <td>
+                      <Mail size={18} className="inline text-indigo-600 mr-2" />
+                      {clientData.prospect.BillingEmail}
+                    </td>
+                  </tr>
+                )}
               <tr>
-                <td className="font-medium">Address:</td>
+                <td className="font-medium">Billing Address:</td>
                 <td>
                   <MapPin size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.prospect.MAILINGADDRESS},
-                  {clientData.prospect.MAILINGADDRESSCITYTXZIP}
+                  {clientData.prospect.BillingAddress ??
+                    `  ${clientData.prospect.MAILINGADDRESS},
+                  ${clientData.prospect.MAILINGADDRESSCITYTXZIP}`}
                 </td>
               </tr>
               {/* Show Envelope ID and Download Button if status is SIGNED */}

@@ -115,13 +115,17 @@ export const addProspect = async (
   }
 };
 
-export const addClient = async (
-  CLIENTNAME: string,
-  Email: string,
-  PHONENUMBER: string,
-  MAILINGADDRESSCITYTXZIP: string,
-  TypeOfAcct: string
-) => {
+export const addClient = async (clientDetails: {
+  CLIENTNAME: string;
+  Email: string;
+  BillingEmail?: string;
+  PHONENUMBER: string;
+  MAILINGADDRESS: string;
+  MAILINGADDRESSCITYTXZIP: string;
+  BillingAddress?: string;
+  TypeOfAcct: string;
+  IsArchived?: boolean;
+}) => {
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/action/add-client`,
@@ -130,15 +134,10 @@ export const addClient = async (
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          CLIENTNAME,
-          Email,
-          PHONENUMBER,
-          MAILINGADDRESSCITYTXZIP,
-          TypeOfAcct,
-        }),
+        body: JSON.stringify(clientDetails), // Send the entire object
       }
     );
+
     const data = await response.json();
 
     if (!response.ok) {
@@ -147,7 +146,7 @@ export const addClient = async (
 
     return data;
   } catch (error: unknown) {
-    let errorMessage = "Prospect Addition Failed. Please try again.";
+    let errorMessage = "Client Addition Failed. Please try again.";
 
     if (error instanceof Error) {
       console.log({ error });
@@ -191,6 +190,85 @@ export const editProperty = async (
     return data;
   } catch (error: unknown) {
     let errorMessage = "Property Update Failed. Please try again.";
+
+    if (error instanceof Error) {
+      console.log({ error });
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
+export const editClient = async (
+  cliendId: string,
+  clientDetails: any,
+) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/edit-client`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          cliendId,
+          clientDetails
+        }),
+      }
+    );
+
+    // Check if response is OK before trying to parse JSON
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to update client");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error: unknown) {
+    let errorMessage = "Client Update Failed. Please try again.";
+
+    if (error instanceof Error) {
+      console.log({ error });
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
+export const editProspect = async (prospectId: string, prospectDetails: any) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/edit-prospect`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          prospectId,
+          prospectDetails,
+        }),
+      }
+    );
+
+    // Check if response is OK before trying to parse JSON
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to update prospect");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error: unknown) {
+    let errorMessage = "Prospect Update Failed. Please try again.";
 
     if (error instanceof Error) {
       console.log({ error });
@@ -530,5 +608,37 @@ export const downloadSignedPDF = async ({
   } catch (error) {
     console.error("Error downloading PDF:", error);
     throw new Error("Error downloading PDF. Please try again.");
+  }
+};
+
+export const archiveItem = async (tableName: string, id: number) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/archive-entity`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tableName, id }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to archive item");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error: unknown) {
+    let errorMessage = "Archiving Failed. Please try again.";
+
+    if (error instanceof Error) {
+      console.error("Error archiving item:", error);
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
   }
 };

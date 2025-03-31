@@ -6,6 +6,8 @@ export interface ClientData {
   CLIENTNumber?: string; // Optional to match `String?` in Prisma
   CLIENTNAME?: string;
   Email?: string;
+  BillingAddress: string;
+  BillingEmail: string;
   PHONENUMBER?: string;
   NAMEONCAD?: string;
   MAILINGADDRESS?: string;
@@ -77,6 +79,8 @@ export interface Invoice {
 }
 
 export interface InvoiceSummary {
+  id: any;
+  isArchived: any;
   clientId: string;
   propertyNumbers: string[]; 
   totalContingencyFeeDue: number;
@@ -99,6 +103,8 @@ export interface PropertyData {
 }
 
 export interface Prospect {
+  BillingAddress: string;
+  BillingEmail: string;
   envelopeId: string;
   id: number;
   ProspectName: string;

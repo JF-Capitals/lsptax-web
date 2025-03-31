@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 // import { useLocation } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { downloadInvoicesCSV, getAllInvoices } from "@/store/data";
+import { downloadInvoicesCSV, getAllInvoices, getArchiveInvoices } from "@/store/data";
 import TableBuilder from "../TableBuilder";
 import { Archive, Download, LoaderCircle } from "lucide-react";
 
@@ -22,7 +22,8 @@ const InvoicesTable = <TData, TValue>({
     try {
       setLoading(true);
       setError(null); // Reset error state before fetching
-      const response = await getAllInvoices();
+      const response = archived ? await getArchiveInvoices() : await getAllInvoices();
+      // console.log("Fetched invoices:", response);
       setInvoices(response);
     } catch (error) {
       console.error("Error fetching invoice data:", error);
@@ -34,7 +35,7 @@ const InvoicesTable = <TData, TValue>({
 
   useEffect(() => {
     fetchInvoiceData();
-  }, []);
+  }, [archived]);
 
   if (loading) {
     return (

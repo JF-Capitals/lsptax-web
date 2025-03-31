@@ -6,6 +6,13 @@ import { useSearchParams } from "react-router-dom";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Form,
   FormField,
   FormItem,
@@ -16,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { getSingleClient } from "@/store/data";
 import { ClientData, Property } from "@/types/types";
 import { LoaderCircle } from "lucide-react";
+import { editClient } from "@/api/api";
 
 interface Client {
   client: ClientData;
@@ -34,9 +42,24 @@ export default function EditClient() {
     async function loadClientData() {
       try {
         if (clientId) {
-          const data = await getSingleClient({ clientId });
+          const data = await getSingleClient({ clientId: clientId });
           setClient(data);
           setLoading(false);
+          form.reset({
+            TypeOfAcct: client?.client.TypeOfAcct || "",
+            CLIENTNumber: client?.client.CLIENTNumber || "",
+            CLIENTNAME: client?.client.CLIENTNAME || "",
+            Email: client?.client.Email || "",
+            BillingEmail: client?.client.BillingEmail || "",
+            PHONENUMBER: client?.client.PHONENUMBER || "",
+            MAILINGADDRESS: client?.client.MAILINGADDRESS || "",
+            MAILINGADDRESSCITYTXZIP:
+              client?.client.MAILINGADDRESSCITYTXZIP || "",
+            BillingAddress: client?.client.BillingAddress || "",
+            IsArchived: client?.client.IsArchived || false,
+            useSameAsEmail: false,
+            useSameAsMailing: false,
+          });
         }
       } catch (error) {
         console.error("Failed to load client data", error);
@@ -50,51 +73,35 @@ export default function EditClient() {
   }, [searchParams]);
 
   const formSchema = z.object({
-    TypeOfAcct: z
-      .string()
-      .optional()
-      .default(client?.client.TypeOfAcct || ""),
-    CLIENTNumber: z.string().nonempty(client?.client.CLIENTNumber || ""),
-    CLIENTNAME: z
-      .string()
-      .optional()
-      .default(client?.client.CLIENTNAME || ""),
-    Email: z
-      .string()
-      .email("Invalid email address")
-      .optional()
-      .default(client?.client.Email || ""),
-    PHONENUMBER: z
-      .string()
-      .optional()
-      .default(client?.client.PHONENUMBER || ""),
-    MAILINGADDRESS: z
-      .string()
-      .optional()
-      .default(client?.client.MAILINGADDRESS || ""),
-    MAILINGADDRESSCITYTXZIP: z
-      .string()
-      .optional()
-      .default(client?.client.MAILINGADDRESSCITYTXZIP || ""),
-    IsArchived: z
-      .boolean()
-      .optional()
-      .default(client?.client.IsArchived || false),
+    TypeOfAcct: z.string().optional(),
+    CLIENTNumber: z.string().optional(),
+    CLIENTNAME: z.string().min(1, "Client name is required"),
+    Email: z.string().email("Invalid email address"),
+    BillingEmail: z.string().email("Invalid billing email address").optional(),
+    PHONENUMBER: z.string().optional(),
+    MAILINGADDRESS: z.string().optional(),
+    MAILINGADDRESSCITYTXZIP: z.string().optional(),
+    BillingAddress: z.string().optional(),
+    IsArchived: z.boolean().optional(),
+    useSameAsEmail: z.boolean().default(false),
+    useSameAsMailing: z.boolean().default(false),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       IsArchived: false,
+      useSameAsEmail: false,
+      useSameAsMailing: false,
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true); // Set loading state
     try {
-      console.log("Client Data :", { values });
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (clientId) {
+        await editClient(clientId, values);
+      }
       toast.success("Client updated successfully!");
     } catch (error) {
       console.error("Failed to update client", error);
@@ -123,7 +130,7 @@ export default function EditClient() {
       </h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
               name="CLIENTNAME"
@@ -146,6 +153,13 @@ export default function EditClient() {
                     type="email"
                     {...field}
                     className="border-gray-300 rounded-lg"
+                    onChange={(e) => {
+                      field.onChange(e); // Update the field value
+                      // Automatically update BillingEmail if the checkbox is checked
+                      if (form.getValues("useSameAsEmail")) {
+                        form.setValue("BillingEmail", e.target.value);
+                      }
+                    }}
                   />
                   <FormMessage />
                 </FormItem>
@@ -163,30 +177,206 @@ export default function EditClient() {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="TypeOfAcct"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">Account Type</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                      <SelectValue placeholder="Select account type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Real">Real</SelectItem>
+                      <SelectItem value="BPP">BPP</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="MAILINGADDRESS"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Street Address</FormLabel>
+                  <Input
+                    {...field}
+                    placeholder="Street Address"
+                    className="border-gray-300 rounded-lg"
+                    onChange={(e) => {
+                      field.onChange(e); // Update the field value
+                      // Automatically update BillingAddress if the checkbox is checked
+                      if (form.getValues("useSameAsMailing")) {
+                        form.setValue(
+                          "BillingAddress",
+                          `${e.target.value}, ${form.getValues(
+                            "MAILINGADDRESSCITYTXZIP"
+                          )}`
+                        );
+                      }
+                    }}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="MAILINGADDRESSCITYTXZIP"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>City, State, ZIP</FormLabel>
+                  <Input
+                    {...field}
+                    placeholder="City, TX ZIP"
+                    className="border-gray-300 rounded-lg"
+                    onChange={(e) => {
+                      field.onChange(e); // Update the field value
+                      // Automatically update BillingAddress if the checkbox is checked
+                      if (form.getValues("useSameAsMailing")) {
+                        form.setValue(
+                          "BillingAddress",
+                          `${form.getValues("MAILINGADDRESS")}, ${
+                            e.target.value
+                          }`
+                        );
+                      }
+                    }}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
-          <FormField
-            control={form.control}
-            name="MAILINGADDRESSCITYTXZIP"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mailing Address (City, TX, ZIP)</FormLabel>
-                <Input {...field} className="border-gray-300 rounded-lg" />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="TypeOfAcct"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Type</FormLabel>
-                <Input {...field} className="border-gray-300 rounded-lg" />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-col w-full">
+            <FormField
+              control={form.control}
+              name="useSameAsEmail"
+              render={({ field }) => {
+                const email = form.watch("Email");
+                const isDisabled = !email; // Disable if the normal email is empty
+
+                return (
+                  <FormItem className="flex items-center mt-2">
+                    <input
+                      type="checkbox"
+                      id="useSameAsEmail"
+                      checked={field.value}
+                      onChange={(e) => {
+                        field.onChange(e.target.checked); // Update the checkbox value
+                        if (e.target.checked) {
+                          // Set BillingEmail to the value of Email
+                          form.setValue(
+                            "BillingEmail",
+                            form.getValues("Email")
+                          );
+                        }
+                      }}
+                      className="mr-2"
+                      disabled={isDisabled} // Disable the checkbox if the normal email is empty
+                    />
+                    <FormLabel
+                      htmlFor="useSameAsEmail"
+                      className={`text-gray-700 ${
+                        isDisabled ? "opacity-50" : ""
+                      }`} // Add opacity for disabled state
+                    >
+                      Use the same email for billing
+                    </FormLabel>
+                  </FormItem>
+                );
+              }}
+            />
+
+            <FormField
+              control={form.control}
+              name="BillingEmail"
+              render={({ field }) => (
+                <FormItem className="mt-2">
+                  <FormLabel>Billing Email</FormLabel>
+                  <Input
+                    {...field}
+                    type="email"
+                    placeholder="billing@example.com"
+                    className="border-gray-300 rounded-lg"
+                    readOnly={form.getValues("useSameAsEmail")} // Make it read-only if the checkbox is checked
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="useSameAsMailing"
+              render={({ field }) => {
+                const mailingAddress = form.watch("MAILINGADDRESS");
+                const mailingAddressCityTxZip = form.watch(
+                  "MAILINGADDRESSCITYTXZIP"
+                );
+                const isDisabled = !mailingAddress || !mailingAddressCityTxZip; // Disable if either field is empty
+
+                return (
+                  <FormItem className="flex items-center mt-2">
+                    <input
+                      type="checkbox"
+                      id="useSameAsMailing"
+                      checked={field.value}
+                      onChange={(e) => {
+                        field.onChange(e.target.checked); // Update the checkbox value
+                        if (e.target.checked) {
+                          // Set BillingAddress to the combination of MAILINGADDRESS and MAILINGADDRESSCITYTXZIP
+                          form.setValue(
+                            "BillingAddress",
+                            `${form.getValues(
+                              "MAILINGADDRESS"
+                            )}, ${form.getValues("MAILINGADDRESSCITYTXZIP")}`
+                          );
+                        }
+                      }}
+                      className="mr-2"
+                      disabled={isDisabled} // Disable the checkbox if required fields are empty
+                    />
+                    <FormLabel
+                      htmlFor="useSameAsMailing"
+                      className={`text-gray-700 ${
+                        isDisabled ? "opacity-50" : ""
+                      }`} // Add opacity for disabled state
+                    >
+                      Use the same address for billing
+                    </FormLabel>
+                  </FormItem>
+                );
+              }}
+            />
+
+            <FormField
+              control={form.control}
+              name="BillingAddress"
+              render={({ field }) => (
+                <FormItem className="mt-2">
+                  <FormLabel>Billing Address</FormLabel>
+                  <Input
+                    {...field}
+                    placeholder="Street, City, TX ZIP"
+                    className="border-gray-300 rounded-lg"
+                    readOnly={form.getValues("useSameAsMailing")} // Make it read-only if the checkbox is checked
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <div className="flex justify-center gap-4">
             <Button

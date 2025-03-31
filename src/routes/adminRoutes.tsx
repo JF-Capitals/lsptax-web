@@ -32,6 +32,7 @@ import ProspectPage from "@/components/portal/prospects/ProspectPage";
 import AddProspectPropertyForm from "@/components/portal/prospects/AddProspectProperty";
 import ProspectProspertyTable from "@/components/portal/prospects/ProspectPropertyTable";
 import EditProspectProperty from "@/components/portal/prospects/EditProspectProperty";
+import EditProspectDetails from "@/components/portal/prospects/edit/EditProspectDetails";
 
 const AdminRoutes = () => {
   return (
@@ -66,6 +67,7 @@ const AdminRoutes = () => {
         <Route path="/client" element={<ClientPage />} />
         <Route path="/edit-client" element={<EditClient />} />
         <Route path="/prospects/add-prospect" element={<AddProspect />} />
+        <Route path="/edit-prospect" element={<EditProspectDetails />} />
         <Route
           path="/edit-prospect-properties"
           element={<EditProspectProperty />}

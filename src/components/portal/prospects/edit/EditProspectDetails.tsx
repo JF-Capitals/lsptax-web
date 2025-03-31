@@ -5,6 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Form,
   FormField,
   FormItem,
@@ -12,11 +19,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { addProspect } from "@/api/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LoaderCircle } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { getSingleProspect } from "@/store/data";
+import { editProspect } from "@/api/api";
 
 const formSchema = z.object({
+  TypeOfAcct: z.string().optional(),
   ProspectName: z.string().min(1, "Prospect name is required"),
   Email: z.string().email("Invalid email address"),
   BillingEmail: z.string().email("Invalid billing email address"),
@@ -29,9 +39,13 @@ const formSchema = z.object({
   useSameAsEmail: z.boolean().default(false), // Add this field
 });
 
-export default function AddProspectForm() {
+export default function EditProspectDetails() {
+  const [searchParams] = useSearchParams();
+  const prospectId = searchParams.get("prospectId");
+
   const { toast } = useToast();
   const [loading, setLoading] = useState(false); // Track loading state
+  const [initialLoading, setInitialLoading] = useState(true); // Track initial data loading
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,45 +53,78 @@ export default function AddProspectForm() {
       Email: "",
       BillingEmail: "",
       PHONENUMBER: "",
+      MAILINGADDRESS: "",
       MAILINGADDRESSCITYTXZIP: "",
+      BillingAddress: "",
       useSameAsMailing: false, // Default value
-      useSameAsEmail: false,
+      useSameAsEmail: false, // Default value
     },
   });
+  // Fetch prospect details and pre-fill the form
+  useEffect(() => {
+    async function fetchProspectDetails() {
+      try {
+        if (prospectId) {
+          const data = await getSingleProspect({ prospectId: prospectId }); // Replace with actual API call
+          console.log("Fetched prospect data:", data);
+          form.reset({
+            TypeOfAcct: data.prospect.TypeOfAcct || "",
+            ProspectName: data.prospect.ProspectName || "",
+            Email: data.prospect.Email || "",
+            BillingEmail: data.prospect.BillingEmail || "",
+            PHONENUMBER: data.prospect.PHONENUMBER || "",
+            MAILINGADDRESS: data.prospect.MAILINGADDRESS || "",
+            MAILINGADDRESSCITYTXZIP:
+              data.prospect.MAILINGADDRESSCITYTXZIP || "",
+            BillingAddress: data.prospect.BillingAddress || "",
+            useSameAsMailing: false,
+            useSameAsEmail: false,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load prospect details:", error);
+        toast({
+          variant: "destructive",
+          title: "Failed to load prospect details",
+          description: "Please try again later.",
+        });
+      } finally {
+        setInitialLoading(false);
+      }
+    }
+
+    fetchProspectDetails();
+  }, [prospectId, form, toast]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true); // Set loading to true
     try {
-      await addProspect(
-        values.ProspectName,
-        values.Email,
-        values.PHONENUMBER || "",
-        values.MAILINGADDRESS || "",
-        values.MAILINGADDRESSCITYTXZIP || ""
-      );
+      if (prospectId) {
+        // Exclude `useSameAsMailing` and `useSameAsEmail` from the values
+        const { useSameAsMailing, useSameAsEmail, ...filteredValues } = values;
 
-      toast({
-        title: "✓ Prospect added successfully",
-      });
-
-      form.reset();
-    } catch (error) {
-      if (error instanceof Error && error.message === "Email Already Present") {
-        toast({
-          variant: "destructive",
-          title: "Email already exists",
-          action: <ToastAction altText="Try again">Try again</ToastAction>,
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Failed to add prospect",
-          action: <ToastAction altText="Try again">Try again</ToastAction>,
-        });
+        await editProspect(prospectId, filteredValues); // Send only the filtered values
       }
+      toast({
+        title: "✓ Prospect updated successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to update prospect",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
     } finally {
       setLoading(false); // Set loading to false after submission
     }
+  }
+
+  if (initialLoading) {
+    return (
+      <div className="flex justify-center h-full items-center py-20">
+        <LoaderCircle className="animate-spin w-16 h-16 text-blue-500" />
+      </div>
+    );
   }
 
   return (
@@ -87,10 +134,10 @@ export default function AddProspectForm() {
         className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border p-8"
       >
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-xl font-semibold text-gray-900">New Prospect</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Edit Prospect</h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="ProspectName"
@@ -108,12 +155,11 @@ export default function AddProspectForm() {
             name="Email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-gray-700">Email</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <Input
                   {...field}
                   type="email"
                   placeholder="email@example.com"
-                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   onChange={(e) => {
                     field.onChange(e); // Update the field value
                     // Automatically update BillingEmail if the checkbox is checked
@@ -132,28 +178,22 @@ export default function AddProspectForm() {
             name="PHONENUMBER"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-gray-700">Phone</FormLabel>
-                <Input
-                  {...field}
-                  placeholder="+1 (555) 000-0000"
-                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                />
+                <FormLabel>Phone</FormLabel>
+                <Input {...field} placeholder="+1 (555) 000-0000" />
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {/* Street Address and City, State, ZIP */}
           <FormField
             control={form.control}
             name="MAILINGADDRESS"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-gray-700">Street Address</FormLabel>
+                <FormLabel>Street Address</FormLabel>
                 <Input
                   {...field}
                   placeholder="Street Address"
-                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   onChange={(e) => {
                     field.onChange(e); // Update the field value
                     // Automatically update BillingAddress if the checkbox is checked
@@ -177,13 +217,10 @@ export default function AddProspectForm() {
             name="MAILINGADDRESSCITYTXZIP"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-gray-700">
-                  City, State, ZIP
-                </FormLabel>
+                <FormLabel>City, State, ZIP</FormLabel>
                 <Input
                   {...field}
                   placeholder="City, TX ZIP"
-                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   onChange={(e) => {
                     field.onChange(e); // Update the field value
                     // Automatically update BillingAddress if the checkbox is checked
@@ -199,11 +236,36 @@ export default function AddProspectForm() {
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="TypeOfAcct"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-gray-700">Account Type</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className="border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                    <SelectValue placeholder="Select account type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Real">Real</SelectItem>
+                    <SelectItem value="BPP">BPP</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
+
         <div className="flex flex-col w-full">
           <h2 className="text-lg font-semibold text-gray-800 my-2">
-            Client Info
+            Prospect Info
           </h2>
+
+          {/* Checkbox for using the same email */}
           <FormField
             control={form.control}
             name="useSameAsEmail"
@@ -239,23 +301,24 @@ export default function AddProspectForm() {
               );
             }}
           />
+
           <FormField
             control={form.control}
             name="BillingEmail"
             render={({ field }) => (
               <FormItem className="mt-2">
-                <FormLabel className="text-gray-700">Billing Email</FormLabel>
+                <FormLabel>Billing Email</FormLabel>
                 <Input
                   {...field}
                   type="email"
                   placeholder="billing@example.com"
-                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   readOnly={form.getValues("useSameAsEmail")} // Make it read-only if the checkbox is checked
                 />
                 <FormMessage />
               </FormItem>
             )}
           />
+
           {/* Checkbox for using the same address */}
           <FormField
             control={form.control}
@@ -301,17 +364,15 @@ export default function AddProspectForm() {
             }}
           />
 
-          {/* Billing Address */}
           <FormField
             control={form.control}
             name="BillingAddress"
             render={({ field }) => (
               <FormItem className="mt-2">
-                <FormLabel className="text-gray-700">Billing Address</FormLabel>
+                <FormLabel>Billing Address</FormLabel>
                 <Input
                   {...field}
                   placeholder="Street, City, TX ZIP"
-                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   readOnly={form.getValues("useSameAsMailing")} // Make it read-only if the checkbox is checked
                 />
                 <FormMessage />
@@ -319,6 +380,7 @@ export default function AddProspectForm() {
             )}
           />
         </div>
+
         <div className="mt-8">
           <Button
             type="submit"
@@ -328,10 +390,10 @@ export default function AddProspectForm() {
             {loading ? (
               <>
                 <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
-                Adding Prospect...
+                Updating Prospect...
               </>
             ) : (
-              "Add Prospect"
+              "Update Prospect"
             )}
           </Button>
         </div>
