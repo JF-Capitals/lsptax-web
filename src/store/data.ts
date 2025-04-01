@@ -249,6 +249,21 @@ export const getProspects = async (limit = 10) => {
   }
 };
 
+export const getArchiveProspects = async (limit = 10) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/archive-prospects?limit=${limit}`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch prospects");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching prospects:", error);
+    return [];
+  }
+};
+
 export const getContractOwner = async () => {
   try {
     const response = await fetch(
@@ -445,4 +460,21 @@ export const downloadInvoicesCSV = async () => {
   } catch (error) {
     console.error("Error downloading invoices CSV:", error);
   }
+};
+
+
+export const getPreviewDocuments = async ({ prospectId }: { prospectId: Number }) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/preview-signed-pdf`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prospectId }),
+      }
+    );
+    return response.json();
+  } catch (error) {}
 };

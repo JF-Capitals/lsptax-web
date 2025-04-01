@@ -33,6 +33,7 @@ import AddProspectPropertyForm from "@/components/portal/prospects/AddProspectPr
 import ProspectProspertyTable from "@/components/portal/prospects/ProspectPropertyTable";
 import EditProspectProperty from "@/components/portal/prospects/EditProspectProperty";
 import EditProspectDetails from "@/components/portal/prospects/edit/EditProspectDetails";
+import PreviewSignedPdf from "@/components/portal/prospects/preview/PreviewSignedPDF";
 
 const AdminRoutes = () => {
   return (
@@ -82,6 +83,7 @@ const AdminRoutes = () => {
         />
 
         <Route path="/prospect" element={<ProspectPage />} />
+        <Route path="/prospect/preview-docs" element={<PreviewSignedPdf />} />
         <Route path="/prospect/add-prospect" element={<AddProspect />} />
         <Route
           path="/prospect/add-property"

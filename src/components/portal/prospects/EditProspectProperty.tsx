@@ -262,8 +262,8 @@ export default function EditProspectProperty() {
               name="CONTACTOWNER"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contact Owner</FormLabel>
-                  <Input placeholder="Enter Contact Owner" {...field} />
+                  <FormLabel>Contract Owner</FormLabel>
+                  <Input placeholder="Enter Contract Owner" {...field} />
                   <FormMessage />
                 </FormItem>
               )}

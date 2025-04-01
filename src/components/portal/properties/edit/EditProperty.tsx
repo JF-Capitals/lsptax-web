@@ -477,8 +477,8 @@ export default function EditProperty() {
               name="CONTACTOWNER"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contact Owner</FormLabel>
-                  <Input placeholder="Enter Contact Owner" {...field} />
+                  <FormLabel>Contract Owner</FormLabel>
+                  <Input placeholder="Enter Contract Owner Name" {...field} />
                   <FormMessage />
                 </FormItem>
               )}

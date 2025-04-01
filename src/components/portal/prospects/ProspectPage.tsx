@@ -35,6 +35,7 @@ const ProspectPage = () => {
   const id = searchParams.get("id");
   const [clientData, setClientData] = useState<ProspectData | null>(null);
   const [isSending, setIsSending] = useState(false); // Track sending state
+  const [isDownloading, setIsDownloading] = useState(false); // Track downloading state
 
   const { toast } = useToast();
 
@@ -101,6 +102,7 @@ const ProspectPage = () => {
     }
   };
   const handleDownloadSignedPDF = async (id: number) => {
+    setIsDownloading(true);
     try {
       console.log("DOWNLOAD FOR:", { id });
       await downloadSignedPDF({ prospectId: id });
@@ -115,6 +117,8 @@ const ProspectPage = () => {
         title: "Failed to download PDF",
         description: "Please try again",
       });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -174,6 +178,38 @@ const ProspectPage = () => {
               Edit Prospect Details
             </Button>
           </NavLink>
+          {!isSendDisabled && clientData.prospect.status !== "IN_PROGRESS" ? (
+            <NavLink to={`/portal/prospect/preview-docs?id=${id}`}>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="w-full">
+                      <Button variant={"blue"} className="w-full">
+                        Preview Documents
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                </Tooltip>
+              </TooltipProvider>
+            </NavLink>
+          ) : (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="w-full">
+                    <Button variant={"blue"} className="w-full" disabled>
+                      Preview Documents
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {isSendDisabled && !hasProperties && (
+                  <TooltipContent>
+                    Add a property before sending the contract
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
       </div>
 
@@ -220,6 +256,7 @@ const ProspectPage = () => {
                 </td>
               </tr>
               {/* Show Envelope ID and Download Button if status is SIGNED */}
+              {/* Show Envelope ID and Download Button if status is SIGNED */}
               {clientData.prospect.status === "SIGNED" && (
                 <tr>
                   <td className="font-medium">Envelope ID:</td>
@@ -232,9 +269,19 @@ const ProspectPage = () => {
                         onClick={() =>
                           handleDownloadSignedPDF(clientData.prospect.id)
                         }
+                        disabled={isDownloading} // Disable the button while downloading
                       >
-                        <Download size={18} />
-                        Download Signed PDF
+                        {isDownloading ? (
+                          <span className="flex items-center gap-2">
+                            <LoaderCircle className="animate-spin w-5 h-5" />
+                            Downloading...
+                          </span>
+                        ) : (
+                          <>
+                            <Download size={18} />
+                            Download Signed PDF
+                          </>
+                        )}
                       </Button>
                     )}
                   </td>

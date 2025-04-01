@@ -350,6 +350,7 @@ export const editProspectProperty = async (
     throw new Error(errorMessage);
   }
 };
+
 export const addProperty = async ({
   CLIENTNumber,
   propertyData,
@@ -576,7 +577,7 @@ export const sendContract = async ({ prospectId }: { prospectId: Number }) => {
 export const downloadSignedPDF = async ({
   prospectId,
 }: {
-  prospectId: Number;
+  prospectId: number;
 }) => {
   try {
     const response = await fetch(
@@ -593,21 +594,23 @@ export const downloadSignedPDF = async ({
     );
 
     if (!response.ok) {
-      throw new Error("Failed to download PDF");
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to download signed documents");
     }
 
+    // Handle the ZIP file response
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `signed_aoa_${prospectId}.pdf`;
+    a.download = `signed_documents_${prospectId}.zip`; // Download as a ZIP file
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    window.URL.revokeObjectURL(url); // Clean up the Blob URL
   } catch (error) {
-    console.error("Error downloading PDF:", error);
-    throw new Error("Error downloading PDF. Please try again.");
+    console.error("Error downloading signed documents:", error);
+    throw new Error("Error downloading signed documents. Please try again.");
   }
 };
 

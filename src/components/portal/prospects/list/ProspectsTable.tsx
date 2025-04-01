@@ -11,7 +11,11 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 
-import { downloadProspectsCSV, getProspects } from "@/store/data";
+import {
+  downloadProspectsCSV,
+  getArchiveProspects,
+  getProspects,
+} from "@/store/data";
 import TableBuilder from "../../TableBuilder";
 import { Input } from "@/components/ui/input";
 import { NavLink } from "react-router-dom";
@@ -38,12 +42,16 @@ const ProspectTable = <TData, TValue>({
   const [rowSelection, setRowSelection] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [archived, setArchived] = useState(false); // State to track archive view
 
   const fetchProspects = async () => {
     try {
       setLoading(true);
       setError(null); // Reset error state before fetching
-      const data = await getProspects();
+      const data = archived
+        ? await getArchiveProspects()
+        : await getProspects();
+
       setProspects(data);
     } catch (err) {
       console.error("Error fetching prospects:", err);
@@ -55,7 +63,7 @@ const ProspectTable = <TData, TValue>({
 
   useEffect(() => {
     fetchProspects();
-  }, []);
+  }, [archived]);
 
   const table = useReactTable({
     data: prospects,
@@ -124,7 +132,15 @@ const ProspectTable = <TData, TValue>({
 
         <div className="w-full">
           <h2 className="text-2xl font-bold">{prospects.length}</h2>
-          <h3>Total number of Prospects</h3>
+          <h3>Total number of {archived ? "Archived" : "Active"} Prospects</h3>
+        </div>
+        <div >
+          <Button
+            onClick={() => setArchived((prev) => !prev)}
+            className="flex items-center gap-2"
+          >
+            {archived ? "Show Active Prospects" : "Show Archived Prospects"}
+          </Button>
         </div>
 
         <NavLink to={`/portal/prospect/add-prospect`}>
@@ -134,7 +150,6 @@ const ProspectTable = <TData, TValue>({
           <Download />
         </Button>
       </div>
-
       {/* Filter Dropdown */}
       <div className="flex justify-end mb-4">
         <DropdownMenu>
