@@ -33,7 +33,19 @@ const ClientTable = <TData, TValue>({
   const [error, setError] = useState<string | null>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [downloadingCsv, setDownloadingCsv] = useState(false);
 
+  const handleCsvDownload = async () => {
+    setDownloadingCsv(true);
+    try {
+      await downloadClientsCSV();
+    } catch (error) {
+      console.error("Error downloading CSV:", error);
+      setError("Failed to download CSV. Please try again later.");
+    } finally {
+      setDownloadingCsv(false);
+    }
+  };
   const fetchClients = async () => {
     try {
       setLoading(true);
@@ -124,8 +136,12 @@ const ClientTable = <TData, TValue>({
               <UserRoundPlus /> Add New Client
             </Button>
           </NavLink>
-          <Button onClick={downloadClientsCSV}>
-            <Download />
+          <Button onClick={handleCsvDownload} disabled={downloadingCsv}>
+            {downloadingCsv ? (
+              <LoaderCircle className="animate-spin" />
+            ) : (
+              <Download />
+            )}
           </Button>
         </div>
       </div>

@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 // import { useLocation } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { downloadInvoicesCSV, getAllInvoices, getArchiveInvoices } from "@/store/data";
+import {
+  downloadInvoicesCSV,
+  getAllInvoices,
+  getArchiveInvoices,
+} from "@/store/data";
 import TableBuilder from "../TableBuilder";
 import { Archive, Download, LoaderCircle } from "lucide-react";
 
@@ -17,12 +21,27 @@ const InvoicesTable = <TData, TValue>({
   const [archived, setArchived] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloadingCsv, setDownloadingCsv] = useState(false);
+
+  const handleCsvDownload = async () => {
+    setDownloadingCsv(true);
+    try {
+      await downloadInvoicesCSV();
+    } catch (error) {
+      console.error("Error downloading CSV:", error);
+      setError("Failed to download CSV. Please try again later.");
+    } finally {
+      setDownloadingCsv(false);
+    }
+  };
 
   const fetchInvoiceData = async () => {
     try {
       setLoading(true);
       setError(null); // Reset error state before fetching
-      const response = archived ? await getArchiveInvoices() : await getAllInvoices();
+      const response = archived
+        ? await getArchiveInvoices()
+        : await getAllInvoices();
       // console.log("Fetched invoices:", response);
       setInvoices(response);
     } catch (error) {
@@ -67,8 +86,12 @@ const InvoicesTable = <TData, TValue>({
           <Archive />
           {archived ? "View Active Invoices" : "View Archive"}
         </Button>
-        <Button onClick={downloadInvoicesCSV}>
-          <Download />
+        <Button onClick={handleCsvDownload} disabled={downloadingCsv}>
+          {downloadingCsv ? (
+            <LoaderCircle className="animate-spin" />
+          ) : (
+            <Download />
+          )}
         </Button>
       </div>
       <TableBuilder

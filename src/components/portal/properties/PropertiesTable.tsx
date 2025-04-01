@@ -12,7 +12,11 @@ import {
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-import { getProperties, getArchiveProperties, downloadPropertiesCSV } from "@/store/data"; // Import both data-fetching functions
+import {
+  getProperties,
+  getArchiveProperties,
+  downloadPropertiesCSV,
+} from "@/store/data"; // Import both data-fetching functions
 import TableBuilder from "../TableBuilder";
 import { Archive, Download, LoaderCircle } from "lucide-react";
 import { Properties } from "./columns";
@@ -32,7 +36,19 @@ const PropertiesTable = <TData extends Properties, TValue>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloadingCsv, setDownloadingCsv] = useState(false);
 
+  const handleCsvDownload = async () => {
+    setDownloadingCsv(true);
+    try {
+      await downloadPropertiesCSV();
+    } catch (error) {
+      console.error("Error downloading CSV:", error);
+      setError("Failed to download CSV. Please try again later.");
+    } finally {
+      setDownloadingCsv(false);
+    }
+  };
   useEffect(() => {
     const fetchProperties = async () => {
       try {
@@ -126,8 +142,12 @@ const PropertiesTable = <TData extends Properties, TValue>({
             <Archive />
             {archived ? "View Active" : "View Archived"}
           </Button>
-          <Button onClick={downloadPropertiesCSV}>
-            <Download />
+          <Button onClick={handleCsvDownload} disabled={downloadingCsv}>
+            {downloadingCsv ? (
+              <LoaderCircle className="animate-spin" />
+            ) : (
+              <Download />
+            )}
           </Button>
         </div>
       </div>

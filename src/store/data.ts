@@ -386,7 +386,7 @@ export const downloadClientsCSV = async () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `clients_${getFormattedDate()}.csv`; // Include today's date in the filename
+    a.download = `clients_${getFormattedDate()}.xlsx`; // Include today's date in the filename
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -408,7 +408,7 @@ export const downloadProspectsCSV = async () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `prospects_${getFormattedDate()}.csv`; // Include today's date in the filename
+    a.download = `prospects_${getFormattedDate()}.xlsx`; // Include today's date in the filename
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -430,7 +430,7 @@ export const downloadPropertiesCSV = async () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `properties_${getFormattedDate()}.csv`; // Include today's date in the filename
+    a.download = `properties_${getFormattedDate()}.xlsx`; // Include today's date in the filename
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -452,7 +452,7 @@ export const downloadInvoicesCSV = async () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `invoices_${getFormattedDate()}.csv`; // Include today's date in the filename
+    a.download = `invoices_${getFormattedDate()}.xlsx`; // Include today's date in the filename
     document.body.appendChild(a);
     a.click();
     a.remove();

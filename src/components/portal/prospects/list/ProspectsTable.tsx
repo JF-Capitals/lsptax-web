@@ -43,7 +43,19 @@ const ProspectTable = <TData, TValue>({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [archived, setArchived] = useState(false); // State to track archive view
+  const [downloadingCsv, setDownloadingCsv] = useState(false);
 
+  const handleCsvDownload = async () => {
+    setDownloadingCsv(true);
+    try {
+      await downloadProspectsCSV();
+    } catch (error) {
+      console.error("Error downloading CSV:", error);
+      setError("Failed to download CSV. Please try again later.");
+    } finally {
+      setDownloadingCsv(false);
+    }
+  };
   const fetchProspects = async () => {
     try {
       setLoading(true);
@@ -134,7 +146,7 @@ const ProspectTable = <TData, TValue>({
           <h2 className="text-2xl font-bold">{prospects.length}</h2>
           <h3>Total number of {archived ? "Archived" : "Active"} Prospects</h3>
         </div>
-        <div >
+        <div>
           <Button
             onClick={() => setArchived((prev) => !prev)}
             className="flex items-center gap-2"
@@ -146,8 +158,12 @@ const ProspectTable = <TData, TValue>({
         <NavLink to={`/portal/prospect/add-prospect`}>
           <Button className="w-full">Add New Prospect</Button>
         </NavLink>
-        <Button onClick={downloadProspectsCSV}>
-          <Download />
+        <Button onClick={handleCsvDownload} disabled={downloadingCsv}>
+          {downloadingCsv ? (
+            <LoaderCircle className="animate-spin" />
+          ) : (
+            <Download />
+          )}
         </Button>
       </div>
       {/* Filter Dropdown */}
