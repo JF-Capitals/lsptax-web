@@ -149,7 +149,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
         {isDashboard ? (
           <HeaderDescriptionItem
             icon=""
-            label={`Welcome,${`${localStorage.getItem("user")}`}`}
+            label={`Welcome,${username}`}
             desc="This is your dashboard."
           />
         ) : currentHeader ? (
@@ -162,7 +162,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
           <div className="hidden md:block">
             <HeaderDescriptionItem
               icon={""}
-              label={`Welcome, ${name}`}
+              label={`Welcome, ${username}`}
               desc={""}
             />
           </div>
@@ -174,7 +174,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
           <DropdownMenu>
             <DropdownMenuTrigger>
               <div className="text-sm flex gap-1 border p-1 rounded-lg">
-                <User2 size={20}/>
+                <User2 size={20} />
                 <h1>{username}</h1>
               </div>
             </DropdownMenuTrigger>

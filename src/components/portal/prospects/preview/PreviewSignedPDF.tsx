@@ -13,6 +13,7 @@ interface ProspectData {
   prospect: Prospect;
   properties: Property[];
 }
+
 const PreviewSignedPdf = () => {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
@@ -21,84 +22,69 @@ const PreviewSignedPdf = () => {
     null
   );
   const [clientData, setClientData] = useState<ProspectData | null>(null);
-  const [isSending, setIsSending] = useState(false); // Track sending state
+  const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
+
+  const convertBase64ToUint8Array = (base64String: string): Uint8Array => {
+    const base64WithoutPrefix = base64String.split(";base64,").pop() || "";
+    const byteCharacters = atob(base64WithoutPrefix);
+    return new Uint8Array(
+      Array.from(byteCharacters, (char) => char.charCodeAt(0))
+    );
+  };
 
   useEffect(() => {
     const fetchPreviewDocuments = async () => {
       try {
-        console.log("Fetching preview documents for prospectId:", id);
-
-        const response = await getPreviewDocuments({
-          prospectId: Number(id),
-        });
-
-        if (response?.aoaPdf) {
-          const aoaPdf = convertBase64ToUint8Array(response.aoaPdf);
-          setAoaPdfData(aoaPdf);
-        } else {
-          console.error("AOA PDF is missing or invalid");
-        }
-
-        if (response?.contractPdf) {
-          const contractPdf = convertBase64ToUint8Array(response.contractPdf);
-          setContractPdfData(contractPdf);
-        } else {
-          console.error("Contract PDF is missing or invalid");
-        }
+        const response = await getPreviewDocuments({ prospectId: Number(id) });
+        if (response?.aoaPdf)
+          setAoaPdfData(convertBase64ToUint8Array(response.aoaPdf));
+        if (response?.contractPdf)
+          setContractPdfData(convertBase64ToUint8Array(response.contractPdf));
       } catch (error) {
         console.error("Error fetching contract preview data:", error);
       }
     };
+
     const fetchClientData = async () => {
       try {
-        if (id) {
-          const response = await getSingleProspect({ prospectId: id });
-          setClientData(response);
-        }
+        if (id) setClientData(await getSingleProspect({ prospectId: id }));
       } catch (error) {
         console.error("Error fetching client data:", error);
       }
     };
+
     if (id) {
       fetchPreviewDocuments();
       fetchClientData();
-    } else {
-      console.error("Prospect ID is missing");
     }
   }, [id]);
+
   if (!clientData) {
     return (
-      <div className="text-center text-gray-500">Loading client data...</div>
+      <div className="flex flex-col items-center justify-center h-screen text-gray-500 bg-transparent">
+        <LoaderCircle className="w-8 h-8 animate-spin mb-4" />
+        <p>Loading client data...</p>
+      </div>
     );
   }
-  // Convert Base64 to Uint8Array for PDF.js
-  const convertBase64ToUint8Array = (base64String: string): Uint8Array => {
-    const base64WithoutPrefix = base64String.split(";base64,").pop() || "";
-    const byteCharacters = atob(base64WithoutPrefix);
-    const byteNumbers = new Uint8Array(
-      Array.from(byteCharacters, (char) => char.charCodeAt(0))
-    );
-    return byteNumbers;
-  };
+
   const handleSendContract = async (id: number) => {
     setIsSending(true);
     try {
       await sendContract({ prospectId: id });
       toast({
         title: "Contract Sent Successfully",
-        description: `Contract Sent to id:${id}`,
+        description: `Contract sent to ID: ${id}`,
       });
-      setClientData((prevData) => {
-        if (!prevData) return prevData;
-        return {
-          ...prevData,
-          prospect: {
-            ...prevData.prospect,
-            status: "IN_PROGRESS",
-          },
-        };
-      });
+      setClientData((prevData) =>
+        prevData
+          ? {
+              ...prevData,
+              prospect: { ...prevData.prospect, status: "IN_PROGRESS" },
+            }
+          : prevData
+      );
       if (clientData?.prospect.status === "CONTACTED") {
         await changeProspectStatus({
           prospectId: id,
@@ -115,21 +101,20 @@ const PreviewSignedPdf = () => {
       setIsSending(false);
     }
   };
+
   return (
-    <div className="p-4">
+    <div className="p-4 bg-transparent">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold mb-4">Preview Contract PDFs</h1>
+        <h1 className="text-xl font-bold">Preview Contract PDFs</h1>
         <Button
-          variant={"blue"}
-          // className="w-full"
+          variant="blue"
           onClick={() => handleSendContract(clientData.prospect.id)}
         >
           {clientData.prospect.status === "IN_PROGRESS" ? (
             "Sent"
           ) : isSending ? (
             <span className="flex items-center gap-2">
-              <LoaderCircle className="animate-spin w-5 h-5" />
-              Sending...
+              <LoaderCircle className="animate-spin w-5 h-5" /> Sending...
             </span>
           ) : (
             "Send Contract"
@@ -137,38 +122,32 @@ const PreviewSignedPdf = () => {
         </Button>
       </div>
 
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-2">AOA Form</h2>
-        {aoaPdfData ? (
-          <Worker
-            workerUrl={`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`}
+      <div className="flex flex-col gap-4 bg-transparent">
+        {[
+          { title: "AOA Form", data: aoaPdfData },
+          { title: "Contract Form", data: contractPdfData },
+        ].map(({ title, data }, index) => (
+          <div
+            key={index}
+            className="p-4 rounded-lg bg-transparent border border-gray-300"
           >
-            <Viewer
-              fileUrl={URL.createObjectURL(
-                new Blob([aoaPdfData], { type: "application/pdf" })
-              )}
-            />
-          </Worker>
-        ) : (
-          <p>Loading AOA Form...</p>
-        )}
-      </div>
-
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Contract Form</h2>
-        {contractPdfData ? (
-          <Worker
-            workerUrl={`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`}
-          >
-            <Viewer
-              fileUrl={URL.createObjectURL(
-                new Blob([contractPdfData], { type: "application/pdf" })
-              )}
-            />
-          </Worker>
-        ) : (
-          <p>Loading Contract Form...</p>
-        )}
+            <h2 className="text-lg font-semibold mb-2">{title}</h2>
+            {data ? (
+              <Worker workerUrl="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js">
+                <Viewer
+                  fileUrl={URL.createObjectURL(
+                    new Blob([data], { type: "application/pdf" })
+                  )}
+                />
+              </Worker>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-32 text-gray-500">
+                <LoaderCircle className="w-6 h-6 animate-spin mb-2" />
+                <p>Loading {title}...</p>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
