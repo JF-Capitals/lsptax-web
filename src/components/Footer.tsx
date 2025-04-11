@@ -44,24 +44,24 @@ const Footer = () => {
           <div className="flex flex-col space-y-2">
             <h3 className="text-lg font-bold text-[#0093FF]">Quick Links</h3>
             <div className="flex flex-col space-y-1">
-              <NavLink
+              {/* <NavLink
                 to="/portal/dashboard"
                 className="text-white hover:text-blue-400 transition-all duration-300 hover:translate-x-2"
               >
                 Admin Portal
-              </NavLink>
-              <NavLink
+              </NavLink> */}
+              {/* <NavLink
                 to="#service"
                 className="text-white hover:text-blue-400 transition-all duration-300 hover:translate-x-2"
               >
                 Our Services
-              </NavLink>
-              <NavLink
-                to="/about"
+              </NavLink> */}
+              <a
+                 href="#about"
                 className="text-white hover:text-blue-400 transition-all duration-300 hover:translate-x-2"
               >
                 About Us
-              </NavLink>
+              </a>
             </div>
           </div>
         </div>
