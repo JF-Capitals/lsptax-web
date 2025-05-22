@@ -123,15 +123,13 @@ const PropertiesTable = <TData extends Properties, TValue>({
         <div className="flex flex-col gap-2 w-full">
           <h1>Quick search a Property</h1>
           <Input
-            placeholder="Search Property Name..."
-            value={
-              (table
-                .getColumn("propertyAccount")
-                ?.getFilterValue() as string) ?? ""
-            }
+            placeholder="Search CAD Owner Name..."
+            value={String(
+              table.getColumn("cadOwner.name")?.getFilterValue() ?? ""
+            )}
             onChange={(event) =>
               table
-                .getColumn("propertyAccount")
+                .getColumn("cadOwner.name")
                 ?.setFilterValue(event.target.value)
             }
             className="max-w-sm"

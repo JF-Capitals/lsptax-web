@@ -89,32 +89,31 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
     },
   },
   {
-    accessorKey: "cadOwner",
+    id: "cadOwner.name",
+    accessorFn: (row) => row.cadOwner?.name ?? "",
     header: "CAD Owner",
+    enableColumnFilter: true,
     cell: ({ row }) => {
       const owner = row.original.cadOwner;
       return (
-        <div className="">
+        <div>
           <div className="flex flex-col">
             <h1 className="text-xs font-bold text-muted-foreground">Name:</h1>
             {owner.name}
           </div>
           <div className="flex flex-col">
-            <h1 className="text-xs font-bold text-muted-foreground">
-              Address:
-            </h1>{" "}
-            {owner.address ? owner.address : "N/A"}
+            <h1 className="text-xs font-bold text-muted-foreground">Address:</h1>
+            {owner.address ?? "N/A"}
           </div>
           <div className="flex flex-col">
-            <h1 className="text-xs font-bold text-muted-foreground">
-              Mailing Address:
-            </h1>
-            {owner.mailingAddress ? owner.mailingAddress : "N/A"}
+            <h1 className="text-xs font-bold text-muted-foreground">Mailing Address:</h1>
+            {owner.mailingAddress ?? "N/A"}
           </div>
         </div>
       );
     },
-  },
+  },  
+
   // {
   //   accessorKey: "hearingDate",
   //   header: "Hearing Date",
