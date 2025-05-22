@@ -12,12 +12,10 @@ const Dashboard = () => {
   const [clientData, setClientData] = useState<Clients | null>(null);
   const [prospectData, setProspectData] = useState<Prospect | null>(null);
   useEffect(() => {
-    // Fetch stats from dashboardData function
     const fetchData = async () => {
       try {
-        const fetchedPropData = await getProperties();
-        const fetchedClientData = await getClients();
-        const fetchedProspectData = await getProspects();
+        const [fetchedPropData, fetchedClientData, fetchedProspectData] =
+          await Promise.all([getProperties(), getClients(), getProspects()]);
         setPropData(fetchedPropData);
         setClientData(fetchedClientData);
         setProspectData(fetchedProspectData);
@@ -27,6 +25,7 @@ const Dashboard = () => {
     };
     fetchData();
   }, []);
+  
 
   if (!propData || !clientData || !prospectData) {
     return (
