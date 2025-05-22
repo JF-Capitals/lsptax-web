@@ -28,11 +28,18 @@ const formSchema = z.object({
   CLIENTNumber: z.string().optional(),
   CLIENTNAME: z.string().min(1, "Client name is required"),
   Email: z.string().email("Invalid email address"),
-  BillingEmail: z.string().email("Invalid billing email address"),
+  BillingEmail: z
+    .string()
+    .optional()
+    .or(z.literal("")) // allow empty string
+    .refine((val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: "Invalid billing email address",
+    }),
+  BillingAddress: z.string().optional(),
+
   PHONENUMBER: z.string().min(1, "Phone number is required"),
   MAILINGADDRESS: z.string().min(1, "Mailing Address is required"),
   MAILINGADDRESSCITYTXZIP: z.string().min(1, "City, State, ZIP is required"),
-  BillingAddress: z.string().min(1, "City, State, ZIP is required"),
   IsArchived: z.boolean().optional(),
   useSameAsMailing: z.boolean().default(false),
   useSameAsEmail: z.boolean().default(false),
@@ -59,11 +66,30 @@ export default function AddClientForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true); // Set loading state
+    setIsSubmitting(true);
     try {
-      if (!values) { 
-        await addClient(values);
+      if (!values) {
+        toast({
+          title: "Data Missing!",
+          description: "Please Add Data.",
+        });
+        return;
       }
+
+      // Extract only valid API fields
+      const clientPayload = {
+        CLIENTNAME: values.CLIENTNAME,
+        Email: values.Email,
+        BillingEmail: values.BillingEmail,
+        PHONENUMBER: values.PHONENUMBER,
+        MAILINGADDRESS: values.MAILINGADDRESS,
+        MAILINGADDRESSCITYTXZIP: values.MAILINGADDRESSCITYTXZIP,
+        BillingAddress: values.BillingAddress,
+        TypeOfAcct: values.TypeOfAcct ?? "Real",
+        IsArchived: values.IsArchived ?? false,
+      };
+
+      await addClient(clientPayload);
 
       toast({
         title: "✓ Client added successfully",
@@ -88,9 +114,10 @@ export default function AddClientForm() {
         });
       }
     } finally {
-      setIsSubmitting(false); // Reset loading state
+      setIsSubmitting(false);
     }
   }
+  
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-10">
