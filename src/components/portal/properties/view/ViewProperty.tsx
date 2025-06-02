@@ -248,7 +248,7 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
           <table className="table-auto w-full">
             <tbody>
               <tr>
-                <td className="font-medium">Assessor:</td>
+                <td className="font-medium">Contract Owner:</td>
                 <td>{property.propertyDetails.CONTACTOWNER}</td>
               </tr>
               <tr>

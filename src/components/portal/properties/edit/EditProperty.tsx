@@ -61,23 +61,23 @@ type TableRow = {
 };
 
 const formSchema = z.object({
-  StatusNotes: z.string().optional(),
-  OtherNotes: z.string().optional(),
-  NAMEONCAD: z.string().optional(),
-  MAILINGADDRESS: z.string().optional(),
-  MAILINGADDRESSCITYTXZIP: z.string().optional(),
-  CADMailingADDRESS: z.string().optional(),
-  CADCITY: z.string().optional(),
-  CADZIPCODE: z.string().optional(),
-  CADCOUNTY: z.string().optional(),
-  AccountNumber: z.string().optional(),
-  CLIENTNumber: z.string().optional(),
-  CONTACTOWNER: z.string().optional(),
-  SUBCONTRACTOWNER: z.string().optional(),
-  BPPFEE: z.string().optional(),
-  CONTINGENCYFee: z.string().optional(),
-  FlatFee: z.string().optional(),
-  IsArchived: z.boolean().default(false),
+  StatusNotes: z.string().optional().default(""),
+  OtherNotes: z.string().optional().default(""),
+  NAMEONCAD: z.string().optional().default(""),
+  MAILINGADDRESS: z.string().optional().default(""),
+  MAILINGADDRESSCITYTXZIP: z.string().optional().default(""),
+  CADMailingADDRESS: z.string().optional().default(""),
+  CADCITY: z.string().optional().default(""),
+  CADZIPCODE: z.string().optional().default(""),
+  CADCOUNTY: z.string().optional().default(""),
+  AccountNumber: z.string().optional().default(""),
+  CLIENTNumber: z.string().optional().default(""),
+  CONTACTOWNER: z.string().optional().default(""),
+  SUBCONTRACTOWNER: z.string().optional().default(""),
+  BPPFEE: z.string().optional().default(""),
+  CONTINGENCYFee: z.string().optional().default(""),
+  FlatFee: z.string().optional().default(""),
+  IsArchived: z.boolean().optional().default(false),
 });
 
 interface CompleteSubmission {
@@ -635,21 +635,26 @@ export default function EditProperty() {
 
         {/* Submit Buttons */}
         <div className="flex justify-end gap-4 mt-6">
-          <Button type="button" variant="outline" onClick={() => form.reset()}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => form.reset()}
+            className="w-32"
+          >
             Reset
           </Button>
           <Button
             type="submit"
-            className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center"
+            className="w-32 bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center"
             disabled={loading}
           >
             {loading ? (
               <>
                 <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
-                Saving Changes...
+                Saving...
               </>
             ) : (
-              "Save Changes"
+              "Save"
             )}
           </Button>
         </div>
