@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "react-router-dom";
@@ -21,52 +21,55 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { getSingleClient } from "@/store/data";
-import { ClientData, Property } from "@/types/types";
 import { LoaderCircle } from "lucide-react";
 import { editClient } from "@/api/api";
 
-interface Client {
-  client: ClientData;
-  properties: Property[];
-}
 
 export default function EditClient() {
-  const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
   const [searchParams] = useSearchParams();
+    const { toast } = useToast();
   const clientId = searchParams.get("clientId");
+  console.log({ clientId });
+  async function loadClientData() {
+    try {
+      if (clientId) {
+        const data = await getSingleClient({ clientId: clientId });
+        console.log({ data });
+        // setClient(data);
+        setLoading(false);
 
-  useEffect(() => {
-    async function loadClientData() {
-      try {
-        if (clientId) {
-          const data = await getSingleClient({ clientId: clientId });
-          setClient(data);
-          setLoading(false);
-          form.reset({
-            TypeOfAcct: client?.client.TypeOfAcct || "",
-            CLIENTNumber: client?.client.CLIENTNumber || "",
-            CLIENTNAME: client?.client.CLIENTNAME || "",
-            Email: client?.client.Email || "",
-            BillingEmail: client?.client.BillingEmail || "",
-            PHONENUMBER: client?.client.PHONENUMBER || "",
-            MAILINGADDRESS: client?.client.MAILINGADDRESS || "",
-            MAILINGADDRESSCITYTXZIP:
-              client?.client.MAILINGADDRESSCITYTXZIP || "",
-            BillingAddress: client?.client.BillingAddress || "",
-            IsArchived: client?.client.IsArchived || false,
-            useSameAsEmail: false,
-            useSameAsMailing: false,
-          });
-        }
-      } catch (error) {
-        console.error("Failed to load client data", error);
-        toast.error("Could not load client data. Please try again later.");
-        setError("Error getting client details");
+        const fields = {
+          TypeOfAcct: data?.client.TypeOfAcct || "",
+          CLIENTNumber: data?.client.CLIENTNumber || "",
+          CLIENTNAME: data?.client.CLIENTNAME || "",
+          Email: data?.client.Email || "",
+          BillingEmail: data?.client.BillingEmail || "",
+          PHONENUMBER: data?.client.PHONENUMBER || "",
+          MAILINGADDRESS: data?.client.MAILINGADDRESS || "",
+          MAILINGADDRESSCITYTXZIP: data?.client.MAILINGADDRESSCITYTXZIP || "",
+          BillingAddress: data?.client.BillingAddress || "",
+          IsArchived: data?.client.IsArchived || false,
+          useSameAsEmail: false,
+          useSameAsMailing: false,
+        };
+
+        Object.entries(fields).forEach(([key, value]) => {
+          form.setValue(key as keyof typeof fields, value);
+        });
       }
+    } catch (error) {
+      console.error("Failed to load client data", error);
+      toast({
+        title: "Could not load client data. Please try again later.",
+        variant: "destructive",
+      });
+      setError("Error getting client details");
     }
+  }
+  useEffect(() => {
     if (clientId) {
       loadClientData();
     }
@@ -100,12 +103,16 @@ export default function EditClient() {
     setIsSubmitting(true); // Set loading state
     try {
       if (clientId) {
-        await editClient(clientId, values);
+        const { useSameAsEmail, useSameAsMailing, ...backendValues } = values;
+        await editClient(clientId, backendValues);
       }
-      toast.success("Client updated successfully!");
+      toast({ title: "Client updated successfully!" });
     } catch (error) {
       console.error("Failed to update client", error);
-      toast.error("Failed to update client. Please try again.");
+      toast({
+        title: "Failed to update client. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false); // Reset loading state
     }

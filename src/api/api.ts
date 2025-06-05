@@ -201,7 +201,7 @@ export const editProperty = async (
 };
 
 export const editClient = async (
-  cliendId: string,
+  clientId: string,
   clientDetails: any,
 ) => {
   try {
@@ -209,13 +209,13 @@ export const editClient = async (
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/action/edit-client`,
       {
-        method: "PUT",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          cliendId,
+          clientId,
           clientDetails
         }),
       }
@@ -226,8 +226,8 @@ export const editClient = async (
       const errorText = await response.text();
       throw new Error(errorText || "Failed to update client");
     }
-
-    const data = await response.json();
+    const text = await response.text();
+    const data = text ? JSON.parse(text) : {};
     return data;
   } catch (error: unknown) {
     let errorMessage = "Client Update Failed. Please try again.";

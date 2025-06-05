@@ -61,8 +61,8 @@ type TableRow = {
 };
 
 const formSchema = z.object({
-  StatusNotes: z.string().optional().default(""),
-  OtherNotes: z.string().optional().default(""),
+  StatusNotes: z.string().nullable().default(""),
+  OtherNotes: z.string().nullable().default(""),
   NAMEONCAD: z.string().optional().default(""),
   MAILINGADDRESS: z.string().optional().default(""),
   MAILINGADDRESSCITYTXZIP: z.string().optional().default(""),
@@ -72,8 +72,8 @@ const formSchema = z.object({
   CADCOUNTY: z.string().optional().default(""),
   AccountNumber: z.string().optional().default(""),
   CLIENTNumber: z.string().optional().default(""),
-  CONTACTOWNER: z.string().optional().default(""),
-  SUBCONTRACTOWNER: z.string().optional().default(""),
+  CONTACTOWNER: z.string().nullable().default(""),
+  SUBCONTRACTOWNER: z.string().nullable().default(""),
   BPPFEE: z.string().optional().default(""),
   CONTINGENCYFee: z.string().optional().default(""),
   FlatFee: z.string().optional().default(""),
@@ -478,7 +478,11 @@ export default function EditProperty() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contract Owner</FormLabel>
-                  <Input placeholder="Enter Contract Owner Name" {...field} />
+                  <Input
+                    placeholder="Enter Contract Owner Name"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -490,7 +494,11 @@ export default function EditProperty() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Subcontract Owner</FormLabel>
-                  <Input placeholder="Enter Subcontract Owner" {...field} />
+                  <Input
+                    placeholder="Enter Subcontract Owner"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -529,7 +537,11 @@ export default function EditProperty() {
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel>Status Notes</FormLabel>
-                  <Input placeholder="Enter Status Notes" {...field} />
+                  <Input
+                    placeholder="Enter Status Notes"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -540,7 +552,11 @@ export default function EditProperty() {
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel>Other Notes</FormLabel>
-                  <Input placeholder="Enter Other Notes" {...field} />
+                  <Input
+                    placeholder="Enter Other Notes"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                   <FormMessage />
                 </FormItem>
               )}
