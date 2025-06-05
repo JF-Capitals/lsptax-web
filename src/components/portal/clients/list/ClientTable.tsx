@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   ColumnDef,
-  SortingState,
-  getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
-  getPaginationRowModel,
   ColumnFiltersState,
-  getFilteredRowModel,
-  VisibilityState,
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +11,7 @@ import { getArchiveClients } from "@/store/data"; // Import the function
 import { Archive, Download, LoaderCircle, UserRoundPlus } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import TableBuilder from "../../TableBuilder";
+import UploadCsvButton from "./uploadCSV";
 
 interface ClientTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -28,12 +22,11 @@ const ClientTable = <TData, TValue>({
 }: ClientTableProps<TData, TValue>) => {
   const [clients, setClients] = useState<TData[]>([]);
   const [archived, setArchived] = useState(false); // State to track archive view
-  const [sorting, setSorting] = useState<SortingState>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [downloadingCsv, setDownloadingCsv] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleCsvDownload = async () => {
     setDownloadingCsv(true);
@@ -68,23 +61,6 @@ const ClientTable = <TData, TValue>({
     fetchClients();
   }, [archived]); // Refetch data when archive state changes
 
-  const table = useReactTable({
-    data: clients,
-    columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-    },
-  });
-
   if (loading) {
     return (
       <div className="flex justify-center h-full items-center py-20">
@@ -114,15 +90,9 @@ const ClientTable = <TData, TValue>({
         <div className="flex flex-col w-full gap-2">
           <h1>Quick search a Client</h1>
           <Input
-            placeholder="Search Client Name..."
-            value={
-              (table.getColumn("clientName")?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) => {
-              table
-                .getColumn("clientName")
-                ?.setFilterValue(event.target.value || undefined);
-            }}
+            placeholder="Search Name or Client Number..."
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
             className="max-w-sm"
           />
         </div>
@@ -136,6 +106,12 @@ const ClientTable = <TData, TValue>({
               <UserRoundPlus /> Add New Client
             </Button>
           </NavLink>
+          <UploadCsvButton
+            onSuccess={fetchClients}
+            onError={() =>
+              setError("Failed to upload CSV. Please try again later.")
+            }
+          />
           <Button onClick={handleCsvDownload} disabled={downloadingCsv}>
             {downloadingCsv ? (
               <LoaderCircle className="animate-spin" />
@@ -146,7 +122,13 @@ const ClientTable = <TData, TValue>({
         </div>
       </div>
       <TableBuilder
-        data={clients}
+        data={clients.filter((client: any) => {
+          const value = searchTerm.toLowerCase();
+          return (
+            client.clientName?.toLowerCase().includes(value) ||
+            client.clientId?.toString().toLowerCase().includes(value)
+          );
+        })}
         columns={columns}
         label="Clients"
         columnFilters={columnFilters}
