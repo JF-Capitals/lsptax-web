@@ -37,7 +37,7 @@ export const clientsColumn: ColumnDef<Clients>[] = [
     header: "Client #",
     cell: ({ row }) => {
       const clientNum = row.original.clientNumber;
-      const clientId = row.original.clientId
+      const clientId = row.original.clientId;
 
       return (
         <NavLink to={`/portal/client?clientId=${clientNum}`}>
@@ -68,13 +68,14 @@ export const clientsColumn: ColumnDef<Clients>[] = [
     header: "Actions",
     cell: ({ row }) => {
       const { toast } = useToast();
-      const id = row.original.clientNumber;
+      const clientNum = row.original.clientId;
+      const clientId = row.original.clientNumber;
       const clientName = row.original.clientName;
       const isArchived = row.original.isArchived; // Assuming `isArchived` is part of the client data
 
       const handleDelete = async () => {
         try {
-          await deleteClient(Number(id));
+          await deleteClient(Number(clientId));
           toast({
             title: "✓ Client deleted successfully",
             description: "The client has been deleted from the system.",
@@ -90,7 +91,7 @@ export const clientsColumn: ColumnDef<Clients>[] = [
 
       const handleArchive = async () => {
         try {
-          await archiveItem("client", Number(id));
+          await archiveItem("client", Number(clientId));
           toast({
             title: "✓ Client archived successfully",
             description: "The client has been archived.",
@@ -106,7 +107,7 @@ export const clientsColumn: ColumnDef<Clients>[] = [
 
       const handleMoveToActive = async () => {
         try {
-          await archiveItem("client", Number(id)); // Assuming the same API can unarchive by toggling `isArchived`
+          await archiveItem("client", Number(clientId)); // Assuming the same API can unarchive by toggling `isArchived`
           toast({
             title: "✓ Client moved to active successfully",
             description: "The client is now active.",
@@ -134,7 +135,8 @@ export const clientsColumn: ColumnDef<Clients>[] = [
                 <AlertDialogHeader>
                   <AlertDialogTitle>Archive Client</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to archive client {clientName} (#{id}
+                    Are you sure you want to archive client {clientName} (#
+                    {clientNum}
                     )? This action can be undone by restoring the client later.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
@@ -162,8 +164,8 @@ export const clientsColumn: ColumnDef<Clients>[] = [
                   <AlertDialogHeader>
                     <AlertDialogTitle>Move Client to Active</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Are you sure you want to move client {clientName} (#{id})
-                      to active?
+                      Are you sure you want to move client {clientName} (#
+                      {clientNum}) to active?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -187,9 +189,9 @@ export const clientsColumn: ColumnDef<Clients>[] = [
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Client</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will permanently delete client {clientName} (#{id})
-                      and all associated properties and invoices. This action
-                      cannot be undone.
+                      This will permanently delete client {clientName} (#
+                      {clientId}) and all associated properties and invoices.
+                      This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
