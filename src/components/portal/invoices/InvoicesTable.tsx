@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 // import { useLocation } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   downloadInvoicesCSV,
   getAllInvoices,
   getArchiveInvoices,
 } from "@/store/data";
 import TableBuilder from "../TableBuilder";
-import { Archive, Download, LoaderCircle } from "lucide-react";
+import { Archive, Download, LoaderCircle, Search, X } from "lucide-react";
 
 interface InvoicesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -18,10 +19,12 @@ const InvoicesTable = <TData, TValue>({
   columns,
 }: InvoicesTableProps<TData, TValue>) => {
   const [invoices, setInvoices] = useState<TData[]>([]);
+  const [allInvoices, setAllInvoices] = useState<TData[]>([]); // Store all invoices for filtering
   const [archived, setArchived] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleCsvDownload = async () => {
     setDownloadingCsv(true);
@@ -43,6 +46,7 @@ const InvoicesTable = <TData, TValue>({
         ? await getArchiveInvoices()
         : await getAllInvoices();
       // console.log("Fetched invoices:", response);
+      setAllInvoices(response);
       setInvoices(response);
     } catch (error) {
       console.error("Error fetching invoice data:", error);
@@ -101,8 +105,12 @@ const InvoicesTable = <TData, TValue>({
     setInvoices(allInvoices);
   };
 
+
+
   useEffect(() => {
     fetchInvoiceData();
+    // Reset search when switching between archived and active
+    setSearchTerm("");
   }, [archived]);
 
   if (loading) {
