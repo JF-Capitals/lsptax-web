@@ -1,14 +1,14 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   ColumnDef,
-  SortingState,
-  getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
-  getPaginationRowModel,
+  // SortingState,
+  // getCoreRowModel,
+  // useReactTable,
+  // getSortedRowModel,
+  // getPaginationRowModel,
   ColumnFiltersState,
-  getFilteredRowModel,
-  VisibilityState,
+  // getFilteredRowModel,
+  // VisibilityState,
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
@@ -31,9 +31,9 @@ const PropertiesTable = <TData extends Properties, TValue>({
 }: PropertiesTableProps<TData, TValue>) => {
   const [properties, setProperties] = useState<TData[]>([]);
   const [archived, setArchived] = useState(false); // Track if viewing archived properties
-  const [sorting, setSorting] = useState<SortingState>([]);
+  // const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  // const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
@@ -90,22 +90,7 @@ const PropertiesTable = <TData extends Properties, TValue>({
     });
   }, [properties, searchTerm]);
 
-  const table = useReactTable({
-    data: filteredProperties,
-    columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-    },
-  });
+
 
   if (loading) {
     return (
