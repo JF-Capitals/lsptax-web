@@ -258,9 +258,9 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
             </Button>
           </div>
 
-          <NavLink to={"/editProperty"}>
+          {/* <NavLink to={"/editProperty"}>
             <Button className="w-full">Schedule Hearing Date</Button>
-          </NavLink>
+          </NavLink> */}
           <Button
             onClick={handleDelete}
             disabled={isDeleting}
