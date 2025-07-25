@@ -58,7 +58,9 @@ export const invoicesColumn: ColumnDef<InvoiceSummary>[] = [
     accessorKey: "amount",
     header: "Amount",
     cell: ({ row }) => {
-      const amount = row.original.totalContingencyFeeDue;
+      const amount = row.original.totalInvoiceAmount;
+      console.log({ original: row.original });
+      console.log({ amount });
       return <div className="font-bold">{formatUSD(amount)}</div>;
     },
   },

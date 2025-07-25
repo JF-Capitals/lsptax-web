@@ -83,7 +83,7 @@ export interface InvoiceSummary {
   isArchived: any;
   clientId: string;
   propertyNumbers: string[]; 
-  totalContingencyFeeDue: number;
+  totalInvoiceAmount: number;
   createdAt: string; 
 }
 
