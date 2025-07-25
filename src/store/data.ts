@@ -218,6 +218,92 @@ export const getAllInvoices = async () => {
   }
 };
 
+// Invoice Generation APIs
+export const getClientsForInvoiceGeneration = async () => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/invoice/clients`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch clients for invoice generation");
+    }
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error("Error fetching clients for invoice generation:", error);
+    throw error;
+  }
+};
+
+export const getPropertiesForInvoiceGeneration = async (clientNumbers: string[]) => {
+  try {
+    const clientNumbersParam = clientNumbers.join(',');
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/invoice/properties?clientNumbers=${clientNumbersParam}`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch properties for invoice generation");
+    }
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error("Error fetching properties for invoice generation:", error);
+    throw error;
+  }
+};
+
+export const generateInvoices = async (options: {
+  clientNumbers: string[];
+  propertyAccountNumbers?: string[];
+  years: number[];
+}) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/invoice/generate`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(options),
+      }
+    );
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to generate invoices");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error generating invoices:", error);
+    throw error;
+  }
+};
+
+export const getInvoiceGenerationStats = async (clientNumbers?: string[], years?: number[]) => {
+  try {
+    const params = new URLSearchParams();
+    if (clientNumbers && clientNumbers.length > 0) {
+      params.append('clientNumbers', clientNumbers.join(','));
+    }
+    if (years && years.length > 0) {
+      params.append('years', years.map(y => y.toString()).join(','));
+    }
+
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/invoice/stats?${params.toString()}`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch invoice generation statistics");
+    }
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error("Error fetching invoice generation stats:", error);
+    throw error;
+  }
+};
+
 export const getArchiveInvoices = async () => {
   try {
     const response = await fetch(

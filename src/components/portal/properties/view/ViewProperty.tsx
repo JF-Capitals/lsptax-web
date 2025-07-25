@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { NavLink, useSearchParams } from "react-router-dom";
-import { getSingleProperty } from "@/store/data";
-import { LoaderCircle, Mail, MapPin, Phone } from "lucide-react";
+import { getSingleProperty, generateInvoices } from "@/store/data";
+import { LoaderCircle, Mail, MapPin, Phone, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PropertyData } from "@/types/types";
 import { deleteProperty } from "@/api/api";
 import YearTable from "../yeardata/YearTable";
 import { useToast } from "@/hooks/use-toast";
+
 
 const ViewProperty = () => {
   const { toast } = useToast();
@@ -15,6 +17,8 @@ const ViewProperty = () => {
   const [error, setError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false); // Track deletion state
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false); // Track invoice section state
+  const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false); // Track invoice generation state
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Track selected year
   const [searchParams, setSearchParams] = useSearchParams();
   const propertyId = parseInt(searchParams.get("propertyId") || "1");
   const [isNavigating, setIsNavigating] = useState<"prev" | "next" | null>(
@@ -122,6 +126,63 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
     }
   };
 
+  const handleGenerateInvoice = async () => {
+    if (!property) {
+      toast({
+        title: "Error",
+        description: "Property data not available",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingInvoice(true);
+    try {
+      const clientNumber = property.propertyDetails.CLIENTNumber;
+      const accountNumber = property.propertyDetails.AccountNumber;
+      
+      if (!clientNumber || !accountNumber) {
+        toast({
+          title: "Error",
+          description: "Missing client number or account number",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log(`🔄 Generating invoice for year: ${selectedYear}, property: ${accountNumber}, client: ${clientNumber}`);
+      
+      const result = await generateInvoices({
+        clientNumbers: [clientNumber],
+        propertyAccountNumbers: [accountNumber],
+        years: [selectedYear], // Use selected year
+      });
+
+      const totalProcessed = result.data.createdInvoices + result.data.updatedInvoices;
+      const description = result.data.updatedInvoices > 0 
+        ? `Processed ${totalProcessed} invoice(s) for ${selectedYear} (${result.data.createdInvoices} created, ${result.data.updatedInvoices} updated)`
+        : `Generated ${result.data.createdInvoices} invoice(s) for ${selectedYear}`;
+
+      toast({
+        title: "✓ Invoice processed successfully",
+        description,
+      });
+
+      // Refresh the property data to show the new invoice
+      await fetchProperty(propertyId);
+      
+    } catch (error) {
+      console.error("Error generating invoice:", error);
+      toast({
+        title: "Error generating invoice",
+        description: error instanceof Error ? error.message : "Failed to generate invoice",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingInvoice(false);
+    }
+  };
+
   useEffect(() => {
     fetchProperty(propertyId);
   }, [propertyId]); // Refetch when propertyId changes
@@ -164,10 +225,38 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
           </NavLink>
 
           <NavLink
-            to={`/portal/invoices?propertyId=${property.propertyDetails.AccountNumber}`}
+            to={`/portal/invoice?clientId=${property.propertyDetails.CLIENTNumber}`}
           >
             <Button className="w-full">View Invoices</Button>
           </NavLink>
+
+          <div className="flex gap-2 w-full">
+            <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Year" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).reverse().map((year) => (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button 
+              onClick={handleGenerateInvoice}
+              disabled={isGeneratingInvoice}
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              {isGeneratingInvoice ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileText className="h-4 w-4" />
+              )}
+              {isGeneratingInvoice ? "Processing..." : "Generate/Update Invoice"}
+            </Button>
+          </div>
 
           <NavLink to={"/editProperty"}>
             <Button className="w-full">Schedule Hearing Date</Button>

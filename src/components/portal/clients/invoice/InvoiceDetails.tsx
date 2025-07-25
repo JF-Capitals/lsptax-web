@@ -4,6 +4,7 @@ import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
+import { formatUSD } from "@/utils/formatCurrency";
 
 const InvoiceDetails: React.FC<{
   invoice?: InvoiceData;
@@ -17,8 +18,12 @@ const InvoiceDetails: React.FC<{
     if (!invoice) return 0;
     return invoice.properties.reduce((total, property) => {
       const yearlyInvoice = getYearlyInvoiceData(property);
-      const fee = yearlyInvoice?.invoiceAmount;
-      return total + (isNaN(fee) ? 0 : fee);
+      const contingencyFee = property.propertyDetails.CONTINGENCYFee || "25";
+      const cleanPercentage = contingencyFee.replace(/%/g, '');
+      const contingencyPercentage = parseFloat(cleanPercentage);
+      const taxableSavings = parseFloat(yearlyInvoice?.taxableSavings || "0");
+      const calculatedFee = taxableSavings * (contingencyPercentage / 100);
+      return total + calculatedFee;
     }, 0);
   };
   const totalFees = calculateFees();
@@ -188,34 +193,46 @@ const InvoiceDetails: React.FC<{
                         {selectedYear} Protest
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        ${yearlyInvoice?.noticeMarketValue?.toFixed(2)}
+                        {formatUSD(yearlyInvoice?.noticeMarketValue)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        ${yearlyInvoice?.finalMarketValue?.toFixed(2)}
+                        {formatUSD(yearlyInvoice?.finalMarketValue)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        ${yearlyInvoice?.marketReduction?.toFixed(2)}
+                        {formatUSD(yearlyInvoice?.marketReduction)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        ${yearlyInvoice?.noticeAppraisedValue?.toFixed(2)}
+                        {formatUSD(yearlyInvoice?.noticeAppraisedValue)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        ${yearlyInvoice?.finalAppraisedValue?.toFixed(2)}
+                        {formatUSD(yearlyInvoice?.finalAppraisedValue)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        ${yearlyInvoice?.appraisedReduction?.toFixed(2)}
+                        {formatUSD(yearlyInvoice?.appraisedReduction)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        ${yearlyInvoice?.taxRate?.toFixed(2)}
+                        {yearlyInvoice?.taxRate?.toFixed(2)}%
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        ${yearlyInvoice?.taxableSavings?.toFixed(2)}
+                        {formatUSD(yearlyInvoice?.taxableSavings)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {yearlyInvoice?.contingency || 25}%
+                        {(() => {
+                          const contingencyFee = property.propertyDetails.CONTINGENCYFee || "25";
+                          // Remove any existing % signs and add one
+                          const cleanPercentage = contingencyFee.replace(/%/g, '');
+                          return `${cleanPercentage}%`;
+                        })()}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        ${yearlyInvoice?.contingencyFee?.toFixed(2)}
+                        {(() => {
+                          const contingencyFee = property.propertyDetails.CONTINGENCYFee || "25";
+                          const cleanPercentage = contingencyFee.replace(/%/g, '');
+                          const contingencyPercentage = parseFloat(cleanPercentage);
+                          const taxableSavings = parseFloat(yearlyInvoice?.taxableSavings || "0");
+                          const calculatedFee = taxableSavings * (contingencyPercentage / 100);
+                          return formatUSD(calculatedFee);
+                        })()}
                       </td>
                     </tr>
                   );
@@ -230,7 +247,7 @@ const InvoiceDetails: React.FC<{
                     Total
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-right">
-                    ${totalFees.toFixed(2)}
+                    {formatUSD(totalFees)}
                   </td>
                 </tr>
               </tfoot>

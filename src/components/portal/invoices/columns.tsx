@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Archive } from "lucide-react";
+import { formatUSD } from "@/utils/formatCurrency";
 
 export const invoicesColumn: ColumnDef<InvoiceSummary>[] = [
   {
@@ -58,7 +59,7 @@ export const invoicesColumn: ColumnDef<InvoiceSummary>[] = [
     header: "Amount",
     cell: ({ row }) => {
       const amount = row.original.totalContingencyFeeDue;
-      return <div className="font-bold">${amount}</div>;
+      return <div className="font-bold">{formatUSD(amount)}</div>;
     },
   },
   {

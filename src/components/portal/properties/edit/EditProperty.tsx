@@ -27,6 +27,7 @@ import { getSingleProperty } from "@/store/data";
 import { PropertyData } from "@/types/types";
 import { editProperty } from "@/api/api";
 import { LoaderCircle } from "lucide-react";
+import { formatUSD, cleanNumberInput } from "@/utils/formatCurrency";
 
 type TableRow = {
   year: number;
@@ -115,14 +116,49 @@ export default function EditProperty() {
     if (!pendingValues) return;
     setLoading(true);
     try {
+      // Filter out years with no meaningful data
+      const meaningfulYearlyData = tableData.reduce((acc, row) => {
+        const { year, ...rowWithoutYear } = row;
+        
+        // Only check user-editable fields, not calculated fields
+        const editableFields = [
+          "Protest Date", "BPP Rendered", "BPP Invoice", "BPP Paid",
+          "Notice Land Value", "Notice Improvement Value", "Notice Appraised Value",
+          "Final Land Value", "Final Improvement Value", "Final Appraised Value",
+          "Hearing Date", "Invoice Date", "Under Litigation", "Under Arbitration",
+          "Tax Rate", "Paid Date", "Payment Notes", "Ending Market", "Ending Appraised"
+        ];
+        
+        // Check if this year has any meaningful data in editable fields
+        const hasData = editableFields.some(field => {
+          const value = rowWithoutYear[field as keyof typeof rowWithoutYear];
+          if (typeof value === 'boolean') {
+            return value === true; // Only include if litigation/arbitration is true
+          }
+          if (typeof value === 'string') {
+            return value.trim() !== '' && value !== '0'; // Exclude empty strings and "0"
+          }
+          if (typeof value === 'number') {
+            return value > 0; // Only include positive numbers
+          }
+          return false;
+        });
+        
+        if (hasData) {
+          acc[year] = rowWithoutYear;
+        }
+        
+        return acc;
+      }, {} as Record<number, Omit<TableRow, "year">>);
+
       const completeSubmission: CompleteSubmission = {
         propertyDetails: pendingValues,
-        yearlyData: tableData.reduce((acc, row) => {
-          const { year, ...rowWithoutYear } = row;
-          acc[year] = rowWithoutYear;
-          return acc;
-        }, {} as Record<number, Omit<TableRow, "year">>),
+        yearlyData: meaningfulYearlyData,
       };
+      
+      console.log(`📝 Sending data for years:`, Object.keys(meaningfulYearlyData));
+      console.log(`📝 Yearly data:`, meaningfulYearlyData);
+      
       await editProperty(
         propertyId!,
         completeSubmission.propertyDetails,
@@ -168,19 +204,19 @@ export default function EditProperty() {
     return years.map((year) => {
       const yearData = invoices?.find((invoice) => invoice.year === year);
 
-      const noticeLandValue = parseFloat(yearData?.noticeLandValue) || 0;
+      const noticeLandValue = parseFloat(cleanNumberInput(yearData?.noticeLandValue?.toString())) || 0;
       const noticeImprovementValue =
-        parseFloat(yearData?.noticeImprovementValue) || 0;
+        parseFloat(cleanNumberInput(yearData?.noticeImprovementValue?.toString())) || 0;
       const noticeAppraisedValue =
-        parseFloat(yearData?.noticeAppraisedValue) || 0;
-      const finalLandValue = parseFloat(yearData?.finalLandValue) || 0;
+        parseFloat(cleanNumberInput(yearData?.noticeAppraisedValue?.toString())) || 0;
+      const finalLandValue = parseFloat(cleanNumberInput(yearData?.finalLandValue?.toString())) || 0;
       const finalImprovementValue =
-        parseFloat(yearData?.finalImprovementValue) || 0;
+        parseFloat(cleanNumberInput(yearData?.finalImprovementValue?.toString())) || 0;
       const finalAppraisedValue =
-        parseFloat(yearData?.finalAppraisedValue) || 0;
-      const taxRate = parseFloat(yearData?.taxRate) || 0;
-      const endingMarket = parseFloat(yearData?.endingMarket) || 0;
-      const endingAppraised = parseFloat(yearData?.endingAppraised) || 0;
+        parseFloat(cleanNumberInput(yearData?.finalAppraisedValue?.toString())) || 0;
+      const taxRate = parseFloat(cleanNumberInput(yearData?.taxRate?.toString())) || 0;
+      const endingMarket = parseFloat(cleanNumberInput(yearData?.endingMarket?.toString())) || 0;
+      const endingAppraised = parseFloat(cleanNumberInput(yearData?.endingAppraised?.toString())) || 0;
 
       // Parse contingency fee from string (e.g., "25%" -> 0.25)
       const contingencyFeeString =
@@ -252,10 +288,22 @@ export default function EditProperty() {
   ) => {
     const { value } = e.target;
 
+    // Clean comma-separated values for numeric fields
+    const numericFields = [
+      "Notice Land Value", "Notice Improvement Value", "Notice Appraised Value",
+      "Final Land Value", "Final Improvement Value", "Final Appraised Value",
+      "Tax Rate", "Ending Market", "Ending Appraised"
+    ];
+
+    let processedValue = value;
+    if (numericFields.includes(columnKey)) {
+      processedValue = cleanNumberInput(value);
+    }
+
     // Update the specific field
     setTableData((prev) =>
       prev.map((row, idx) =>
-        idx === rowIndex ? { ...row, [columnKey]: value } : row
+        idx === rowIndex ? { ...row, [columnKey]: processedValue } : row
       )
     );
 
@@ -286,19 +334,19 @@ export default function EditProperty() {
       prev.map((row, idx) => {
         if (idx !== rowIndex) return row; // Only update the current row
 
-        const noticeLandValue = parseFloat(row["Notice Land Value"]) || 0;
+        const noticeLandValue = parseFloat(cleanNumberInput(row["Notice Land Value"])) || 0;
         const noticeImprovementValue =
-          parseFloat(row["Notice Improvement Value"]) || 0;
+          parseFloat(cleanNumberInput(row["Notice Improvement Value"])) || 0;
         const noticeAppraisedValue =
-          parseFloat(row["Notice Appraised Value"]) || 0;
-        const finalLandValue = parseFloat(row["Final Land Value"]) || 0;
+          parseFloat(cleanNumberInput(row["Notice Appraised Value"])) || 0;
+        const finalLandValue = parseFloat(cleanNumberInput(row["Final Land Value"])) || 0;
         const finalImprovementValue =
-          parseFloat(row["Final Improvement Value"]) || 0;
+          parseFloat(cleanNumberInput(row["Final Improvement Value"])) || 0;
         const finalAppraisedValue =
-          parseFloat(row["Final Appraised Value"]) || 0;
-        const taxRate = parseFloat(row["Tax Rate"]) || 0;
-        const endingMarket = parseFloat(row["Ending Market"]) || 0;
-        const endingAppraised = parseFloat(row["Ending Appraised"]) || 0;
+          parseFloat(cleanNumberInput(row["Final Appraised Value"])) || 0;
+        const taxRate = parseFloat(cleanNumberInput(row["Tax Rate"])) || 0;
+        const endingMarket = parseFloat(cleanNumberInput(row["Ending Market"])) || 0;
+        const endingAppraised = parseFloat(cleanNumberInput(row["Ending Appraised"])) || 0;
 
         // Parse contingency fee from string (e.g., "25%" -> 0.25)
         const contingencyFeeString = row["Contingency Fee"] || "0%"; // Default to "0%" if not provided
@@ -622,7 +670,7 @@ export default function EditProperty() {
                         ) : isCalculatedField ? (
                           <input
                             type="text"
-                            value={row[key as keyof TableRow] as string}
+                            value={formatUSD(row[key as keyof TableRow] as string)}
                             readOnly
                             className="block w-full px-2 py-1 text-sm border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
                           />
