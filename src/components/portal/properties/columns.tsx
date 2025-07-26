@@ -92,7 +92,6 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
     id: "cadOwner.name",
     accessorFn: (row) => row.cadOwner?.name ?? "",
     header: "CAD Owner",
-    enableColumnFilter: true,
     cell: ({ row }) => {
       const owner = row.original.cadOwner;
       return (

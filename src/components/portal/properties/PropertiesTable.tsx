@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   ColumnDef,
-  SortingState,
-  getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
-  getPaginationRowModel,
+  // SortingState,
+  // getCoreRowModel,
+  // useReactTable,
+  // getSortedRowModel,
+  // getPaginationRowModel,
   ColumnFiltersState,
-  getFilteredRowModel,
-  VisibilityState,
+  // getFilteredRowModel,
+  // VisibilityState,
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
@@ -31,9 +31,9 @@ const PropertiesTable = <TData extends Properties, TValue>({
 }: PropertiesTableProps<TData, TValue>) => {
   const [properties, setProperties] = useState<TData[]>([]);
   const [archived, setArchived] = useState(false); // Track if viewing archived properties
-  const [sorting, setSorting] = useState<SortingState>([]);
+  // const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  // const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
@@ -73,22 +73,24 @@ const PropertiesTable = <TData extends Properties, TValue>({
     fetchProperties();
   }, [archived]); // Refetch data when switching between archived and active properties
 
-  const table = useReactTable({
-    data: properties,
-    columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-    },
-  });
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Filter properties based on search term
+  const filteredProperties = useMemo(() => {
+    if (!searchTerm.trim()) return properties;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return properties.filter(property => {
+      // Check if search term matches any of the searchable fields
+      return (
+        property.clientId?.toLowerCase().includes(searchLower) ||
+        property.propertyAccount?.toLowerCase().startsWith(searchLower) ||
+        property.cadOwner?.name?.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [properties, searchTerm]);
+
+
 
   if (loading) {
     return (
@@ -117,22 +119,18 @@ const PropertiesTable = <TData extends Properties, TValue>({
     <div className="overflow-y-auto">
       <div className="flex flex-col md:flex-row border rounded-xl items-center gap-4 bg-white m-4 p-4">
         <div className="w-full">
-          <h2 className="text-2xl font-bold">{properties.length}</h2>
+          <h2 className="text-2xl font-bold">
+            {searchTerm.trim() ? `${filteredProperties.length} of ${properties.length}` : properties.length}
+          </h2>
           <h3>{archived ? "Archived Properties" : "Active Properties"}</h3>
         </div>
         <div className="flex flex-col gap-2 w-full">
-          <h1>Quick search a Property</h1>
+          <h1 className="text-lg font-semibold">Quick Search Properties</h1>
           <Input
-            placeholder="Search CAD Owner Name..."
-            value={String(
-              table.getColumn("cadOwner.name")?.getFilterValue() ?? ""
-            )}
-            onChange={(event) =>
-              table
-                .getColumn("cadOwner.name")
-                ?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
+            placeholder="Search by Client ID, Property Account (starts with), or Owner Name..."
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            className="w-full max-w-md"
           />
         </div>
         <div className="flex gap-2 w-full">
@@ -150,7 +148,7 @@ const PropertiesTable = <TData extends Properties, TValue>({
         </div>
       </div>
       <TableBuilder
-        data={properties}
+        data={filteredProperties}
         columns={columns}
         label={archived ? "Archived Properties" : "All Properties"}
         columnFilters={columnFilters}

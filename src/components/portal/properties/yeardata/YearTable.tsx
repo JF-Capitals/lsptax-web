@@ -1,6 +1,7 @@
 import { Invoice } from "@/types/types";
 // import formatDate from "@/utils/formatDate";
 import React from "react";
+import { formatUSD } from "@/utils/formatCurrency";
 
 // Define the type for table row data
 type TableRow = {
@@ -133,7 +134,22 @@ const YearTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
                           ? data[key as keyof TableRow]
                             ? "Yes"
                             : "No"
-                          : data[key as keyof TableRow]}
+                          : (() => {
+                              const value = data[key as keyof TableRow];
+                              // Format currency fields
+                              const currencyFields = [
+                                "Notice Land Value", "Notice Improvement Value", "Notice Market Value", "Notice Appraised Value",
+                                "Final Land Value", "Final Improvement Value", "Final Market Value", "Final Appraised Value",
+                                "Market Reduction", "Appraised Reduction", "Taxable Savings", "Invoice Amount",
+                                "Beginning Market", "Ending Market", "Beginning Appraised", "Ending Appraised"
+                              ];
+                              
+                              if (currencyFields.includes(key) && value !== "-" && value !== "N/A") {
+                                return formatUSD(value as string);
+                              }
+                              
+                              return value;
+                            })()}
                       </td>
                     ))}
                   </tr>
