@@ -20,8 +20,8 @@ const InvoiceDetails: React.FC<{
       const yearlyInvoice = getYearlyInvoiceData(property);
       const contingencyFee = property.propertyDetails.CONTINGENCYFee || "25";
       const cleanPercentage = contingencyFee.replace(/%/g, '');
-      const contingencyPercentage = parseFloat(cleanPercentage);
-      const taxableSavings = parseFloat(yearlyInvoice?.taxableSavings || "0");
+      const contingencyPercentage = Number(cleanPercentage);
+      const taxableSavings = Number(yearlyInvoice?.taxableSavings || "0");
       const calculatedFee = taxableSavings * (contingencyPercentage / 100);
       return total + calculatedFee;
     }, 0);
@@ -211,7 +211,7 @@ const InvoiceDetails: React.FC<{
                         {formatUSD(yearlyInvoice?.appraisedReduction)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {yearlyInvoice?.taxRate?.toFixed(2)}%
+                        {yearlyInvoice?.taxRate}%
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
                         {formatUSD(yearlyInvoice?.taxableSavings)}
@@ -228,8 +228,8 @@ const InvoiceDetails: React.FC<{
                         {(() => {
                           const contingencyFee = property.propertyDetails.CONTINGENCYFee || "25";
                           const cleanPercentage = contingencyFee.replace(/%/g, '');
-                          const contingencyPercentage = parseFloat(cleanPercentage);
-                          const taxableSavings = parseFloat(yearlyInvoice?.taxableSavings || "0");
+                          const contingencyPercentage = Number(cleanPercentage);
+                          const taxableSavings = Number(yearlyInvoice?.taxableSavings || "0");
                           const calculatedFee = taxableSavings * (contingencyPercentage / 100);
                           return formatUSD(calculatedFee);
                         })()}

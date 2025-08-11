@@ -38,11 +38,16 @@ export function formatUSD(value: number | string | null | undefined, includeDeci
     return '$0';
   }
 
-  // Convert to number
-  const numValue = typeof value === 'string' ? parseFloat(value) : value;
-  
-  if (isNaN(numValue)) {
-    return '$0';
+  // Convert to number with better precision
+  let numValue: number;
+  if (typeof value === 'string') {
+    // Handle potential decimal precision issues
+    numValue = Number(value);
+    if (isNaN(numValue)) {
+      return '$0';
+    }
+  } else {
+    numValue = value;
   }
 
   // Format with dollar sign and commas
