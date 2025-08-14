@@ -26,7 +26,9 @@ const InvoiceSummary: React.FC<{
     return invoice.properties.reduce((total, property) => {
       const yearlyInvoice = getYearlyInvoiceData(property);
       const fee = yearlyInvoice?.invoiceAmount;
-      return total + (isNaN(fee) ? 0 : fee);
+      // Handle both string and number types for backward compatibility
+      const numericFee = typeof fee === 'string' ? parseFloat(fee) || 0 : (fee || 0);
+      return total + numericFee;
     }, 0);
   };
 
@@ -143,7 +145,7 @@ const InvoiceSummary: React.FC<{
                       {selectedYear} Protest
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-right">
-                      ${yearlyInvoice?.invoiceAmount.toFixed(2) || "0.00"}
+                      ${(typeof yearlyInvoice?.invoiceAmount === 'string' ? parseFloat(yearlyInvoice.invoiceAmount) || 0 : yearlyInvoice?.invoiceAmount || 0).toFixed(2)}
                     </td>
                   </tr>
                 );

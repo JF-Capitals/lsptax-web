@@ -260,7 +260,7 @@ export default function EditProperty() {
         "Invoice Date": yearData?.invoiceDate || "",
         "Under Litigation": yearData?.underLitigation || false,
         "Under Arbitration": yearData?.underArbitration || false,
-        "Tax Rate": taxRate.toString(),
+        "Tax Rate": yearData?.taxRate?.toString() || "0.00",
         "Taxable Savings": taxableSavings.toString(),
         "Contingency Fee": contingencyFeeString, // Keep as string for display
         "Invoice Amount": invoiceAmount.toString(),
@@ -673,6 +673,21 @@ export default function EditProperty() {
                             value={formatUSD(row[key as keyof TableRow] as string)}
                             readOnly
                             className="block w-full px-2 py-1 text-sm border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+                          />
+                        ) : key === "Tax Rate" ? (
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={row[key as keyof TableRow] as string}
+                            onChange={(e) =>
+                              handleInputChange(
+                                e,
+                                rowIndex,
+                                key as keyof TableRow
+                              )
+                            }
+                            className="block w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                           />
                         ) : (
                           <input

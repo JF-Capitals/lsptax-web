@@ -21,7 +21,7 @@ const InvoiceDetails: React.FC<{
       const contingencyFee = property.propertyDetails.CONTINGENCYFee || "25";
       const cleanPercentage = contingencyFee.replace(/%/g, '');
       const contingencyPercentage = Number(cleanPercentage);
-      const taxableSavings = Number(yearlyInvoice?.taxableSavings || "0");
+      const taxableSavings = yearlyInvoice?.taxableSavings || 0;
       const calculatedFee = taxableSavings * (contingencyPercentage / 100);
       return total + calculatedFee;
     }, 0);
@@ -229,7 +229,7 @@ const InvoiceDetails: React.FC<{
                           const contingencyFee = property.propertyDetails.CONTINGENCYFee || "25";
                           const cleanPercentage = contingencyFee.replace(/%/g, '');
                           const contingencyPercentage = Number(cleanPercentage);
-                          const taxableSavings = Number(yearlyInvoice?.taxableSavings || "0");
+                          const taxableSavings = yearlyInvoice?.taxableSavings || 0;
                           const calculatedFee = taxableSavings * (contingencyPercentage / 100);
                           return formatUSD(calculatedFee);
                         })()}

@@ -15,8 +15,8 @@ const InvoicePage = () => {
     const fetchInvoiceData = async () => {
       try {
         if (clientId) {
-          const response = await getInvoice({ clientId: clientId });
-          setInvoiceData(response);
+                  const response = await getInvoice({ clientId: clientId });
+        setInvoiceData(response);
         }
       } catch (error) {
         console.error("Error fetching invoice data:", error);
@@ -29,12 +29,27 @@ const InvoicePage = () => {
   }, [clientId]);
 
   if (!invoiceData) {
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="flex flex-col items-center space-y-4">
-        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-lg font-semibold text-gray-700">Loading data...</p>
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-lg font-semibold text-gray-700">Loading data...</p>
+        </div>
       </div>
-    </div>;
+    );
+  }
+
+  // Validate that invoiceData has the expected structure
+  if (!invoiceData.client || !invoiceData.properties || !Array.isArray(invoiceData.properties)) {
+    console.error('Invalid invoice data structure:', invoiceData);
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="flex flex-col items-center space-y-4">
+          <p className="text-lg font-semibold text-red-700">Error: Invalid data structure</p>
+          <p className="text-sm text-gray-600">Please try refreshing the page</p>
+        </div>
+      </div>
+    );
   }
 
   return (
