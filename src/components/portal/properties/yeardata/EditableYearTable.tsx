@@ -8,43 +8,42 @@ type TableRow = {
   "BPP Rendered": string;
   "BPP Invoice": string;
   "BPP Paid": string;
-  "Notice Land Value": string;
-  "Notice Improvement Value": string;
-  "Notice Market Value": string;
-  "Notice Appraised Value": string;
-  "Final Land Value": string;
-  "Final Improvement Value": string;
-  "Final Market Value": string;
-  "Final Appraised Value": string;
-  "Market Reduction": string;
-  "Appraised Reduction": string;
+  "Notice Land Value": string | number;
+  "Notice Improvement Value": string | number;
+  "Notice Market Value": string | number;
+  "Notice Appraised Value": string | number;
+  "Final Land Value": string | number;
+  "Final Improvement Value": string | number;
+  "Final Market Value": string | number;
+  "Final Appraised Value": string | number;
+  "Market Reduction": string | number;
+  "Appraised Reduction": string | number;
   "Hearing Date"?: string;
   "Invoice Date"?: string;
   "Under Litigation": boolean;
   "Under Arbitration": boolean;
-  "Tax Rate": string;
-  "Taxable Savings": string;
-  "Contingency Fee"?: string;
-  "Invoice Amount"?: string;
+  "Tax Rate": string | number;
+  "Taxable Savings": string | number;
+  "Contingency Fee"?: string | number;
+  "Invoice Amount"?: string | number;
   "Paid Date"?: string;
   "Payment Notes"?: string;
-  "Beginning Market": string;
-  "Ending Market": string;
-  "Beginning Appraised": string;
-  "Ending Appraised": string;
+  "Beginning Market": string | number;
+  "Ending Market": string | number;
+  "Beginning Appraised": string | number;
+  "Ending Appraised": string | number;
 };
 
 const EditableYearTable: React.FC<{ invoices?: Invoice[] }> = ({
   invoices,
 }) => {
   const years = [2021, 2022, 2023, 2024, 2025];
-  console.log({ invoices });
   // Prepare initial table data from invoices
   const initialTableData: TableRow[] = years.map((year) => {
     const yearData = invoices?.find((invoice) => invoice.year === year);
 
     return {
-      year,
+      year: year,
       "Protested Date": "-",
       "BPP Rendered": "",
       "BPP Invoice": yearData?.bppInvoice || "-",
@@ -85,9 +84,35 @@ const EditableYearTable: React.FC<{ invoices?: Invoice[] }> = ({
     columnKey: keyof TableRow
   ) => {
     const { value } = e.target;
+    
+    // Check if this is a numeric field
+    const numericFields = [
+      "Notice Land Value", "Notice Improvement Value", "Notice Market Value", "Notice Appraised Value",
+      "Final Land Value", "Final Improvement Value", "Final Market Value", "Final Appraised Value",
+      "Market Reduction", "Appraised Reduction", "Tax Rate", "Taxable Savings",
+      "Contingency Fee", "Invoice Amount", "Beginning Market", "Ending Market",
+      "Beginning Appraised", "Ending Appraised"
+    ];
+    
+    let processedValue: string | number = value;
+    
+    // Convert to number if it's a numeric field and contains a valid number
+    if (numericFields.includes(columnKey as string)) {
+      if (value === '' || value === '-') {
+        processedValue = value;
+      } else {
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue)) {
+          processedValue = numValue;
+        } else {
+          processedValue = value;
+        }
+      }
+    }
+    
     setTableData((prev) =>
       prev.map((row, idx) =>
-        idx === rowIndex ? { ...row, [columnKey]: value } : row
+        idx === rowIndex ? { ...row, [columnKey]: processedValue } : row
       )
     );
   };
@@ -162,7 +187,7 @@ const EditableYearTable: React.FC<{ invoices?: Invoice[] }> = ({
                       ) : (
                         <input
                           type="text"
-                          value={row[key as keyof TableRow] as string}
+                          value={String(row[key as keyof TableRow] || '')}
                           onChange={(e) =>
                             handleInputChange(
                               e,

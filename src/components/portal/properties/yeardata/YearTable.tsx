@@ -10,35 +10,34 @@ type TableRow = {
   "BPP Rendered"?: string;
   "BPP Invoice": string;
   "BPP Paid": string;
-  "Notice Land Value": string;
-  "Notice Improvement Value": string;
-  "Notice Market Value": string;
-  "Notice Appraised Value": string;
-  "Final Land Value": string;
-  "Final Improvement Value": string;
-  "Final Market Value": string;
-  "Final Appraised Value": string;
-  "Market Reduction": string;
-  "Appraised Reduction": string;
+  "Notice Land Value": string | number;
+  "Notice Improvement Value": string | number;
+  "Notice Market Value": string | number;
+  "Notice Appraised Value": string | number;
+  "Final Land Value": string | number;
+  "Final Improvement Value": string | number;
+  "Final Market Value": string | number;
+  "Final Appraised Value": string | number;
+  "Market Reduction": string | number;
+  "Appraised Reduction": string | number;
   "Hearing Date"?: string;
   "Invoice Date"?: string;
   "Under Litigation": boolean;
   "Under Arbitration": boolean;
-  "Tax Rate": string;
-  "Taxable Savings": string;
-  "Contingency Fee": string;
-  "Invoice Amount": string;
+  "Tax Rate": string | number;
+  "Taxable Savings": string | number;
+  "Contingency Fee": string | number;
+  "Invoice Amount": string | number;
   "Paid Date": string;
   "Payment Notes": string;
-  "Beginning Market": string;
-  "Ending Market": string;
-  "Beginning Appraised": string;
-  "Ending Appraised": string;
+  "Beginning Market": string | number;
+  "Ending Market": string | number;
+  "Beginning Appraised": string | number;
+  "Ending Appraised": string | number;
 };
 
 const YearTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
   // Extract data for the table: creating rows and columns
-  console.log({ invoices });
   const years = [2021, 2022, 2023, 2024, 2025];
   const rowData: TableRow[] = years.map((year) => {
     const yearData = invoices.find((invoice) => invoice.year === year);
@@ -145,7 +144,7 @@ const YearTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
                               ];
                               
                               if (currencyFields.includes(key) && value !== "-" && value !== "N/A") {
-                                return formatUSD(value as string);
+                                return formatUSD(String(value));
                               }
                               
                               return value;
