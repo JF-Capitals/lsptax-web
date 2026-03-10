@@ -7,21 +7,21 @@ import { LoaderCircle, FileText, Users, Building2, Calendar, DollarSign } from "
 import { useToast } from "@/hooks/use-toast";
 
 interface Client {
-  CLIENTNumber: string;
-  CLIENTNAME: string;
-  Email: string;
-  PHONENUMBER: string;
+  clientNumber: string;
+  clientName: string;
+  email: string;
+  phoneNumber: string;
   propertyCount: number;
 }
 
 interface Property {
   id: number;
-  AccountNumber: string;
-  CADMailingADDRESS: string;
-  CADCITY: string;
-  CADCOUNTY: string;
-  CONTINGENCYFee: string;
-  FlatFee: string;
+  accountNumber: string;
+  cadMailingAddress: string;
+  cadCity: string;
+  cadCounty: string;
+  contingencyFee: string;
+  flatFee: string;
   existingInvoices: any[];
 }
 
@@ -41,6 +41,11 @@ const InvoiceGenerator = () => {
   const [stats, setStats] = useState<any>(null);
   const { toast } = useToast();
 
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   // Available years (current year and 4 years back)
   const availableYears = Array.from(
     { length: 5 },
@@ -51,7 +56,11 @@ const InvoiceGenerator = () => {
   const fetchClients = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invoice/clients`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invoice/clients`, {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      });
       if (!response.ok) throw new Error("Failed to fetch clients");
       
       const data = await response.json();
@@ -79,7 +88,12 @@ const InvoiceGenerator = () => {
       setLoading(true);
       const clientNumbersParam = selectedClients.join(',');
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/invoice/properties?clientNumbers=${clientNumbersParam}`
+        `${import.meta.env.VITE_BACKEND_URL}/invoice/properties?clientNumbers=${clientNumbersParam}`,
+        {
+          headers: {
+            ...getAuthHeaders(),
+          },
+        }
       );
       
       if (!response.ok) throw new Error("Failed to fetch properties");
@@ -109,7 +123,12 @@ const InvoiceGenerator = () => {
       const clientNumbersParam = selectedClients.join(',');
       const yearsParam = selectedYears.join(',');
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/invoice/stats?clientNumbers=${clientNumbersParam}&years=${yearsParam}`
+        `${import.meta.env.VITE_BACKEND_URL}/invoice/stats?clientNumbers=${clientNumbersParam}&years=${yearsParam}`,
+        {
+          headers: {
+            ...getAuthHeaders(),
+          },
+        }
       );
       
       if (!response.ok) throw new Error("Failed to fetch statistics");
@@ -147,6 +166,7 @@ const InvoiceGenerator = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           clientNumbers: selectedClients,
@@ -437,14 +457,14 @@ const InvoiceGenerator = () => {
                               {property.cadMailingAddress}, {property.cadCity}, {property.cadCounty}
                             </div>
                             <div className="text-sm">
-                              {property.CONTINGENCYFee && (
+                              {property.contingencyFee && (
                                 <Badge variant="secondary" className="mr-1">
-                                  Contingency: ${property.CONTINGENCYFee}
+                                  Contingency: ${property.contingencyFee}
                                 </Badge>
                               )}
-                              {property.FlatFee && (
+                              {property.flatFee && (
                                 <Badge variant="outline">
-                                  Flat Fee: ${property.FlatFee}
+                                  Flat Fee: ${property.flatFee}
                                 </Badge>
                               )}
                             </div>

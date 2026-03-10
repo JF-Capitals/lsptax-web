@@ -10,9 +10,32 @@ const getFormattedDate = () => {
   return `${day}${ordinalSuffix}${month}${year}`;
 };
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+async function authFetch(input: RequestInfo | URL, init?: RequestInit) {
+  const headers = {
+    ...(init?.headers || {}),
+    ...getAuthHeaders(),
+  } as Record<string, string>;
+
+  const response = await fetch(input, { ...init, headers });
+
+  if (response.status === 401) {
+    // Token missing/invalid/blacklisted → force re-login on next navigation
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("username");
+  }
+
+  return response;
+}
+
 export const getClients = async (limit = 10) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/clients?limit=${limit}`
     );
     if (!response.ok) {
@@ -27,7 +50,7 @@ export const getClients = async (limit = 10) => {
 
 export const getSingleClient = async ({ clientId }: { clientId?: string }) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/client?clientId=${clientId}`
     );
     if (response.status == 404) {
@@ -50,7 +73,7 @@ export const getSingleProspect = async ({
   prospectId?: string;
 }) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${
         import.meta.env.VITE_BACKEND_URL
       }/api/prospect?prospectId=${prospectId}`
@@ -74,7 +97,7 @@ export const getArchiveClients = async (limit?: number) => {
     const url = limit != null
       ? `${import.meta.env.VITE_BACKEND_URL}/api/archive_clients?limit=${limit}`
       : `${import.meta.env.VITE_BACKEND_URL}/api/archive_clients`;
-    const response = await fetch(url);
+    const response = await authFetch(url);
     if (!response.ok) {
       throw new Error("Failed to fetch clients");
     }
@@ -88,7 +111,7 @@ export const getArchiveClients = async (limit?: number) => {
 
 export const getProperties = async (limit = 10) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/properties?limit=${limit}`
     );
     if (!response.ok) {
@@ -106,7 +129,7 @@ export const getArchiveProperties = async (limit?: number) => {
     const url = limit != null
       ? `${import.meta.env.VITE_BACKEND_URL}/api/archive_properties?limit=${limit}`
       : `${import.meta.env.VITE_BACKEND_URL}/api/archive_properties`;
-    const response = await fetch(url);
+    const response = await authFetch(url);
     if (!response.ok) {
       throw new Error("Failed to fetch properties");
     }
@@ -124,7 +147,7 @@ export const getSingleProperty = async ({
   propertyId: string;
 }) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${
         import.meta.env.VITE_BACKEND_URL
       }/api/property?propertyId=${propertyId}`
@@ -151,7 +174,7 @@ export const getProspectProperty = async ({
   propertyId: string;
 }) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${
         import.meta.env.VITE_BACKEND_URL
       }/api/prospect-property?id=${propertyId}`
@@ -170,7 +193,7 @@ export const getProspectProperty = async ({
 
 export const getInvoice = async ({ clientId }: { clientId: string }) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/invoice/${clientId}`
     );
     if (!response.ok) {
@@ -189,7 +212,7 @@ export const getInvoiceByPropertyId = async ({
   propertyId: string;
 }) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${
         import.meta.env.VITE_BACKEND_URL
       }/api/invoice_prop?propertyId=${propertyId}`
@@ -209,7 +232,7 @@ export const getAllInvoices = async (limit?: number) => {
     const url = limit != null
       ? `${import.meta.env.VITE_BACKEND_URL}/api/invoices?limit=${limit}`
       : `${import.meta.env.VITE_BACKEND_URL}/api/invoices`;
-    const response = await fetch(url);
+    const response = await authFetch(url);
     if (!response.ok) {
       throw new Error("Failed to fetch Invoices");
     }
@@ -224,7 +247,7 @@ export const getAllInvoices = async (limit?: number) => {
 // Invoice Generation APIs
 export const getClientsForInvoiceGeneration = async () => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/invoice/clients`
     );
     if (!response.ok) {
@@ -241,7 +264,7 @@ export const getClientsForInvoiceGeneration = async () => {
 export const getPropertiesForInvoiceGeneration = async (clientNumbers: string[]) => {
   try {
     const clientNumbersParam = clientNumbers.join(',');
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/invoice/properties?clientNumbers=${clientNumbersParam}`
     );
     if (!response.ok) {
@@ -262,7 +285,7 @@ export const generateInvoices = async (options: {
   invoiceDefaults?: Record<string, unknown>;
 }) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/invoice/generate`,
       {
         method: 'POST',
@@ -294,7 +317,7 @@ export const getInvoiceGenerationStats = async (clientNumbers?: string[], years?
       params.append('years', years.map(y => y.toString()).join(','));
     }
 
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/invoice/stats?${params.toString()}`
     );
     if (!response.ok) {
@@ -310,7 +333,7 @@ export const getInvoiceGenerationStats = async (clientNumbers?: string[], years?
 
 export const getArchiveInvoices = async () => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/archive-invoices`
     );
     if (!response.ok) {
@@ -326,7 +349,7 @@ export const getArchiveInvoices = async () => {
 
 export const getProspects = async (limit = 10) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/prospects?limit=${limit}`
     );
     if (!response.ok) {
@@ -341,7 +364,7 @@ export const getProspects = async (limit = 10) => {
 
 export const getArchiveProspects = async (limit = 10) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/archive-prospects?limit=${limit}`
     );
     if (!response.ok) {
@@ -356,7 +379,7 @@ export const getArchiveProspects = async (limit = 10) => {
 
 export const getContractOwner = async () => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/contract_owner`
     );
     if (!response.ok) {
@@ -372,7 +395,7 @@ export const getContractOwner = async () => {
 
 export const getContractOwnerById = async ({ coId }: { coId: number }) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${
         import.meta.env.VITE_BACKEND_URL
       }/api/contract_owner_details?co_id=${coId}`
@@ -390,7 +413,7 @@ export const getContractOwnerById = async ({ coId }: { coId: number }) => {
 
 export const getContracts = async () => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/form/contracts`
     );
     if (!response.ok) {
@@ -406,7 +429,7 @@ export const getContracts = async () => {
 
 export const getAgents = async () => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/form/agents`
     );
     if (!response.ok) {
@@ -422,7 +445,7 @@ export const getAgents = async () => {
 
 export const getProtests = async () => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/contracts`
     );
     if (!response.ok) {
@@ -446,7 +469,7 @@ interface Stats {
 export const dashboardData = async (): Promise<Stats | null> => {
   try {
     // Fetch stats from the new /stats endpoint
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/stats`
     );
     if (!response.ok) {
@@ -466,7 +489,7 @@ export const dashboardData = async (): Promise<Stats | null> => {
 
 export const downloadClientsCSV = async () => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/download-clients-csv`
     );
     if (!response.ok) {
@@ -488,7 +511,7 @@ export const downloadClientsCSV = async () => {
 
 export const downloadProspectsCSV = async () => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/download-prospects-csv`
     );
     if (!response.ok) {
@@ -510,7 +533,7 @@ export const downloadProspectsCSV = async () => {
 
 export const downloadPropertiesCSV = async () => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/download-properties-csv`
     );
     if (!response.ok) {
@@ -532,7 +555,7 @@ export const downloadPropertiesCSV = async () => {
 
 export const downloadInvoicesCSV = async () => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/download-invoices-csv`
     );
     if (!response.ok) {
@@ -555,7 +578,7 @@ export const downloadInvoicesCSV = async () => {
 
 export const getPreviewDocuments = async ({ prospectId }: { prospectId: Number }) => {
   try {
-    const response = await fetch(
+    const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/action/preview-signed-pdf`,
       {
         method: "POST",

@@ -14,6 +14,11 @@ const UploadCsvButton = ({
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -27,6 +32,9 @@ const UploadCsvButton = ({
         `${import.meta.env.VITE_BACKEND_URL}/action/add-client-data-csv`,
         {
           method: "POST",
+          headers: {
+            ...getAuthHeaders(),
+          },
           body: formData,
         }
       );

@@ -72,46 +72,58 @@ export const logoutUser = async () => {
   }
 };
 
-export const addProspect = async (data: {
+const getAuthHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+export const addProspect = async (payload: {
   clientName: string;
   email: string;
   phoneNumber?: string;
   mailingAddress?: string;
   mailingAddressCityTxZip?: string;
 }) => {
+  const baseUrl = import.meta.env.VITE_BACKEND_URL;
+  if (!baseUrl) {
+    throw new Error("Server URL is not configured. Please set VITE_BACKEND_URL.");
+  }
+
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/action/add-prospect`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          clientName: data.clientName,
-          email: data.email,
-          phoneNumber: data.phoneNumber ?? "",
-          mailingAddress: data.mailingAddress ?? "",
-          mailingAddressCityTxZip: data.mailingAddressCityTxZip ?? "",
-        }),
+    const response = await fetch(`${baseUrl}/action/add-prospect`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({
+        clientName: payload.clientName,
+        email: payload.email,
+        phoneNumber: payload.phoneNumber ?? "",
+        mailingAddress: payload.mailingAddress ?? "",
+        mailingAddressCityTxZip: payload.mailingAddressCityTxZip ?? "",
+      }),
+    });
+
+    const text = await response.text();
+    let result: Record<string, unknown> = {};
+    if (text) {
+      try {
+        result = JSON.parse(text);
+      } catch {
+        // non-JSON response (e.g. HTML error page)
       }
-    );
-    const data = await response.json();
+    }
 
     if (!response.ok) {
-      throw new Error(data.error || "Failed to add prospect");
+      const msg = (result?.message as string) || (result?.error as string) || "Failed to add prospect";
+      throw new Error(msg);
     }
 
-    return data;
+    return result;
   } catch (error: unknown) {
-    let errorMessage = "Prospect Addition Failed. Please try again.";
-
-    if (error instanceof Error) {
-      console.log({ error });
-      errorMessage = error.message;
-    }
-
-    throw new Error(errorMessage);
+    if (error instanceof Error) throw error;
+    throw new Error("Prospect addition failed. Please try again.");
   }
 };
 
@@ -140,6 +152,7 @@ export const addClient = async (clientDetails: {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify(body),
       }
@@ -170,14 +183,13 @@ export const editProperty = async (
   yearlyData: Record<number, any>
 ) => {
   try {
-    const token = localStorage.getItem("token");
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/action/edit-property`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           propertyId: Number(propertyId),
@@ -212,14 +224,13 @@ export const editClient = async (
   clientDetails: any,
 ) => {
   try {
-    const token = localStorage.getItem("token");
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/action/edit-client`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           clientId: Number(clientId),
@@ -250,14 +261,13 @@ export const editClient = async (
 
 export const editProspect = async (prospectId: string, prospectDetails: any) => {
   try {
-    const token = localStorage.getItem("token");
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/action/edit-prospect`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           prospectId: Number(prospectId),
@@ -294,6 +304,7 @@ export const deleteProperty = async (propertyId: string) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({ id: Number(propertyId) }),
       }
@@ -322,14 +333,13 @@ export const editProspectProperty = async (
   propertyDetails: any
 ) => {
   try {
-    const token = localStorage.getItem("token");
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/action/edit-prospect-property`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           propertyId: Number(propertyId),
@@ -371,6 +381,7 @@ export const addProperty = async ({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...getAuthHeaders(),
       },
       body: JSON.stringify({
         clientId,
@@ -400,6 +411,7 @@ export const addProspectProperty = async ({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...getAuthHeaders(),
       },
       body: JSON.stringify({
         id,
@@ -424,6 +436,7 @@ export const deleteProspectProperty = async (propertyId: string) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({ id: Number(propertyId) }),
       }
@@ -453,6 +466,7 @@ export const deleteClient = async (id: Number) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...getAuthHeaders(),
       },
       body: JSON.stringify({
         id,
@@ -476,6 +490,7 @@ export const deleteProspect = async (id: Number) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...getAuthHeaders(),
       },
       body: JSON.stringify({
         id,
@@ -501,6 +516,7 @@ export const moveProspectToClient = async (id: Number) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           id,
@@ -538,6 +554,7 @@ export const changeProspectStatus = async ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           prospectId,
@@ -563,6 +580,7 @@ export const sendContract = async ({ prospectId }: { prospectId: Number }) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...getAuthHeaders(),
       },
       body: JSON.stringify({
         prospectId,
@@ -595,6 +613,7 @@ export const sendAOAToClient = async ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           clientId,
@@ -627,6 +646,7 @@ export const sendClientContract = async ({ clientId }: { clientId: string }) => 
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           clientId,
@@ -662,6 +682,7 @@ export const downloadSignedPDF = async ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           prospectId,
@@ -698,6 +719,7 @@ export const archiveItem = async (tableName: string, id: number) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({ tableName, id }),
       }
@@ -728,6 +750,9 @@ async function postCsv(endpoint: string, file: File) {
 
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}${endpoint}`, {
     method: "POST",
+    headers: {
+      ...getAuthHeaders(),
+    },
     body: formData,
   });
 

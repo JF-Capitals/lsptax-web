@@ -39,14 +39,14 @@ const Contact = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-     setLoading(true);
+    setLoading(true);
     try {
       await addProspect({
-        clientName: values.ProspectName,
-        email: values.Email,
-        phoneNumber: values.PHONENUMBER || "",
-        mailingAddress: values.MAILINGADDRESS || "",
-        mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP || "",
+        clientName: String(values.ProspectName ?? "").trim(),
+        email: String(values.Email ?? "").trim(),
+        phoneNumber: values.PHONENUMBER ? String(values.PHONENUMBER).trim() : "",
+        mailingAddress: values.MAILINGADDRESS ? String(values.MAILINGADDRESS).trim() : "",
+        mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP ? String(values.MAILINGADDRESSCITYTXZIP).trim() : "",
       });
       toast({
         title: "Great! We'll be in touch soon to start your savings journey.",
@@ -54,21 +54,19 @@ const Contact = () => {
       form.reset();
     } catch (error) {
       console.error("Error submitting form:", error);
-      let errorMessage = "Failed to add prospect. Please try again.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to add prospect. Please try again.";
+      const isEmailExists = /already|already present|duplicate|exists/i.test(errorMessage);
       toast({
         variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description:
-          errorMessage === "Email Already Present"
-            ? "This email is already registered. Try a different one."
-            : "There was a problem with your request.",
+        title: "Something went wrong",
+        description: isEmailExists
+          ? "This email is already registered. Try a different one."
+          : errorMessage,
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
     } finally {
-      setLoading(false); // Set loading to false after submission
+      setLoading(false);
     }
   }
 

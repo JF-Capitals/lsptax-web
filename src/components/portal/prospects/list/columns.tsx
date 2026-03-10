@@ -25,6 +25,16 @@ import { Label } from "@/components/ui/label"; // Import Label for RadioGroup it
 import React from "react";
 import { Prospect } from "@/types/types";
 
+function getProspectDisplayName(row: Prospect | Record<string, unknown>): string {
+  const r = row as Record<string, unknown>;
+  return (r.clientName as string) ?? (r.prospectName as string) ?? (r.name as string) ?? "";
+}
+
+function getProspectPhone(row: Prospect | Record<string, unknown>): string {
+  const r = row as Record<string, unknown>;
+  return (r.phoneNumber as string) ?? (r.PHONENUMBER as string) ?? (r.phone as string) ?? (r.mobile as string) ?? "";
+}
+
 export const prospectColumn: ColumnDef<Prospect, any>[] = [
   {
     accessorKey: "id",
@@ -41,16 +51,18 @@ export const prospectColumn: ColumnDef<Prospect, any>[] = [
     },
   },
   {
-    accessorKey: "clientName",
+    id: "prospectName",
     header: "Prospect Name",
+    accessorFn: (row) => getProspectDisplayName(row),
   },
   {
     accessorKey: "email",
     header: "Email",
   },
   {
-    accessorKey: "phoneNumber",
+    id: "phone",
     header: "Mobile",
+    accessorFn: (row) => getProspectPhone(row),
   },
   {
     accessorKey: "status",
@@ -188,7 +200,7 @@ export const prospectColumn: ColumnDef<Prospect, any>[] = [
                 <AlertDialogTitle>Delete Prospect</AlertDialogTitle>
                 <AlertDialogDescription>
                   Are you sure you want to delete prospect{" "}
-                  {prospect.clientName}? This action cannot be undone.
+                  {getProspectDisplayName(prospect)}? This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -213,7 +225,7 @@ export const prospectColumn: ColumnDef<Prospect, any>[] = [
               <AlertDialogHeader>
                 <AlertDialogTitle>Move to Client</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Convert {prospect.clientName} to a client? This will move
+                  Convert {getProspectDisplayName(prospect)} to a client? This will move
                   all prospect information to a new client record.
                 </AlertDialogDescription>
               </AlertDialogHeader>
