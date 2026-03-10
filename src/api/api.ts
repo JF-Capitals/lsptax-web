@@ -72,13 +72,13 @@ export const logoutUser = async () => {
   }
 };
 
-export const addProspect = async (
-  ProspectName: string,
-  Email: string,
-  PHONENUMBER: string,
-  MAILINGADDRESS: string,
-  MAILINGADDRESSCITYTXZIP: string
-) => {
+export const addProspect = async (data: {
+  clientName: string;
+  email: string;
+  phoneNumber?: string;
+  mailingAddress?: string;
+  mailingAddressCityTxZip?: string;
+}) => {
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/action/add-prospect`,
@@ -88,11 +88,11 @@ export const addProspect = async (
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ProspectName,
-          Email,
-          PHONENUMBER,
-          MAILINGADDRESS,
-          MAILINGADDRESSCITYTXZIP,
+          clientName: data.clientName,
+          email: data.email,
+          phoneNumber: data.phoneNumber ?? "",
+          mailingAddress: data.mailingAddress ?? "",
+          mailingAddressCityTxZip: data.mailingAddressCityTxZip ?? "",
         }),
       }
     );
@@ -116,17 +116,24 @@ export const addProspect = async (
 };
 
 export const addClient = async (clientDetails: {
-  CLIENTNAME: string;
-  Email: string;
-  BillingEmail?: string;
-  PHONENUMBER: string;
-  MAILINGADDRESS: string;
-  MAILINGADDRESSCITYTXZIP: string;
-  BillingAddress?: string;
-  TypeOfAcct: string;
-  IsArchived?: boolean;
+  clientName: string;
+  email: string;
+  phoneNumber?: string;
+  mailingAddressCityTxZip?: string;
+  typeOfAcct?: string;
+  billingEmail?: string;
+  billingAddress?: string;
 }) => {
   try {
+    const body: Record<string, string> = {
+      clientName: clientDetails.clientName,
+      email: clientDetails.email,
+      phoneNumber: clientDetails.phoneNumber ?? "",
+      mailingAddressCityTxZip: clientDetails.mailingAddressCityTxZip ?? "",
+      typeOfAcct: clientDetails.typeOfAcct ?? "",
+    };
+    if (clientDetails.billingEmail != null) body.billingEmail = clientDetails.billingEmail;
+    if (clientDetails.billingAddress != null) body.billingAddress = clientDetails.billingAddress;
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/action/add-client`,
       {
@@ -134,7 +141,7 @@ export const addClient = async (clientDetails: {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(clientDetails), // Send the entire object
+        body: JSON.stringify(body),
       }
     );
 
@@ -173,7 +180,7 @@ export const editProperty = async (
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          propertyId,
+          propertyId: Number(propertyId),
           propertyDetails,
           yearlyData,
         }),
@@ -215,8 +222,8 @@ export const editClient = async (
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          clientId,
-          clientDetails
+          clientId: Number(clientId),
+          clientDetails,
         }),
       }
     );
@@ -253,7 +260,7 @@ export const editProspect = async (prospectId: string, prospectDetails: any) => 
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          prospectId,
+          prospectId: Number(prospectId),
           prospectDetails,
         }),
       }
@@ -288,7 +295,7 @@ export const deleteProperty = async (propertyId: string) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ propertyId }),
+        body: JSON.stringify({ id: Number(propertyId) }),
       }
     );
 
@@ -325,7 +332,7 @@ export const editProspectProperty = async (
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          propertyId,
+          propertyId: Number(propertyId),
           propertyDetails,
         }),
       }
@@ -352,11 +359,11 @@ export const editProspectProperty = async (
 };
 
 export const addProperty = async ({
-  CLIENTNumber,
+  clientId,
   propertyData,
 }: {
-  CLIENTNumber: string;
-  propertyData: any;
+  clientId: number;
+  propertyData: Record<string, unknown>;
 }) => {
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/action/add-property`,
@@ -366,7 +373,7 @@ export const addProperty = async ({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        CLIENTNumber,
+        clientId,
         propertyData,
       }),
     }
@@ -384,8 +391,8 @@ export const addProspectProperty = async ({
   id,
   propertyData,
 }: {
-  id: string;
-  propertyData: any;
+  id: number;
+  propertyData: Record<string, unknown>;
 }) => {
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/action/add-prospect-property`,
@@ -418,7 +425,7 @@ export const deleteProspectProperty = async (propertyId: string) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ propertyId }),
+        body: JSON.stringify({ id: Number(propertyId) }),
       }
     );
 

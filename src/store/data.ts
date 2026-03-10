@@ -69,11 +69,12 @@ export const getSingleProspect = async ({
   }
 };
 
-export const getArchiveClients = async () => {
+export const getArchiveClients = async (limit?: number) => {
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/archive_clients`
-    );
+    const url = limit != null
+      ? `${import.meta.env.VITE_BACKEND_URL}/api/archive_clients?limit=${limit}`
+      : `${import.meta.env.VITE_BACKEND_URL}/api/archive_clients`;
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error("Failed to fetch clients");
     }
@@ -100,11 +101,12 @@ export const getProperties = async (limit = 10) => {
   }
 };
 
-export const getArchiveProperties = async () => {
+export const getArchiveProperties = async (limit?: number) => {
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/archive_properties`
-    );
+    const url = limit != null
+      ? `${import.meta.env.VITE_BACKEND_URL}/api/archive_properties?limit=${limit}`
+      : `${import.meta.env.VITE_BACKEND_URL}/api/archive_properties`;
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error("Failed to fetch properties");
     }
@@ -202,11 +204,12 @@ export const getInvoiceByPropertyId = async ({
     return [{}];
   }
 };
-export const getAllInvoices = async () => {
+export const getAllInvoices = async (limit?: number) => {
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/invoices`
-    );
+    const url = limit != null
+      ? `${import.meta.env.VITE_BACKEND_URL}/api/invoices?limit=${limit}`
+      : `${import.meta.env.VITE_BACKEND_URL}/api/invoices`;
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error("Failed to fetch Invoices");
     }
@@ -254,8 +257,9 @@ export const getPropertiesForInvoiceGeneration = async (clientNumbers: string[])
 
 export const generateInvoices = async (options: {
   clientNumbers: string[];
-  propertyAccountNumbers?: string[];
-  years: number[];
+  propertyAccountNumbers?: string[] | null;
+  years?: number[];
+  invoiceDefaults?: Record<string, unknown>;
 }) => {
   try {
     const response = await fetch(

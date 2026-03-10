@@ -99,7 +99,7 @@ const ViewProspectProperty = ({ propertyId,prospectId }: { propertyId: string, p
           <h1 className="flex gap-2">
             Property No:
             <p className="font-bold">
-              #{property.propertyDetails.AccountNumber}
+              #{property.propertyDetails.accountNumber}
             </p>
           </h1>
         </div>
@@ -133,18 +133,18 @@ const ViewProspectProperty = ({ propertyId,prospectId }: { propertyId: string, p
             <tbody>
               <tr>
                 <td className="font-medium">Assessor:</td>
-                <td>{property.propertyDetails.CONTACTOWNER}</td>
+                <td>{property.propertyDetails.contactOwner}</td>
               </tr>
               <tr>
                 <td className="font-medium">Address:</td>
                 <td>
-                  {property.propertyDetails.CADMailingADDRESS + " "}
-                  {property.propertyDetails.CADZIPCODE + " "}
+                  {property.propertyDetails.cadMailingAddress + " "}
+                  {property.propertyDetails.cadZipCode + " "}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">County:</td>
-                <td>{property.propertyDetails.CADCOUNTY}</td>
+                <td>{property.propertyDetails.cadCounty}</td>
               </tr>
             </tbody>
           </table>

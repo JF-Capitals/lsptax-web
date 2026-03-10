@@ -76,17 +76,15 @@ export default function AddClientForm() {
         return;
       }
 
-      // Extract only valid API fields
+      // API v2: camelCase field names
       const clientPayload = {
-        CLIENTNAME: values.CLIENTNAME,
-        Email: values.Email,
-        BillingEmail: values.BillingEmail,
-        PHONENUMBER: values.PHONENUMBER,
-        MAILINGADDRESS: values.MAILINGADDRESS,
-        MAILINGADDRESSCITYTXZIP: values.MAILINGADDRESSCITYTXZIP,
-        BillingAddress: values.BillingAddress,
-        TypeOfAcct: values.TypeOfAcct ?? "Real",
-        IsArchived: values.IsArchived ?? false,
+        clientName: values.CLIENTNAME,
+        email: values.Email,
+        phoneNumber: values.PHONENUMBER,
+        mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP,
+        typeOfAcct: values.TypeOfAcct ?? "Real",
+        billingEmail: values.BillingEmail,
+        billingAddress: values.BillingAddress,
       };
 
       await addClient(clientPayload);

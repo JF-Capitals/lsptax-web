@@ -53,26 +53,27 @@ export default function AddPropertyForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true); // Set loading to true
     try {
+      // API v2: camelCase property fields
       const propertyData = {
-        StatusNotes: values.StatusNotes,
-        OtherNotes: values.OtherNotes,
-        NAMEONCAD: values.NAMEONCAD,
-        MAILINGADDRESS: values.MAILINGADDRESS,
-        MAILINGADDRESSCITYTXZIP: values.MAILINGADDRESSCITYTXZIP,
-        CADMailingADDRESS: values.CADMailingADDRESS,
-        CADCITY: values.CADCITY,
-        CADZIPCODE: values.CADZIPCODE,
-        CADCOUNTY: values.CADCOUNTY,
-        AccountNumber: values.AccountNumber,
-        CONTACTOWNER: values.CONTACTOWNER,
-        SUBCONTRACTOWNER: values.SUBCONTRACTOWNER,
-        BPPFEE: values.BPPFEE,
-        CONTINGENCYFee: values.CONTINGENCYFee,
-        FlatFee: values.FlatFee,
+        accountNumber: values.AccountNumber,
+        nameOnCad: values.NAMEONCAD,
+        mailingAddress: values.MAILINGADDRESS,
+        mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP,
+        statusNotes: values.StatusNotes,
+        otherNotes: values.OtherNotes,
+        cadMailingAddress: values.CADMailingADDRESS,
+        cadCity: values.CADCITY,
+        cadZipCode: values.CADZIPCODE,
+        cadCounty: values.CADCOUNTY,
+        contactOwner: values.CONTACTOWNER,
+        subcontractOwner: values.SUBCONTRACTOWNER,
+        bppFee: values.BPPFEE,
+        contingencyFee: values.CONTINGENCYFee,
+        flatFee: values.FlatFee,
       };
 
       const newProperty = await addProperty({
-        CLIENTNumber: clientId!,
+        clientId: Number(clientId!),
         propertyData,
       });
       window.location.href = `/portal/property?propertyId=${newProperty?.property.id}`;

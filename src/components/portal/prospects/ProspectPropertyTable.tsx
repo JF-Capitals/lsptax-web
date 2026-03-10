@@ -90,13 +90,13 @@ const ProspectPropertyPage = () => {
           <h1 className="flex gap-2">
             Property No:
             <p className="font-bold">
-              #{property.propertyDetails.AccountNumber}
+              #{property.propertyDetails.accountNumber}
             </p>
           </h1>
           <h2 className="flex gap-2">
             Prospect No:
             <p className="font-bold">
-              #{property.propertyDetails.CLIENTNumber}
+              #{property.propertyDetails.clientNumber}
             </p>
           </h2>
         </div>
@@ -110,28 +110,28 @@ const ProspectPropertyPage = () => {
             <tbody>
               <tr>
                 <td className="font-medium">Client:</td>
-                <td>{property.clientDetails?.ProspectName}</td>
+                <td>{property.clientDetails?.clientName}</td>
               </tr>
               <tr>
                 <td className="font-medium">Phone:</td>
                 <td>
                   <Phone size={18} className="inline text-indigo-600 mr-2" />
-                  {property.clientDetails?.PHONENUMBER}
+                  {property.clientDetails?.phoneNumber}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">Email:</td>
                 <td>
                   <Mail size={18} className="inline text-indigo-600 mr-2" />
-                  {property.clientDetails?.Email}
+                  {property.clientDetails?.email}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">Address:</td>
                 <td>
                   <MapPin size={18} className="inline text-indigo-600 mr-2" />
-                  {property?.propertyDetails.MAILINGADDRESS},{" "}
-                  {property?.propertyDetails.MAILINGADDRESSCITYTXZIP}
+                  {property?.propertyDetails.mailingAddress},{" "}
+                  {property?.propertyDetails.mailingAddressCityTxZip}
                 </td>
               </tr>
             </tbody>
@@ -145,18 +145,18 @@ const ProspectPropertyPage = () => {
             <tbody>
               <tr>
                 <td className="font-medium">Assessor:</td>
-                <td>{property.propertyDetails.CONTACTOWNER}</td>
+                <td>{property.propertyDetails.contactOwner}</td>
               </tr>
               <tr>
                 <td className="font-medium">Address:</td>
                 <td>
-                  {property.propertyDetails.CADMailingADDRESS + " "}
-                  {property.propertyDetails.CADZIPCODE + " "}
+                  {property.propertyDetails.cadMailingAddress + " "}
+                  {property.propertyDetails.cadZipCode + " "}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">County:</td>
-                <td>{property.propertyDetails.CADCOUNTY}</td>
+                <td>{property.propertyDetails.cadCounty}</td>
               </tr>
             </tbody>
           </table>

@@ -48,13 +48,13 @@ export default function AddProspectForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true); // Set loading to true
     try {
-      await addProspect(
-        values.ProspectName,
-        values.Email,
-        values.PHONENUMBER || "",
-        values.MAILINGADDRESS || "",
-        values.MAILINGADDRESSCITYTXZIP || ""
-      );
+      await addProspect({
+        clientName: values.ProspectName,
+        email: values.Email,
+        phoneNumber: values.PHONENUMBER || "",
+        mailingAddress: values.MAILINGADDRESS || "",
+        mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP || "",
+      });
 
       toast({
         title: "✓ Prospect added successfully",

@@ -219,30 +219,30 @@ const ProspectPage = () => {
             <tbody>
               <tr>
                 <td className="font-medium">Client Name:</td>
-                <td>{clientData.prospect.ProspectName}</td>
+                <td>{clientData.prospect.clientName}</td>
               </tr>
               <tr>
                 <td className="font-medium">Phone:</td>
                 <td>
                   <Phone size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.prospect.PHONENUMBER}
+                  {clientData.prospect.phoneNumber}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">Email:</td>
                 <td>
                   <Mail size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.prospect.Email}
+                  {clientData.prospect.email}
                 </td>
               </tr>
-              {clientData.prospect.BillingEmail &&
-                clientData.prospect.BillingEmail !==
-                  clientData.prospect.Email && (
+              {clientData.prospect.billingEmail &&
+                clientData.prospect.billingEmail !==
+                  clientData.prospect.email && (
                   <tr>
                     <td className="font-medium">Secondary Email:</td>
                     <td>
                       <Mail size={18} className="inline text-indigo-600 mr-2" />
-                      {clientData.prospect.BillingEmail}
+                      {clientData.prospect.billingEmail}
                     </td>
                   </tr>
                 )}
@@ -250,9 +250,9 @@ const ProspectPage = () => {
                 <td className="font-medium">Billing Address:</td>
                 <td>
                   <MapPin size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.prospect.BillingAddress ??
-                    `  ${clientData.prospect.MAILINGADDRESS},
-                  ${clientData.prospect.MAILINGADDRESSCITYTXZIP}`}
+                  {clientData.prospect.billingAddress ??
+                    `  ${clientData.prospect.mailingAddress},
+                  ${clientData.prospect.mailingAddressCityTxZip}`}
                 </td>
               </tr>
               {/* Show Envelope ID and Download Button if status is SIGNED */}

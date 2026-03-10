@@ -106,7 +106,7 @@ const AppointmentForm: React.FC = () => {
                 <div className="flex justify-between  ">
                   <div className="flex-[2] mx-2">
                     <p className="border-b text-sm border-[#3285ca]">
-                      {clientData?.client.CLIENTNAME}
+                      {clientData?.client.clientName}
                     </p>
                     <p className="text-xs">Name</p>
                   </div>
@@ -119,14 +119,14 @@ const AppointmentForm: React.FC = () => {
                 </div>
                 <div className="m-2">
                   <p className="text-sm border-b border-[#3285ca]">
-                    {clientData?.client.MAILINGADDRESS}
+                    {clientData?.client.mailingAddress}
                   </p>
                   <p className="text-xs">Address</p>
                 </div>
                 <div className="m-2">
                   <p className="text-sm border-b border-[#3285ca]">
                     {" "}
-                    {clientData?.client.MAILINGADDRESSCITYTXZIP}
+                    {clientData?.client.mailingAddressCityTxZip}
                   </p>
                   <p className="text-xs">City, State, Zip Code</p>
                 </div>

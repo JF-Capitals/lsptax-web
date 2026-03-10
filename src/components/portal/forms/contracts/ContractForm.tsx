@@ -210,7 +210,7 @@ export default function ContractForm() {
                 </div>
                 <div className="flex-1 ml-2">
                   <p className="text-xs border-b-2 mr-2 border-black">
-                    {clientData?.client.CLIENTNAME}
+                    {clientData?.client.clientName}
                   </p>
                   <p className="text-sm">Owner/Representative (Please Print)</p>
                 </div>
@@ -218,13 +218,13 @@ export default function ContractForm() {
               <div className="flex justify-between my-4">
                 <div className="flex-1 mr-2">
                   <p className=" text-xs border-b-2 mr-2 border-black">
-                    {clientData?.client.PHONENUMBER}
+                    {clientData?.client.phoneNumber}
                   </p>
                   <p className="text-sm">Phone Number</p>
                 </div>
                 <div className="flex-1 ml-2">
                   <p className="text-xs border-b-2 mr-2 border-black">
-                    {clientData?.client.Email}
+                    {clientData?.client.email}
                   </p>
                   <p className="text-sm">Email Address</p>
                 </div>
@@ -232,8 +232,8 @@ export default function ContractForm() {
               <div className="flex justify-between my-4">
                 <div className="flex-1 mr-2">
                   <p className=" text-xs border-b-2 mr-2 border-black">
-                    {clientData?.client.MAILINGADDRESS},
-                    {clientData?.client.MAILINGADDRESSCITYTXZIP}
+                    {clientData?.client.mailingAddress},
+                    {clientData?.client.mailingAddressCityTxZip}
                   </p>
                   <p className="text-sm">Mailing Address</p>
                 </div>
@@ -272,16 +272,16 @@ export default function ContractForm() {
                   {clientData?.properties.map((property, index) => (
                     <tr key={index}>
                       <td className="border border-black p-2 print:p-1 print:text-xs">
-                        {property.MAILINGADDRESS}
+                        {property.mailingAddress}
                       </td>
                       <td className="border border-black p-2 print:p-1 print:text-xs">
-                        {property.CADCOUNTY}
+                        {property.cadCounty}
                       </td>
                       <td className="border border-black p-2 print:p-1 print:text-xs">
-                        {property.AccountNumber}
+                        {property.accountNumber}
                       </td>
                       <td className="border border-black p-2 print:p-1 print:text-xs">
-                        {property.CONTINGENCYFee}
+                        {property.contingencyFee}
                       </td>
                     </tr>
                   ))}

@@ -41,7 +41,7 @@ export const prospectColumn: ColumnDef<Prospect, any>[] = [
     },
   },
   {
-    accessorKey: "name",
+    accessorKey: "clientName",
     header: "Prospect Name",
   },
   {
@@ -49,7 +49,7 @@ export const prospectColumn: ColumnDef<Prospect, any>[] = [
     header: "Email",
   },
   {
-    accessorKey: "mobile",
+    accessorKey: "phoneNumber",
     header: "Mobile",
   },
   {
@@ -188,7 +188,7 @@ export const prospectColumn: ColumnDef<Prospect, any>[] = [
                 <AlertDialogTitle>Delete Prospect</AlertDialogTitle>
                 <AlertDialogDescription>
                   Are you sure you want to delete prospect{" "}
-                  {prospect.ProspectName}? This action cannot be undone.
+                  {prospect.clientName}? This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -213,7 +213,7 @@ export const prospectColumn: ColumnDef<Prospect, any>[] = [
               <AlertDialogHeader>
                 <AlertDialogTitle>Move to Client</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Convert {prospect.ProspectName} to a client? This will move
+                  Convert {prospect.clientName} to a client? This will move
                   all prospect information to a new client record.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -231,7 +231,7 @@ export const prospectColumn: ColumnDef<Prospect, any>[] = [
 
                       // Redirect to the new client's page
                       navigate(
-                        `/portal/client?clientId=${newClient.CLIENTNumber}`
+                        `/portal/client?clientId=${newClient.clientNumber}`
                       ); // Use the returned client ID
                     } catch (error) {
                       console.error(

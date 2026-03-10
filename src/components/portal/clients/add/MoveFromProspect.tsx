@@ -41,10 +41,10 @@ const MoveFromProspect = () => {
           setProspectData(data);
           // Update form values when prospect data is loaded
           form.reset({
-            CLIENTNAME: data.ProspectName,
-            Email: data.Email,
-            PHONENUMBER: data.PHONENUMBER,
-            MAILINGADDRESSCITYTXZIP: data.MAILINGADDRESSCITYTXZIP,
+            CLIENTNAME: data.clientName ?? "",
+            Email: data.email ?? "",
+            PHONENUMBER: data.phoneNumber ?? "",
+            MAILINGADDRESSCITYTXZIP: data.mailingAddressCityTxZip ?? "",
             TypeOfAcct: "Real",
             IsArchived: false,
           });
@@ -85,8 +85,14 @@ const MoveFromProspect = () => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      if (!values) { 
-        await addClient(values);
+      if (values) {
+        await addClient({
+          clientName: values.CLIENTNAME,
+          email: values.Email,
+          phoneNumber: values.PHONENUMBER,
+          mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP,
+          typeOfAcct: values.TypeOfAcct ?? "Real",
+        });
       }
 
       toast({

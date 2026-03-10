@@ -42,16 +42,16 @@ export default function EditClient() {
         setLoading(false);
 
         const fields = {
-          TypeOfAcct: data?.client.TypeOfAcct || "",
-          CLIENTNumber: data?.client.CLIENTNumber || "",
-          CLIENTNAME: data?.client.CLIENTNAME || "",
-          Email: data?.client.Email || "",
-          BillingEmail: data?.client.BillingEmail || "",
-          PHONENUMBER: data?.client.PHONENUMBER || "",
-          MAILINGADDRESS: data?.client.MAILINGADDRESS || "",
-          MAILINGADDRESSCITYTXZIP: data?.client.MAILINGADDRESSCITYTXZIP || "",
-          BillingAddress: data?.client.BillingAddress || "",
-          IsArchived: data?.client.IsArchived || false,
+          TypeOfAcct: data?.client.typeOfAcct || "",
+          CLIENTNumber: data?.client.clientNumber || "",
+          CLIENTNAME: data?.client.clientName || "",
+          Email: data?.client.email || "",
+          BillingEmail: data?.client.billingEmail || "",
+          PHONENUMBER: data?.client.phoneNumber || "",
+          MAILINGADDRESS: data?.client.mailingAddress || "",
+          MAILINGADDRESSCITYTXZIP: data?.client.mailingAddressCityTxZip || "",
+          BillingAddress: data?.client.billingAddress || "",
+          IsArchived: data?.client.isArchived || false,
           useSameAsEmail: false,
           useSameAsMailing: false,
         };

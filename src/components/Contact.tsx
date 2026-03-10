@@ -41,13 +41,13 @@ const Contact = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
      setLoading(true);
     try {
-      await addProspect(
-        values.ProspectName,
-        values.Email,
-        values.PHONENUMBER || "",
-        values.MAILINGADDRESS || "",
-        values.MAILINGADDRESSCITYTXZIP || ""
-      );
+      await addProspect({
+        clientName: values.ProspectName,
+        email: values.Email,
+        phoneNumber: values.PHONENUMBER || "",
+        mailingAddress: values.MAILINGADDRESS || "",
+        mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP || "",
+      });
       toast({
         title: "Great! We'll be in touch soon to start your savings journey.",
       });

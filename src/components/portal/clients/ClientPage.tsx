@@ -76,10 +76,10 @@ const ClientPage = () => {
   }
 
   const uniqueCounties = Array.from(
-    new Set(clientData.properties.map((p) => p.CADCOUNTY))
+    new Set(clientData.properties.map((p) => p.cadCounty))
   );
   const filteredProperties = clientData.properties.filter((p) =>
-    selectedCounty === "All" ? true : p.CADCOUNTY === selectedCounty
+    selectedCounty === "All" ? true : p.cadCounty === selectedCounty
   );
 
   return (
@@ -99,7 +99,7 @@ const ClientPage = () => {
           </NavLink>
           <NavLink
             to={`/portal/contract?clientId=${
-              clientData.client.CLIENTNumber ?? clientId ?? clientData.client.id
+              clientData.client.clientNumber ?? clientId ?? clientData.client.id
             }`}
           >
             <Button variant={"blue"} className="w-full">
@@ -115,28 +115,28 @@ const ClientPage = () => {
             <tbody>
               <tr>
                 <td className="font-medium">Client Name:</td>
-                <td>{clientData.client.CLIENTNAME}</td>
+                <td>{clientData.client.clientName}</td>
               </tr>
               <tr>
                 <td className="font-medium">Phone:</td>
                 <td>
                   <Phone size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.client.PHONENUMBER}
+                  {clientData.client.phoneNumber}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">Email:</td>
                 <td>
                   <Mail size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.client.Email}
+                  {clientData.client.email}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">Address:</td>
                 <td>
                   <MapPin size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.client.MAILINGADDRESS},{" "}
-                  {clientData.client.MAILINGADDRESSCITYTXZIP}
+                  {clientData.client.mailingAddress},{" "}
+                  {clientData.client.mailingAddressCityTxZip}
                 </td>
               </tr>
             </tbody>
@@ -148,7 +148,7 @@ const ClientPage = () => {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Associated Property(s)</h1>
           <NavLink
-            to={`/portal/add-property?clientId=${clientData.client.CLIENTNumber}`}
+            to={`/portal/add-property?clientId=${clientData.client.clientNumber}`}
           >
             <Button variant={"blue"} className="w-full">
               Add Properties
@@ -197,9 +197,9 @@ export default ClientPage;
 
 const PropertyBox: React.FC<Property> = ({
   id,
-  AccountNumber,
-  NAMEONCAD,
-  CADCOUNTY,
+  accountNumber,
+  nameOnCad,
+  cadCounty,
 }) => {
   return (
     <NavLink to={`/portal/property?propertyId=${id}`} className="block">
@@ -207,15 +207,15 @@ const PropertyBox: React.FC<Property> = ({
         <div className="flex items-center gap-3 mb-4">
           <House size={24} className="text-indigo-500" />
           <h2 className="text-lg font-semibold text-gray-800">
-            {AccountNumber}
+            {accountNumber}
           </h2>
         </div>
         <div className="text-sm text-gray-600 mb-2">
-          <span className="font-medium text-gray-700">County:</span> {CADCOUNTY}
+          <span className="font-medium text-gray-700">County:</span> {cadCounty}
         </div>
         <div className="text-sm text-gray-600">
           <span className="font-medium text-gray-700">CAD Details:</span>{" "}
-          {NAMEONCAD}
+          {nameOnCad}
         </div>
       </div>
     </NavLink>

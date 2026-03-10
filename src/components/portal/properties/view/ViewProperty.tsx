@@ -139,8 +139,8 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
 
     setIsGeneratingInvoice(true);
     try {
-      const clientNumber = property.propertyDetails.CLIENTNumber;
-      const accountNumber = property.propertyDetails.AccountNumber;
+      const clientNumber = property.propertyDetails.clientNumber;
+      const accountNumber = property.propertyDetails.accountNumber;
       
       if (!clientNumber || !accountNumber) {
         toast({
@@ -186,7 +186,7 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
 
   const handleSendAoa = async () => {
     if (!property) return;
-    const clientId = property.propertyDetails.CLIENTNumber;
+    const clientId = property.propertyDetails.clientNumber;
 
     if (!clientId) {
       toast({
@@ -246,6 +246,20 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
     );
   }
 
+  const client = property.clientDetails;
+  const prop = property.propertyDetails;
+  const clientName = client?.clientName ?? "";
+  const clientPhone = client?.phoneNumber ?? "";
+  const clientEmail = client?.email ?? "";
+  const clientNumber = prop?.clientNumber ?? "";
+  const accountNumber = prop?.accountNumber ?? "";
+  const mailingAddress = prop?.mailingAddress ?? "";
+  const mailingCityZip = prop?.mailingAddressCityTxZip ?? "";
+  const contactOwner = prop?.contactOwner ?? "";
+  const cadMailingAddress = prop?.cadMailingAddress ?? "";
+  const cadZipCode = prop?.cadZipCode ?? "";
+  const cadCounty = prop?.cadCounty ?? "";
+
   return (
     <div className="w-full p-4 bg-white shadow-md rounded-lg">
       <div className="flex flex-col md:flex-row justify-between ">
@@ -258,13 +272,13 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
           </NavLink>
 
           <NavLink
-            to={`/portal/invoice?clientId=${property.propertyDetails.CLIENTNumber}`}
+            to={`/portal/invoice?clientId=${clientNumber}`}
           >
             <Button className="w-full">View Invoices</Button>
           </NavLink>
 
           <NavLink
-            to={`/portal/agent?clientId=${property.propertyDetails.CLIENTNumber}`}
+            to={`/portal/agent?clientId=${clientNumber}`}
           >
             <Button className="w-full" variant="outline">
               Generate AOA
@@ -333,13 +347,13 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
           <h1 className="flex gap-2">
             Property No:
             <p className="font-bold">
-              #{property.propertyDetails.AccountNumber}
+              #{accountNumber || "—"}
             </p>
           </h1>
           <h2 className="flex gap-2">
             Client No:
             <p className="font-bold">
-              #{property.propertyDetails.CLIENTNumber}
+              #{clientNumber || "—"}
             </p>
           </h2>
         </div>
@@ -353,28 +367,27 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
             <tbody>
               <tr>
                 <td className="font-medium">Client:</td>
-                <td>{property.clientDetails?.CLIENTNAME}</td>
+                <td>{clientName || "—"}</td>
               </tr>
               <tr>
                 <td className="font-medium">Phone:</td>
                 <td>
                   <Phone size={18} className="inline text-indigo-600 mr-2" />
-                  {property.clientDetails?.PHONENUMBER}
+                  {clientPhone || "—"}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">Email:</td>
                 <td>
                   <Mail size={18} className="inline text-indigo-600 mr-2" />
-                  {property.clientDetails?.Email}
+                  {clientEmail || "—"}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">Address:</td>
                 <td>
                   <MapPin size={18} className="inline text-indigo-600 mr-2" />
-                  {property?.propertyDetails.MAILINGADDRESS},{" "}
-                  {property?.propertyDetails.MAILINGADDRESSCITYTXZIP}
+                  {[mailingAddress, mailingCityZip].filter(Boolean).join(", ") || "—"}
                 </td>
               </tr>
             </tbody>
@@ -388,18 +401,17 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
             <tbody>
               <tr>
                 <td className="font-medium">Contract Owner:</td>
-                <td>{property.propertyDetails.CONTACTOWNER}</td>
+                <td>{contactOwner || "—"}</td>
               </tr>
               <tr>
                 <td className="font-medium">Address:</td>
                 <td>
-                  {property.propertyDetails.CADMailingADDRESS + " "}
-                  {property.propertyDetails.CADZIPCODE + " "}
+                  {[cadMailingAddress, cadZipCode].filter(Boolean).join(" ") || "—"}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">County:</td>
-                <td>{property.propertyDetails.CADCOUNTY}</td>
+                <td>{cadCounty || "—"}</td>
               </tr>
             </tbody>
           </table>

@@ -95,16 +95,16 @@ const InvoiceSummary: React.FC<{
               Invoice Date: {new Date().toLocaleDateString()}
             </p>
             <p className="font-bold">
-              Invoice Number: INV-{invoice?.client.CLIENTNumber}-{selectedYear}
+              Invoice Number: INV-{invoice?.client.clientNumber}-{selectedYear}
             </p>
           </div>
         </div>
 
         {/* Client Info */}
         <div className="flex flex-col border-2 border-black p-1 mb-4">
-          <p className="font-bold">{invoice?.client?.CLIENTNAME}</p>
-          <p>{invoice?.client?.MAILINGADDRESS}</p>
-          <p>{invoice?.client?.MAILINGADDRESSCITYTXZIP}</p>
+          <p className="font-bold">{invoice?.client?.clientName}</p>
+          <p>{invoice?.client?.mailingAddress}</p>
+          <p>{invoice?.client?.mailingAddressCityTxZip}</p>
         </div>
 
         <div className="text-center font-bold mb-4 underline">
@@ -136,10 +136,10 @@ const InvoiceSummary: React.FC<{
                 return (
                   <tr key={property.propertyDetails.id}>
                     <td className="border border-gray-300 px-4 py-2">
-                      {property.propertyDetails.MAILINGADDRESS}
+                      {property.propertyDetails.mailingAddress}
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
-                      {property.propertyDetails.AccountNumber}
+                      {property.propertyDetails.accountNumber}
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
                       {selectedYear} Protest

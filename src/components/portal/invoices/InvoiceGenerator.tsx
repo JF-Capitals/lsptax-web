@@ -190,8 +190,8 @@ const InvoiceGenerator = () => {
       setSelectedClients(prev => prev.filter(cn => cn !== clientNumber));
       // Remove properties for this client from selection
       const clientProperties = propertiesByClient
-        .find(c => c.client.CLIENTNumber === clientNumber)
-        ?.properties.map(p => p.AccountNumber) || [];
+        .find(c => c.client.clientNumber === clientNumber)
+        ?.properties.map(p => p.accountNumber) || [];
       setSelectedProperties(prev => prev.filter(p => !clientProperties.includes(p)));
     }
   };
@@ -218,7 +218,7 @@ const InvoiceGenerator = () => {
   const selectAllProperties = () => {
     const allProperties = propertiesByClient
       .flatMap(c => c.properties)
-      .map(p => p.AccountNumber);
+      .map(p => p.accountNumber);
     setSelectedProperties(allProperties);
   };
 
@@ -317,21 +317,21 @@ const InvoiceGenerator = () => {
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {clients.map((client) => (
-                  <div key={client.CLIENTNumber} className="flex items-center space-x-3">
+                  <div key={client.clientNumber} className="flex items-center space-x-3">
                     <Checkbox
-                      id={client.CLIENTNumber}
-                      checked={selectedClients.includes(client.CLIENTNumber)}
+                      id={client.clientNumber}
+                      checked={selectedClients.includes(client.clientNumber)}
                       onCheckedChange={(checked) => 
-                        handleClientSelection(client.CLIENTNumber, checked as boolean)
+                        handleClientSelection(client.clientNumber, checked as boolean)
                       }
                     />
                     <label
-                      htmlFor={client.CLIENTNumber}
+                      htmlFor={client.clientNumber}
                       className="flex-1 cursor-pointer"
                     >
-                      <div className="font-medium">{client.CLIENTNAME}</div>
+                      <div className="font-medium">{client.clientName}</div>
                       <div className="text-sm text-muted-foreground">
-                        {client.CLIENTNumber} • {client.propertyCount} properties
+                        {client.clientNumber} • {client.propertyCount} properties
                       </div>
                     </label>
                   </div>
@@ -414,27 +414,27 @@ const InvoiceGenerator = () => {
             ) : (
               <div className="space-y-4">
                 {propertiesByClient.map((clientData) => (
-                  <div key={clientData.client.CLIENTNumber} className="space-y-2">
+                  <div key={clientData.client.clientNumber} className="space-y-2">
                     <h3 className="font-semibold text-lg">
-                      {clientData.client.CLIENTNAME} ({clientData.client.CLIENTNumber})
+                      {clientData.client.clientName} ({clientData.client.clientNumber})
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {clientData.properties.map((property) => (
-                        <div key={property.AccountNumber} className="flex items-center space-x-3 p-3 border rounded-lg">
+                        <div key={property.accountNumber} className="flex items-center space-x-3 p-3 border rounded-lg">
                           <Checkbox
-                            id={property.AccountNumber}
-                            checked={selectedProperties.includes(property.AccountNumber)}
+                            id={property.accountNumber}
+                            checked={selectedProperties.includes(property.accountNumber)}
                             onCheckedChange={(checked) => 
-                              handlePropertySelection(property.AccountNumber, checked as boolean)
+                              handlePropertySelection(property.accountNumber, checked as boolean)
                             }
                           />
                           <label
-                            htmlFor={property.AccountNumber}
+                            htmlFor={property.accountNumber}
                             className="flex-1 cursor-pointer"
                           >
-                            <div className="font-medium">{property.AccountNumber}</div>
+                            <div className="font-medium">{property.accountNumber}</div>
                             <div className="text-sm text-muted-foreground">
-                              {property.CADMailingADDRESS}, {property.CADCITY}, {property.CADCOUNTY}
+                              {property.cadMailingAddress}, {property.cadCity}, {property.cadCounty}
                             </div>
                             <div className="text-sm">
                               {property.CONTINGENCYFee && (

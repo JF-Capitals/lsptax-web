@@ -2,41 +2,69 @@
 
 export interface ClientData {
   id: number;
-  TypeOfAcct: string;
-  CLIENTNumber?: string; // Optional to match `String?` in Prisma
+  TypeOfAcct?: string;
+  typeOfAcct?: string;
+  CLIENTNumber?: string;
+  clientNumber?: string;
   CLIENTNAME?: string;
+  clientName?: string;
   Email?: string;
-  BillingAddress: string;
-  BillingEmail: string;
+  email?: string;
+  BillingAddress?: string;
+  billingAddress?: string;
+  BillingEmail?: string;
+  billingEmail?: string;
   PHONENUMBER?: string;
+  phoneNumber?: string;
   NAMEONCAD?: string;
+  nameOnCad?: string;
   MAILINGADDRESS?: string;
+  mailingAddress?: string;
   MAILINGADDRESSCITYTXZIP?: string;
-  IsArchived: boolean; // Boolean with default handled in backend
-  createdAt: Date;
-  updatedAt: Date;
+  mailingAddressCityTxZip?: string;
+  IsArchived?: boolean;
+  isArchived?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 export interface Property {
   id: number;
   StatusNotes?: string;
+  statusNotes?: string;
   OtherNotes?: string;
+  otherNotes?: string;
   NAMEONCAD?: string;
+  nameOnCad?: string;
   MAILINGADDRESS?: string;
+  mailingAddress?: string;
   MAILINGADDRESSCITYTXZIP?: string;
+  mailingAddressCityTxZip?: string;
   CADMailingADDRESS?: string;
+  cadMailingAddress?: string;
   CADCITY?: string;
+  cadCity?: string;
   CADZIPCODE?: string;
+  cadZipCode?: string;
   CADCOUNTY?: string;
+  cadCounty?: string;
   AccountNumber?: string;
+  accountNumber?: string;
   CLIENTNumber?: string;
+  clientNumber?: string;
   CONTACTOWNER?: string;
+  contactOwner?: string;
   SUBCONTRACTOWNER?: string;
+  subcontractOwner?: string;
   BPPFEE?: string;
+  bppFee?: string;
   CONTINGENCYFee?: string;
+  contingencyFee?: string;
   FlatFee?: string;
-  IsArchived: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  flatFee?: string;
+  IsArchived?: boolean;
+  isArchived?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
   invoices?: InvoiceData[];
 }
 
@@ -103,16 +131,16 @@ export interface PropertyData {
 }
 
 export interface Prospect {
-  BillingAddress: string;
-  BillingEmail: string;
-  envelopeId: string;
   id: number;
-  ProspectName: string;
-  Email: string;
-  PHONENUMBER: string;
-  MAILINGADDRESS: string;
-  MAILINGADDRESSCITYTXZIP: string;
-  IsArchived: boolean;
+  clientName: string;
+  email: string;
+  phoneNumber: string;
+  mailingAddress?: string;
+  mailingAddressCityTxZip?: string;
+  billingAddress?: string;
+  billingEmail?: string;
+  envelopeId?: string;
+  isArchived?: boolean;
   status: string;
 }
 export interface ProspectPropertyData {

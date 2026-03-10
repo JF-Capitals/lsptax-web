@@ -114,9 +114,9 @@ const InvoiceDetails: React.FC<{
             </div>
             <div>
               <div>
-                <p>{invoice?.client?.CLIENTNAME}</p>
-                <p>{invoice?.client?.MAILINGADDRESS}</p>
-                <p>{invoice?.client?.MAILINGADDRESSCITYTXZIP}</p>
+                <p>{invoice?.client?.clientName}</p>
+                <p>{invoice?.client?.mailingAddress}</p>
+                <p>{invoice?.client?.mailingAddressCityTxZip}</p>
               </div>
             </div>
           </div>
@@ -178,16 +178,16 @@ const InvoiceDetails: React.FC<{
                   return (
                     <tr key={property.propertyDetails.id}>
                       <td className="border border-gray-300 px-4 py-2">
-                        {invoice.client.TypeOfAcct}
+                        {invoice.client.typeOfAcct}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {property.propertyDetails.CADMailingADDRESS}
+                        {property.propertyDetails.cadMailingAddress}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {property.propertyDetails.CADCOUNTY}
+                        {property.propertyDetails.cadCounty}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {property.propertyDetails.AccountNumber}
+                        {property.propertyDetails.accountNumber}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
                         {selectedYear} Protest
