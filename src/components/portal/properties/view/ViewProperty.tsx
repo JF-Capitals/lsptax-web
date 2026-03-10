@@ -5,7 +5,7 @@ import { LoaderCircle, Mail, MapPin, Phone, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PropertyData } from "@/types/types";
-import { deleteProperty } from "@/api/api";
+import { deleteProperty, sendAOAToClient } from "@/api/api";
 import YearTable from "../yeardata/YearTable";
 import { useToast } from "@/hooks/use-toast";
 
@@ -18,6 +18,7 @@ const ViewProperty = () => {
   const [isDeleting, setIsDeleting] = useState(false); // Track deletion state
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false); // Track invoice section state
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false); // Track invoice generation state
+  const [isSendingAoa, setIsSendingAoa] = useState(false);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Track selected year
   const [searchParams, setSearchParams] = useSearchParams();
   const propertyId = parseInt(searchParams.get("propertyId") || "1");
@@ -183,6 +184,38 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
     }
   };
 
+  const handleSendAoa = async () => {
+    if (!property) return;
+    const clientId = property.propertyDetails.CLIENTNumber;
+
+    if (!clientId) {
+      toast({
+        title: "Error",
+        description: "Missing client number for this property.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSendingAoa(true);
+    try {
+      await sendAOAToClient({ clientId, propertyId: property.propertyDetails.id });
+      toast({
+        title: "✓ AOA sent",
+        description: "AOA has been sent to the client for signature.",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to send AOA",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingAoa(false);
+    }
+  };
+
   useEffect(() => {
     fetchProperty(propertyId);
   }, [propertyId]); // Refetch when propertyId changes
@@ -229,6 +262,23 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
           >
             <Button className="w-full">View Invoices</Button>
           </NavLink>
+
+          <NavLink
+            to={`/portal/agent?clientId=${property.propertyDetails.CLIENTNumber}`}
+          >
+            <Button className="w-full" variant="outline">
+              Generate AOA
+            </Button>
+          </NavLink>
+
+          <Button
+            className="w-full"
+            variant="outline"
+            onClick={handleSendAoa}
+            disabled={isSendingAoa}
+          >
+            {isSendingAoa ? "Sending..." : "Send AOA via Email"}
+          </Button>
 
           <div className="flex gap-2 w-full">
             <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>

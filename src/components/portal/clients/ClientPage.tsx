@@ -97,6 +97,15 @@ const ClientPage = () => {
               Invoice
             </Button>
           </NavLink>
+          <NavLink
+            to={`/portal/contract?clientId=${
+              clientData.client.CLIENTNumber ?? clientId ?? clientData.client.id
+            }`}
+          >
+            <Button variant={"blue"} className="w-full">
+              Create Contract
+            </Button>
+          </NavLink>
         </div>
       </div>
 

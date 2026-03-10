@@ -6,7 +6,9 @@ import { useReactToPrint } from "react-to-print";
 // import Logo from "@/assets/logo.svg";
 // import AppointmentForm from "./AppointmentForm";
 import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
+import { LoaderCircle, Printer } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { sendClientContract } from "@/api/api";
 
 interface Client {
   client: ClientData;
@@ -15,6 +17,8 @@ interface Client {
 export default function ContractForm() {
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get("clientId");
+  const { toast } = useToast();
+  const [isSending, setIsSending] = useState(false);
 
   // const [invoiceData, setInvoiceData] = useState<InvoiceData>();
   const [clientData, setClientData] = useState<Client>();
@@ -37,22 +41,79 @@ export default function ContractForm() {
   }, [clientId]);
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
+
+  const handleDownload = () => {
+    reactToPrintFn();
+    toast({
+      title: "Download started",
+      description: "Choose “Save as PDF” in the print dialog to download.",
+    });
+  };
+
+  const handleSendContract = async () => {
+    if (!clientId) {
+      toast({
+        title: "Error",
+        description: "Missing clientId in the URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      await sendClientContract({ clientId });
+      toast({
+        title: "✓ Contract sent",
+        description: "Contract has been sent to the client for signature.",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to send contract",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
   return (
     <>
-      <Button
-        variant={"blue"}
-        className="bg-[#0093FF] rounded-md p-2 px-6 ml-4 text-white"
-        onClick={() => reactToPrintFn()}
-      >
-        <Printer />
-        Print
-      </Button>
+      <div className="flex flex-wrap gap-2 px-4">
+        <Button
+          variant={"blue"}
+          className="bg-[#0093FF] rounded-md p-2 px-6 text-white"
+          onClick={() => reactToPrintFn()}
+        >
+          <Printer />
+          Print
+        </Button>
+        <Button variant={"blue"} className="rounded-md p-2 px-6" onClick={handleDownload}>
+          Download
+        </Button>
+        <Button
+          variant={"blue"}
+          className="rounded-md p-2 px-6"
+          onClick={handleSendContract}
+          disabled={isSending}
+        >
+          {isSending ? (
+            <span className="flex items-center gap-2">
+              <LoaderCircle className="animate-spin w-5 h-5" />
+              Sending...
+            </span>
+          ) : (
+            "Send to Client"
+          )}
+        </Button>
+      </div>
       <div className="w-[210mm] min-h-screen bg-white shadow-md mx-auto border border-gray-300 relative ">
         <div ref={contentRef} className="p-8">
           <div className="">
             <div className="text-center my-4">
               <p className="font-bold text-md underline">
-                PROPERTY REPRESENTATION AGREEMENT
+                PROPERTY REPRESENTATION AGREEMENT HEHE
               </p>
             </div>
 

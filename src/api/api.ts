@@ -574,6 +574,75 @@ export const sendContract = async ({ prospectId }: { prospectId: Number }) => {
   }
 };
 
+export const sendAOAToClient = async ({
+  clientId,
+  propertyId,
+}: {
+  clientId: string;
+  propertyId?: number;
+}) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/sign-aoa`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clientId,
+          propertyId,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to send AOA to client");
+    }
+  } catch (error: unknown) {
+    let errorMessage = "Not able to send AOA to client. Please try again.";
+
+    if (error instanceof Error) {
+      console.log({ error });
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
+export const sendClientContract = async ({ clientId }: { clientId: string }) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/action/sign-aoa`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clientId,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to send contract to client");
+    }
+  } catch (error: unknown) {
+    let errorMessage = "Not able to send contract to client. Please try again.";
+
+    if (error instanceof Error) {
+      console.log({ error });
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
 export const downloadSignedPDF = async ({
   prospectId,
 }: {
