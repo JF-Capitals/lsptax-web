@@ -6,6 +6,7 @@ import {
   FileText,
   Users,
   UserPlus,
+  UploadCloud,
   ChevronLeft,
   ChevronRight,
   // FileSignature,
@@ -30,6 +31,7 @@ const menuOptions: MenuOption[] = [
   { id: "invoices", label: "Invoices", icon: FileText },
   { id: "clients/list-client", label: "Clients", icon: Users },
   { id: "prospects/list-prospect", label: "Prospects", icon: UserPlus },
+  { id: "csv-uploads", label: "CSV Uploads", icon: UploadCloud },
   // { id: "forms/contract", label: "Contracts", icon: FileSignature },
 ];
 

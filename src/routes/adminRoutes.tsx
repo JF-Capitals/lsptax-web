@@ -34,6 +34,7 @@ import ProspectProspertyTable from "@/components/portal/prospects/ProspectProper
 import EditProspectProperty from "@/components/portal/prospects/EditProspectProperty";
 import EditProspectDetails from "@/components/portal/prospects/edit/EditProspectDetails";
 import PreviewSignedPdf from "@/components/portal/prospects/preview/PreviewSignedPDF";
+import CsvUploadsPage from "@/components/portal/csv/CsvUploadsPage";
 
 const AdminRoutes = () => {
   return (
@@ -93,6 +94,7 @@ const AdminRoutes = () => {
         <Route path="/agent" element={<AppointmentForm />} />
         <Route path="/contract" element={<ContractForm />} />
         <Route path="/invoice" element={<InvoicePage />} />
+        <Route path="/csv-uploads" element={<CsvUploadsPage />} />
       </Routes>
     </ProtectedRoute>
   );

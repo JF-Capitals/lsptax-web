@@ -721,3 +721,35 @@ export const archiveItem = async (tableName: string, id: number) => {
     throw new Error(errorMessage);
   }
 };
+
+async function postCsv(endpoint: string, file: File) {
+  const formData = new FormData();
+  formData.append("csv", file);
+
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}${endpoint}`, {
+    method: "POST",
+    body: formData,
+  });
+
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : {};
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.error || "CSV request failed");
+  }
+
+  return data;
+}
+
+// CSV v2 endpoints (multipart form-data, field name: `csv`)
+export const previewClientsPropertiesCsv = async (file: File) =>
+  postCsv("/csv/preview-clients-properties", file);
+
+export const uploadClientsPropertiesCsv = async (file: File) =>
+  postCsv("/csv/upload-clients-properties", file);
+
+export const previewInvoicesCsv = async (file: File) =>
+  postCsv("/csv/preview-invoices", file);
+
+export const uploadInvoicesCsv = async (file: File) =>
+  postCsv("/csv/upload-invoices", file);
