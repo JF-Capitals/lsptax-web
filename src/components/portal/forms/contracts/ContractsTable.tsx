@@ -39,8 +39,8 @@ const ContractTable = <TData, TValue>({
     const fetchClients = async () => {
       try {
         setLoading(true);
-        const data = archived ? await getArchiveClients() : await getClients(); // Fetch archived or active clients
-        setClients(data);
+        const res = archived ? await getArchiveClients(100, 0) : await getClients(100, 0);
+        setClients((res.data ?? []) as TData[]);
       } catch (error) {
         console.error("Error fetching clients:", error);
         setError("Failed to load clients. Please try again later.");
@@ -50,7 +50,7 @@ const ContractTable = <TData, TValue>({
     };
 
     fetchClients();
-  }, [archived]); // Refetch data when archive state changes
+  }, [archived]);
   const table = useReactTable({
     data: clients,
     columns,

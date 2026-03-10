@@ -28,12 +28,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
+export interface ServerPaginationProps {
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+  onPrev: () => void;
+  onNext: () => void;
+  onPageSizeChange: (size: number) => void;
+}
+
 interface TableBuilderProps {
   data: any;
   columns: any;
   label: string;
   columnFilters?: ColumnFiltersState;
   setColumnFilters?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
+  /** When set, table uses server-side pagination (no client-side paging); footer shows total and calls these handlers */
+  serverPagination?: ServerPaginationProps;
 }
 
 const TableBuilder = ({
@@ -42,12 +54,18 @@ const TableBuilder = ({
   label,
   columnFilters,
   setColumnFilters,
+  serverPagination,
 }: TableBuilderProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [pageSize, setPageSize] = useState(10);
-  const [pageIndex, setPageIndex] = useState(0); // Add a pageIndex state
+  const [pageIndex, setPageIndex] = useState(0);
+
+  const isServerPagination = !!serverPagination;
+  const effectivePageSize = isServerPagination
+    ? Math.max(serverPagination!.limit, (data?.length ?? 0) || 10)
+    : pageSize;
 
   const table = useReactTable({
     data,
@@ -56,28 +74,50 @@ const TableBuilder = ({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters, // Use prop from ClientTable
+    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    manualPagination: isServerPagination,
+    pageCount: isServerPagination
+      ? Math.ceil((serverPagination?.total ?? 0) / (serverPagination?.limit ?? 1))
+      : undefined,
     state: {
       sorting,
-      columnFilters, // Use state from ClientTable
+      columnFilters,
       columnVisibility,
       rowSelection,
       pagination: {
-        pageSize,
-        pageIndex,
+        pageSize: effectivePageSize,
+        pageIndex: isServerPagination ? 0 : pageIndex,
       },
     },
   });
 
-  // Update the table's page size whenever it changes
   const handlePageSizeChange = (value: number) => {
+    if (isServerPagination && serverPagination) {
+      serverPagination.onPageSizeChange(value);
+      return;
+    }
     setPageSize(value);
-    setPageIndex(0); // Reset to first page when page size changes
+    setPageIndex(0);
     table.setPageSize(value);
   };
+
+  const start = isServerPagination && serverPagination
+    ? serverPagination.offset + 1
+    : pageIndex * pageSize + 1;
+  const end = isServerPagination && serverPagination
+    ? serverPagination.offset + (data?.length ?? 0)
+    : Math.min(pageIndex * pageSize + pageSize, table.getFilteredRowModel().rows.length);
+  const total = isServerPagination && serverPagination
+    ? serverPagination.total
+    : table.getFilteredRowModel().rows.length;
+  const canPrev = isServerPagination ? serverPagination!.offset > 0 : table.getCanPreviousPage();
+  const canNext = isServerPagination ? serverPagination!.hasMore : table.getCanNextPage();
+  const onPrev = isServerPagination ? serverPagination!.onPrev : () => { setPageIndex((i) => Math.max(0, i - 1)); table.previousPage(); };
+  const onNext = isServerPagination ? serverPagination!.onNext : () => { setPageIndex((i) => i + 1); table.nextPage(); };
+  const displayPageSize = isServerPagination ? serverPagination!.limit : pageSize;
 
   return (
     <div className="rounded-xl border m-4 bg-white p-4 flex flex-col overflow-y-auto h-[calc(100vh-260px)] ">
@@ -93,7 +133,7 @@ const TableBuilder = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuRadioGroup
-                value={pageSize.toString()}
+                value={displayPageSize.toString()}
                 onValueChange={(value) => handlePageSizeChange(Number(value))}
               >
                 <DropdownMenuRadioItem value="10">10</DropdownMenuRadioItem>
@@ -104,6 +144,11 @@ const TableBuilder = ({
             </DropdownMenuContent>
           </DropdownMenu>{" "}
           per page
+          {total > 0 && (
+            <span className="ml-2 text-muted-foreground">
+              ({start}–{end} of {total})
+            </span>
+          )}
         </div>
       </div>
 
@@ -213,22 +258,16 @@ const TableBuilder = ({
         <Button
           variant={"blue"}
           size="sm"
-          onClick={() => {
-            setPageIndex((old) => Math.max(old - 1, 0)); // Go to the previous page
-            table.previousPage();
-          }}
-          disabled={!table.getCanPreviousPage()}
+          onClick={onPrev}
+          disabled={!canPrev}
         >
           Previous
         </Button>
         <Button
           variant={"blue"}
           size="sm"
-          onClick={() => {
-            setPageIndex((old) => old + 1); // Go to the next page
-            table.nextPage();
-          }}
-          disabled={!table.getCanNextPage()}
+          onClick={onNext}
+          disabled={!canNext}
         >
           Next
         </Button>

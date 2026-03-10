@@ -33,18 +33,48 @@ async function authFetch(input: RequestInfo | URL, init?: RequestInit) {
   return response;
 }
 
-export const getClients = async (limit = 10) => {
+/** Paginated list response per API v2 (limit, offset, data, total, hasMore) */
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+const emptyPaginated = <T>(): PaginatedResponse<T> => ({
+  data: [],
+  total: 0,
+  limit: 10,
+  offset: 0,
+  hasMore: false,
+});
+
+export const getClients = async (
+  limit = 10,
+  offset = 0,
+  search?: string
+): Promise<PaginatedResponse<unknown>> => {
   try {
+    const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+    if (search?.trim()) params.set("search", search.trim());
     const response = await authFetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/clients?limit=${limit}`
+      `${import.meta.env.VITE_BACKEND_URL}/api/clients?${params.toString()}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch clients");
     }
-    return await response.json();
+    const json = await response.json();
+    return {
+      data: json.data ?? [],
+      total: json.total ?? 0,
+      limit: json.limit ?? limit,
+      offset: json.offset ?? offset,
+      hasMore: json.hasMore ?? false,
+    };
   } catch (error) {
     console.error("Error fetching clients:", error);
-    return [];
+    return emptyPaginated();
   }
 };
 
@@ -92,52 +122,87 @@ export const getSingleProspect = async ({
   }
 };
 
-export const getArchiveClients = async (limit?: number) => {
+export const getArchiveClients = async (
+  limit = 10,
+  offset = 0,
+  search?: string
+): Promise<PaginatedResponse<unknown>> => {
   try {
-    const url = limit != null
-      ? `${import.meta.env.VITE_BACKEND_URL}/api/archive_clients?limit=${limit}`
-      : `${import.meta.env.VITE_BACKEND_URL}/api/archive_clients`;
-    const response = await authFetch(url);
+    const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+    if (search?.trim()) params.set("search", search.trim());
+    const response = await authFetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/archive_clients?${params.toString()}`
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch clients");
     }
-    const clients = await response.json();
-    return clients;
+    const json = await response.json();
+    return {
+      data: json.data ?? [],
+      total: json.total ?? 0,
+      limit: json.limit ?? limit,
+      offset: json.offset ?? offset,
+      hasMore: json.hasMore ?? false,
+    };
   } catch (error) {
     console.log(error);
-    return [{}];
+    return emptyPaginated();
   }
 };
 
-export const getProperties = async (limit = 10) => {
+export const getProperties = async (
+  limit = 10,
+  offset = 0,
+  search?: string
+): Promise<PaginatedResponse<unknown>> => {
   try {
+    const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+    if (search?.trim()) params.set("search", search.trim());
     const response = await authFetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/properties?limit=${limit}`
+      `${import.meta.env.VITE_BACKEND_URL}/api/properties?${params.toString()}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch properties");
     }
-    return await response.json();
+    const json = await response.json();
+    return {
+      data: json.data ?? [],
+      total: json.total ?? 0,
+      limit: json.limit ?? limit,
+      offset: json.offset ?? offset,
+      hasMore: json.hasMore ?? false,
+    };
   } catch (error) {
     console.error("Error fetching properties:", error);
-    return [];
+    return emptyPaginated();
   }
 };
 
-export const getArchiveProperties = async (limit?: number) => {
+export const getArchiveProperties = async (
+  limit = 10,
+  offset = 0,
+  search?: string
+): Promise<PaginatedResponse<unknown>> => {
   try {
-    const url = limit != null
-      ? `${import.meta.env.VITE_BACKEND_URL}/api/archive_properties?limit=${limit}`
-      : `${import.meta.env.VITE_BACKEND_URL}/api/archive_properties`;
-    const response = await authFetch(url);
+    const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+    if (search?.trim()) params.set("search", search.trim());
+    const response = await authFetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/archive_properties?${params.toString()}`
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch properties");
     }
-    const properties = await response.json();
-    return properties;
+    const json = await response.json();
+    return {
+      data: json.data ?? [],
+      total: json.total ?? 0,
+      limit: json.limit ?? limit,
+      offset: json.offset ?? offset,
+      hasMore: json.hasMore ?? false,
+    };
   } catch (error) {
     console.log(error);
-    return [{}];
+    return emptyPaginated();
   }
 };
 
@@ -227,20 +292,31 @@ export const getInvoiceByPropertyId = async ({
     return [{}];
   }
 };
-export const getAllInvoices = async (limit?: number) => {
+export const getAllInvoices = async (
+  limit = 10,
+  offset = 0,
+  search?: string
+): Promise<PaginatedResponse<unknown>> => {
   try {
-    const url = limit != null
-      ? `${import.meta.env.VITE_BACKEND_URL}/api/invoices?limit=${limit}`
-      : `${import.meta.env.VITE_BACKEND_URL}/api/invoices`;
-    const response = await authFetch(url);
+    const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+    if (search?.trim()) params.set("search", search.trim());
+    const response = await authFetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/invoices?${params.toString()}`
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch Invoices");
     }
-    const invoice = await response.json();
-    return invoice;
+    const json = await response.json();
+    return {
+      data: json.data ?? [],
+      total: json.total ?? 0,
+      limit: json.limit ?? limit,
+      offset: json.offset ?? offset,
+      hasMore: json.hasMore ?? false,
+    };
   } catch (error) {
     console.log(error);
-    return [{}];
+    return emptyPaginated();
   }
 };
 
@@ -331,49 +407,81 @@ export const getInvoiceGenerationStats = async (clientNumbers?: string[], years?
   }
 };
 
-export const getArchiveInvoices = async () => {
+export const getArchiveInvoices = async (
+  limit = 10,
+  offset = 0,
+  search?: string
+): Promise<PaginatedResponse<unknown>> => {
   try {
+    const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+    if (search?.trim()) params.set("search", search.trim());
     const response = await authFetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/archive-invoices`
+      `${import.meta.env.VITE_BACKEND_URL}/api/archive-invoices?${params.toString()}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch Invoices");
     }
-    const invoices = await response.json();
-    return invoices;
+    const json = await response.json();
+    return {
+      data: json.data ?? [],
+      total: json.total ?? 0,
+      limit: json.limit ?? limit,
+      offset: json.offset ?? offset,
+      hasMore: json.hasMore ?? false,
+    };
   } catch (error) {
     console.log(error);
-    return [{}];
+    return emptyPaginated();
   }
 };
 
-export const getProspects = async (limit = 10) => {
+export const getProspects = async (
+  limit = 10,
+  offset = 0
+): Promise<PaginatedResponse<unknown>> => {
   try {
     const response = await authFetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/prospects?limit=${limit}`
+      `${import.meta.env.VITE_BACKEND_URL}/api/prospects?limit=${limit}&offset=${offset}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch prospects");
     }
-    return await response.json();
+    const json = await response.json();
+    return {
+      data: json.data ?? [],
+      total: json.total ?? 0,
+      limit: json.limit ?? limit,
+      offset: json.offset ?? offset,
+      hasMore: json.hasMore ?? false,
+    };
   } catch (error) {
     console.error("Error fetching prospects:", error);
-    return [];
+    return emptyPaginated();
   }
 };
 
-export const getArchiveProspects = async (limit = 10) => {
+export const getArchiveProspects = async (
+  limit = 10,
+  offset = 0
+): Promise<PaginatedResponse<unknown>> => {
   try {
     const response = await authFetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/archive-prospects?limit=${limit}`
+      `${import.meta.env.VITE_BACKEND_URL}/api/archive-prospects?limit=${limit}&offset=${offset}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch prospects");
     }
-    return await response.json();
+    const json = await response.json();
+    return {
+      data: json.data ?? [],
+      total: json.total ?? 0,
+      limit: json.limit ?? limit,
+      offset: json.offset ?? offset,
+      hasMore: json.hasMore ?? false,
+    };
   } catch (error) {
     console.error("Error fetching prospects:", error);
-    return [];
+    return emptyPaginated();
   }
 };
 

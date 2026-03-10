@@ -20,7 +20,8 @@ const DonutChart: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const prospects = await getProspects();
+      const res = await getProspects(100, 0);
+      const prospects = (res.data ?? []) as { status?: ProspectStatus }[];
 
       // Initialize counts
       const counts = {
@@ -29,9 +30,9 @@ const DonutChart: React.FC = () => {
         [ProspectStatus.IN_PROGRESS]: 0,
       };
 
-      // Count occurrences of each status
-      prospects.forEach((prospect: { status: ProspectStatus }) => {
-        if (counts[prospect.status] !== undefined) {
+      // Count occurrences of each status (from current page, max 100)
+      prospects.forEach((prospect) => {
+        if (prospect.status != null && counts[prospect.status] !== undefined) {
           counts[prospect.status]++;
         }
       });

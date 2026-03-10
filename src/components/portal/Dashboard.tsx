@@ -25,19 +25,19 @@ const Dashboard = () => {
       try {
         setLoading(true); // start loading
         const [
-          fetchedPropData,
-          fetchedClientData,
-          fetchedProspectData,
+          fetchedPropRes,
+          fetchedClientRes,
+          fetchedProspectRes,
           dashboardStats,
         ] = await Promise.all([
-          getProperties(),
-          getClients(),
-          getProspects(),
+          getProperties(10, 0),
+          getClients(10, 0),
+          getProspects(10, 0),
           dashboardData(),
         ]);
-        setPropData(fetchedPropData);
-        setClientData(fetchedClientData);
-        setProspectData(fetchedProspectData);
+        setPropData((fetchedPropRes.data ?? []) as Properties);
+        setClientData((fetchedClientRes.data ?? []) as Clients);
+        setProspectData((fetchedProspectRes.data ?? []) as Prospect);
         setStats(dashboardStats);
       } catch (error) {
         console.error("Error fetching stats:", error);

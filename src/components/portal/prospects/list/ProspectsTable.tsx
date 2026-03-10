@@ -36,13 +36,17 @@ const ProspectTable = <TData, TValue>({
   columns,
 }: ProspectTableProps<TData, TValue>) => {
   const [prospects, setProspects] = useState<TData[]>([]);
+  const [total, setTotal] = useState(0);
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [archived, setArchived] = useState(false); // State to track archive view
+  const [archived, setArchived] = useState(false);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
 
   const handleCsvDownload = async () => {
@@ -56,15 +60,21 @@ const ProspectTable = <TData, TValue>({
       setDownloadingCsv(false);
     }
   };
-  const fetchProspects = async () => {
+
+  const fetchProspects = async (opts?: { limit?: number; offset?: number }) => {
+    const l = opts?.limit ?? limit;
+    const o = opts?.offset ?? offset;
     try {
       setLoading(true);
-      setError(null); // Reset error state before fetching
-      const data = archived
-        ? await getArchiveProspects()
-        : await getProspects();
-
-      setProspects(data);
+      setError(null);
+      const res = archived
+        ? await getArchiveProspects(l, o)
+        : await getProspects(l, o);
+      setProspects((res.data ?? []) as TData[]);
+      setTotal(res.total);
+      setLimit(res.limit);
+      setOffset(res.offset);
+      setHasMore(res.hasMore);
     } catch (err) {
       console.error("Error fetching prospects:", err);
       setError("Failed to load prospects. Please try again later.");
@@ -74,8 +84,13 @@ const ProspectTable = <TData, TValue>({
   };
 
   useEffect(() => {
-    fetchProspects();
-  }, [archived]);
+    fetchProspects({ limit, offset });
+  }, [archived, limit, offset]);
+
+  const switchArchived = () => {
+    setArchived((a) => !a);
+    setOffset(0);
+  };
 
   const table = useReactTable({
     data: prospects,
@@ -143,12 +158,12 @@ const ProspectTable = <TData, TValue>({
         </div>
 
         <div className="w-full">
-          <h2 className="text-2xl font-bold">{prospects.length}</h2>
+          <h2 className="text-2xl font-bold">{total}</h2>
           <h3>Total number of {archived ? "Archived" : "Active"} Prospects</h3>
         </div>
         <div>
           <Button
-            onClick={() => setArchived((prev) => !prev)}
+            onClick={switchArchived}
             className="flex items-center gap-2"
           >
             {archived ? "Show Active Prospects" : "Show Archived Prospects"}
@@ -205,6 +220,18 @@ const ProspectTable = <TData, TValue>({
         label="Prospects"
         columnFilters={columnFilters}
         setColumnFilters={setColumnFilters}
+        serverPagination={{
+          total,
+          limit,
+          offset,
+          hasMore,
+          onPrev: () => setOffset((o) => Math.max(0, o - limit)),
+          onNext: () => setOffset((o) => o + limit),
+          onPageSizeChange: (size) => {
+            setLimit(size);
+            setOffset(0);
+          },
+        }}
       />
     </div>
   );
