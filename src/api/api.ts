@@ -732,10 +732,19 @@ async function postCsv(endpoint: string, file: File) {
   });
 
   const text = await response.text();
-  const data = text ? JSON.parse(text) : {};
+  let data: Record<string, unknown> = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    // ignore
+  }
 
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || "CSV request failed");
+    const err = new Error(
+      (data?.message as string) || (data?.error as string) || "CSV request failed"
+    ) as Error & { details?: Record<string, unknown> };
+    err.details = data;
+    throw err;
   }
 
   return data;

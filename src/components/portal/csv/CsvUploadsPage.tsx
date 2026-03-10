@@ -66,6 +66,7 @@ export default function CsvUploadsPage() {
   const [busy, setBusy] = useState<null | "preview" | "upload">(null);
   const [result, setResult] = useState<unknown>(null);
   const [lastAction, setLastAction] = useState<null | "preview" | "upload">(null);
+  const [lastOutcome, setLastOutcome] = useState<null | "success" | "error">(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -85,10 +86,12 @@ export default function CsvUploadsPage() {
 
     setBusy(mode);
     setLastAction(mode);
+    setLastOutcome(null);
     setResult(null);
     try {
       const data = mode === "preview" ? await meta.preview(file) : await meta.upload(file);
       setResult(data);
+      setLastOutcome("success");
       toast({
         title: mode === "preview" ? "Preview ready" : "Upload complete",
         description:
@@ -97,7 +100,12 @@ export default function CsvUploadsPage() {
             : "The CSV has been imported.",
       });
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Request failed";
+      const err = e as Error & { details?: Record<string, unknown> };
+      const message = err?.message ?? "Request failed";
+      if (err?.details && typeof err.details === "object" && "message" in err.details) {
+        setResult(err.details);
+      }
+      setLastOutcome("error");
       toast({
         variant: "destructive",
         title: mode === "preview" ? "Preview failed" : "Upload failed",
@@ -194,6 +202,33 @@ export default function CsvUploadsPage() {
   };
 
   const previewSignals = useMemo(() => collectPreviewSignals(result), [result]);
+
+  type CsvErrorDetails = {
+    line?: number;
+    expectedColumns?: number;
+    actualColumns?: number;
+    hint?: string;
+    errors?: Array<{ line?: number; message?: string }>;
+    [k: string]: unknown;
+  };
+
+  type CsvErrorResult = {
+    code?: string;
+    message: string;
+    details?: CsvErrorDetails;
+  };
+
+  const errorResult =
+    lastOutcome === "error" && result && typeof result === "object" && !Array.isArray(result)
+      ? (result as CsvErrorResult)
+      : null;
+
+  const successMessage = useMemo(() => {
+    if (lastOutcome !== "success") return null;
+    if (!result || typeof result !== "object" || Array.isArray(result)) return null;
+    const r = result as Record<string, unknown>;
+    return typeof r.message === "string" ? r.message : null;
+  }, [lastOutcome, result]);
 
   const sampleRows = useMemo(() => {
     const { headersLine, sampleLine } = sampleCsv[uploadType];
@@ -535,8 +570,98 @@ export default function CsvUploadsPage() {
                 <div className="rounded-xl border bg-gray-50 p-5 text-sm text-muted-foreground">
                   No result yet. Choose a CSV and click <span className="font-semibold">Preview</span>.
                 </div>
+              ) : errorResult ? (
+                <div className="space-y-4">
+                  <div className="rounded-xl border border-destructive/50 bg-destructive/5 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold text-destructive">
+                          {errorResult.code ? errorResult.code : "CSV error"}
+                        </div>
+                        <p className="mt-2 text-sm text-gray-800">{errorResult.message}</p>
+                      </div>
+                      {errorResult.code && (
+                        <Badge variant="destructive" className="rounded-md">
+                          {errorResult.code}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {(errorResult.details?.hint ||
+                      errorResult.details?.line != null ||
+                      errorResult.details?.expectedColumns != null ||
+                      errorResult.details?.actualColumns != null) && (
+                      <div className="mt-4 rounded-lg border bg-white p-3 text-xs">
+                        <div className="font-medium text-gray-700 mb-2">Details</div>
+                        <div className="space-y-1 text-muted-foreground">
+                          {errorResult.details?.line != null && (
+                            <div>
+                              <span className="font-medium text-gray-700">Line:</span>{" "}
+                              <span className="font-mono">{errorResult.details.line}</span>
+                            </div>
+                          )}
+                          {errorResult.details?.expectedColumns != null &&
+                            errorResult.details?.actualColumns != null && (
+                              <div>
+                                <span className="font-medium text-gray-700">Columns:</span>{" "}
+                                expected{" "}
+                                <span className="font-mono">{errorResult.details.expectedColumns}</span>, got{" "}
+                                <span className="font-mono">{errorResult.details.actualColumns}</span>
+                              </div>
+                            )}
+                          {errorResult.details?.hint && (
+                            <div>
+                              <span className="font-medium text-gray-700">Hint:</span>{" "}
+                              {errorResult.details.hint}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {Array.isArray(errorResult.details?.errors) &&
+                      errorResult.details!.errors!.length > 0 && (
+                      <div className="mt-4">
+                        <div className="flex items-center justify-between gap-3 mb-2">
+                          <div className="text-xs font-medium text-gray-700">Details by row</div>
+                          {errorResult.details!.errors!.length > 10 && (
+                            <div className="text-xs text-muted-foreground">
+                              Showing first 10 of {errorResult.details!.errors!.length}
+                            </div>
+                          )}
+                        </div>
+                        <div className="rounded-lg border overflow-hidden">
+                          <table className="min-w-full text-xs">
+                            <thead>
+                              <tr className="bg-gray-100 text-left">
+                                <th className="p-2 font-medium">Line</th>
+                                <th className="p-2 font-medium">Message</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {errorResult.details!.errors!.slice(0, 10).map((row, idx) => (
+                                <tr key={idx} className="border-t">
+                                  <td className="p-2 font-mono">{row.line ?? "—"}</td>
+                                  <td className="p-2">{row.message ?? "—"}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               ) : (
                 <div className="space-y-4">
+                  {successMessage && (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                      <div className="text-sm font-semibold text-emerald-900">
+                        Success
+                      </div>
+                      <p className="mt-2 text-sm text-emerald-900">{successMessage}</p>
+                    </div>
+                  )}
                   <div className="rounded-xl border bg-gray-50 p-4">
                     <div className="text-sm font-semibold">
                       {lastAction === "upload" ? "Upload summary" : "Preview summary"}

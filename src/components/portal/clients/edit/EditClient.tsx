@@ -103,8 +103,22 @@ export default function EditClient() {
     setIsSubmitting(true); // Set loading state
     try {
       if (clientId) {
-        const { useSameAsEmail, useSameAsMailing, ...backendValues } = values;
-        await editClient(clientId, backendValues);
+        const { useSameAsEmail, useSameAsMailing } = values;
+        void useSameAsEmail;
+        void useSameAsMailing;
+
+        // API v2 expects camelCase fields in clientDetails
+        const clientDetails = {
+          clientName: values.CLIENTNAME,
+          email: values.Email,
+          phoneNumber: values.PHONENUMBER ?? "",
+          mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP ?? "",
+          typeOfAcct: values.TypeOfAcct ?? "",
+          billingEmail: values.BillingEmail ?? "",
+          billingAddress: values.BillingAddress ?? "",
+        };
+
+        await editClient(clientId, clientDetails);
       }
       toast({ title: "Client updated successfully!" });
     } catch (error) {
