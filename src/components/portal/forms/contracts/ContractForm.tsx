@@ -1,305 +1,202 @@
 import { getSingleClient } from "@/store/data";
 import { ClientData, Property } from "@/types/types";
-import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
-import { useReactToPrint } from "react-to-print";
-// import Logo from "@/assets/logo.svg";
-// import AppointmentForm from "./AppointmentForm";
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LoaderCircle, Printer } from "lucide-react";
+import { LoaderCircle, Printer, Download, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { sendClientContract } from "@/api/api";
+import { previewContract, sendContractForClient } from "@/api/api";
 
 interface Client {
   client: ClientData;
   properties: Property[];
 }
+
 export default function ContractForm() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const clientId = searchParams.get("clientId");
   const { toast } = useToast();
   const [isSending, setIsSending] = useState(false);
-
-  // const [invoiceData, setInvoiceData] = useState<InvoiceData>();
   const [clientData, setClientData] = useState<Client>();
+  const [contractPdfBase64, setContractPdfBase64] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchClientData = async () => {
       try {
         if (clientId) {
-          const response = await getSingleClient({ clientId: clientId });
+          const response = await getSingleClient({ clientId });
           setClientData(response);
         }
       } catch (error) {
         console.error("Error fetching client data:", error);
       }
     };
-
-    if (clientId) {
-      fetchClientData();
-    }
+    if (clientId) fetchClientData();
   }, [clientId]);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const reactToPrintFn = useReactToPrint({ contentRef });
 
-  const handleDownload = () => {
-    reactToPrintFn();
-    toast({
-      title: "Download started",
-      description: "Choose “Save as PDF” in the print dialog to download.",
-    });
+  useEffect(() => {
+    if (!clientData?.client?.id) return;
+    setPreviewLoading(true);
+    setPreviewError(null);
+    previewContract(clientData.client.id)
+      .then((res) => {
+        setContractPdfBase64(res.contractPdf ?? null);
+      })
+      .catch((err) => {
+        setPreviewError(err instanceof Error ? err.message : "Failed to load preview");
+      })
+      .finally(() => setPreviewLoading(false));
+  }, [clientData?.client?.id]);
+
+  const hasPdf = !!contractPdfBase64 && !previewLoading;
+
+  const handleDownloadPdf = () => {
+    if (!contractPdfBase64) return;
+    try {
+      const blob = new Blob([Uint8Array.from(atob(contractPdfBase64), (c) => c.charCodeAt(0))], {
+        type: "application/pdf",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `contract-client-${clientData?.client?.clientNumber ?? clientId ?? "contract"}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({
+        title: "Download started",
+        description: "Contract PDF has been downloaded.",
+      });
+    } catch {
+      toast({
+        title: "Download failed",
+        description: "Could not save the PDF.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePrint = () => {
+    if (!contractPdfBase64) return;
+    const dataUrl = `data:application/pdf;base64,${contractPdfBase64}`;
+    const w = window.open(dataUrl, "_blank", "noopener,noreferrer");
+    if (w) {
+      w.onload = () => w.print();
+    } else {
+      toast({
+        title: "Print blocked",
+        description: "Allow pop-ups to print the contract, or use Download then print the file.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSendContract = async () => {
-    if (!clientId) {
+    if (!clientData?.client?.id) {
       toast({
         title: "Error",
-        description: "Missing clientId in the URL.",
+        description: "Client data not loaded or missing client ID.",
         variant: "destructive",
       });
       return;
     }
-
     setIsSending(true);
     try {
-      await sendClientContract({ clientId });
+      await sendContractForClient(clientData.client.id);
       toast({
-        title: "✓ Contract sent",
-        description: "Contract has been sent to the client for signature.",
+        title: "✓ Contract sent for signing",
+        description: "Contract has been sent to the client. They will receive an email from DocuSign.",
       });
+      navigate(`/portal/client?clientId=${clientData.client.id}`);
     } catch (error) {
       toast({
         title: "Failed to send contract",
-        description:
-          error instanceof Error ? error.message : "Please try again.",
+        description: error instanceof Error ? error.message : "Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsSending(false);
     }
   };
+
   return (
-    <>
-      <div className="flex flex-wrap gap-2 px-4">
+    <div className="p-4 max-w-4xl mx-auto">
+      <div className="flex flex-wrap gap-2 mb-4">
         <Button
-          variant={"blue"}
-          className="bg-[#0093FF] rounded-md p-2 px-6 text-white"
-          onClick={() => reactToPrintFn()}
+          variant="blue"
+          className="rounded-md p-2 px-6"
+          onClick={handleDownloadPdf}
+          disabled={!hasPdf}
         >
-          <Printer />
+          <Download className="mr-2 h-4 w-4" />
+          Download PDF
+        </Button>
+        <Button
+          variant="blue"
+          className="rounded-md p-2 px-6"
+          onClick={handlePrint}
+          disabled={!hasPdf}
+        >
+          <Printer className="mr-2 h-4 w-4" />
           Print
         </Button>
-        <Button variant={"blue"} className="rounded-md p-2 px-6" onClick={handleDownload}>
-          Download
-        </Button>
         <Button
-          variant={"blue"}
+          variant="blue"
           className="rounded-md p-2 px-6"
           onClick={handleSendContract}
-          disabled={isSending}
+          disabled={isSending || !clientData?.client?.id}
         >
           {isSending ? (
             <span className="flex items-center gap-2">
-              <LoaderCircle className="animate-spin w-5 h-5" />
+              <LoaderCircle className="animate-spin h-5 w-5" />
               Sending...
             </span>
           ) : (
-            "Send to Client"
+            <>
+              <Send className="mr-2 h-4 w-4" />
+              Send for signing
+            </>
           )}
         </Button>
       </div>
-      <div className="w-[210mm] min-h-screen bg-white shadow-md mx-auto border border-gray-300 relative ">
-        <div ref={contentRef} className="p-8">
-          <div className="">
-            <div className="text-center my-4">
-              <p className="font-bold text-md underline">
-                PROPERTY REPRESENTATION AGREEMENT HEHE
-              </p>
-            </div>
 
-            <div className="my-4 ">
-              <p className="font-bold text-sm">Terms and Conditions</p>
-              <div className="text-xs mt-2">
-                <p className="mt-2">
-                  By signing this form, I warrant and represent that I am the
-                  owner on record of the below property(s) or that I am legally
-                  authorized and empowered to enter into this agreement on
-                  behalf of the owner on record of the above property(s).
-                </p>
-                <p className="mt-2">
-                  I agree to pay Lone Star Property Tax, LLC (LSPT) a
-                  contingency fee equal to{" "}
-                  {clientData?.properties[0].CONTINGENCYFee} of the projected
-                  tax savings (as dened below) achieved by the agent for each
-                  protested tax year on the below property(s). Projected savings
-                  are defined and calculated as the difference between Initial
-                  Appraised Value and the Final Appraised Value multiplied by
-                  the latest known tax rate. I understand that there will be no
-                  charge if LSPT does not achieve a reduction in the appraised
-                  value of the above property(s).
-                </p>
-                <p className="mt-2">
-                  The contingency fee is calculated without regard to exemption
-                  amounts oered by individual taxing jurisdictions. If LSPT has
-                  records demonstrating you have an over 65 exemption, the
-                  contingency fee for that property will be reduced to{" "}
-                  {clientData?.properties[0].CONTINGENCYFee}
-                </p>
-                <p className="mt-2">
-                  I understand that the contingency fee will be invoiced upon
-                  completion of the property tax hearing and is due within 30
-                  days of receipt. After 30 days, the invoice is considered
-                  delinquent, and any unpaid balance is subject to collection
-                  costs.
-                </p>
-              </div>
-              <div>
-                <p className="font-bold text-sm mt-4">Authorizations</p>
-                <div className="text-xs mt-2">
-                  <p className="mt-2">
-                    I authorize LSPT to file notice of protest with the
-                    appropriate County Appraisal District and to negotiate and
-                    present cases on my behalf. The representation is to occur
-                    year aer year until notice is given otherwise by either
-                    party.
-                  </p>
-                  <p className="mt-2">
-                    I authorize LSPT to use their sole discretion in determining
-                    whether pursuing a tax reducon is feasible. I understand
-                    that LSPT does not guarantee any specific outcome or result.
-                    I authorize LSPT to accept settlement oders or withdraw
-                    protests if they determine it to be in my best interest.
-                    LSPT can seek refunds from overpayment from previous years
-                    if deemed appropriate by them, and I agree to pay LSPT of{" "}
-                    {clientData?.properties[0].CONTINGENCYFee} tax refunds
-                    obtained.
-                  </p>
-                </div>
-              </div>
-              <div>
-                <p className="font-bold text-sm mt-4">Liabilities</p>
-                <div className="text-xs mt-2">
-                  <p className="mt-2">
-                    LSPT's liability for any error, omission, action, inaction,
-                    or representation is limited to the amount of fees actually
-                    paid under this contract for the year or years in dispute.
-                    All parties agree that any action arising from this
-                    agreement shall be brought in Harris County.
-                  </p>
-                </div>
-              </div>
-              <div>
-                <p className="font-bold text-sm mt-4">Length of Agreement</p>
-                <div className="text-xs mt-2">
-                  <p className="mt-2">
-                    This agreement can be cancelled without notice at any me if
-                    requested information is not provided timely prior to the
-                    hearing taking place or if payment becomes delinquent. This
-                    agreement auto-renews every year until property is sold or
-                    the property owner sends termination notice via email to
-                    info@lsptax.com
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between">
-                <div className="flex-1 mr-2">
-                  <p className=" text-xs border-b-2 p-2 mr-2 border-black"></p>
-                  <p className="text-sm">Signature of Owner/Representative</p>
-                </div>
-                <div className="flex-1 ml-2">
-                  <p className="text-xs border-b-2 mr-2 border-black">
-                    {clientData?.client.clientName}
-                  </p>
-                  <p className="text-sm">Owner/Representative (Please Print)</p>
-                </div>
-              </div>
-              <div className="flex justify-between my-4">
-                <div className="flex-1 mr-2">
-                  <p className=" text-xs border-b-2 mr-2 border-black">
-                    {clientData?.client.phoneNumber}
-                  </p>
-                  <p className="text-sm">Phone Number</p>
-                </div>
-                <div className="flex-1 ml-2">
-                  <p className="text-xs border-b-2 mr-2 border-black">
-                    {clientData?.client.email}
-                  </p>
-                  <p className="text-sm">Email Address</p>
-                </div>
-              </div>
-              <div className="flex justify-between my-4">
-                <div className="flex-1 mr-2">
-                  <p className=" text-xs border-b-2 mr-2 border-black">
-                    {clientData?.client.mailingAddress},
-                    {clientData?.client.mailingAddressCityTxZip}
-                  </p>
-                  <p className="text-sm">Mailing Address</p>
-                </div>
-                <div className="flex-1 ml-2">
-                  <p className="text-xs border-b-2 mr-2 p-2 border-black">{}</p>
-                  <p className="text-sm">Date</p>
-                </div>
-              </div>
-            </div>
-            <div>
-              <p className="font-bold underline text-center my-4 mt-12 page-break">
-                Addendum
-              </p>
-              <p className="text-xs">
-                Below is the list of properties that you authorize LSPT to
-                represent:
-              </p>
-              <table className="w-full border-collapse border border-black print:border">
-                <thead>
-                  <tr className="bg-gray-200 print:bg-gray-100">
-                    <th className="border border-black p-2 print:p-1 text-left print:text-xs">
-                      Property Address{" "}
-                    </th>
-                    <th className="border border-black p-2 print:p-1 text-left print:text-xs">
-                      County
-                    </th>
-                    <th className="border border-black p-2 print:p-1 text-left print:text-xs">
-                      Account Number
-                    </th>
-                    <th className="border border-black p-2 print:p-1 text-left print:text-xs">
-                      % / fee
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {clientData?.properties.map((property, index) => (
-                    <tr key={index}>
-                      <td className="border border-black p-2 print:p-1 print:text-xs">
-                        {property.mailingAddress}
-                      </td>
-                      <td className="border border-black p-2 print:p-1 print:text-xs">
-                        {property.cadCounty}
-                      </td>
-                      <td className="border border-black p-2 print:p-1 print:text-xs">
-                        {property.accountNumber}
-                      </td>
-                      <td className="border border-black p-2 print:p-1 print:text-xs">
-                        {property.contingencyFee}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot></tfoot>
-              </table>
-            </div>
-          </div>
-          {/* <div
-            className="absolute inset-0 opacity-10 pointer-events-none  bg-repeat-y bg-center bg-contain"
-            style={{ backgroundImage: `url(${Logo})` }}
-          /> */}
-          {/* Appointment Page */}
-          {/* <div className="mt-16 page-break">
-            <AppointmentForm></AppointmentForm>
-          </div> */}
+      {previewLoading && (
+        <div className="flex items-center justify-center py-12 gap-2 text-gray-600">
+          <LoaderCircle className="h-6 w-6 animate-spin" />
+          Loading contract from server...
         </div>
-      </div>
-    </>
+      )}
+
+      {previewError && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800 mb-4">
+          <p className="font-medium">Preview could not be loaded</p>
+          <p className="text-sm mt-1">{previewError}</p>
+          <p className="text-sm mt-2">You can still send for signing once client data is ready.</p>
+        </div>
+      )}
+
+      {hasPdf && (
+        <div className="rounded-lg border bg-white overflow-hidden">
+          <p className="text-sm font-medium text-gray-700 p-2 border-b bg-gray-50">
+            Contract (generated by server)
+          </p>
+          <iframe
+            title="Contract preview"
+            src={`data:application/pdf;base64,${contractPdfBase64}`}
+            className="w-full h-[75vh] min-h-[500px]"
+          />
+        </div>
+      )}
+
+      {!clientId && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-600">
+          <p>Open this page with a client selected (e.g. from Client details → Create Contract) to load the contract.</p>
+        </div>
+      )}
+    </div>
   );
 }

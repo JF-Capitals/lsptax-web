@@ -1,8 +1,15 @@
 import { NavLink, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getSingleClient } from "@/store/data";
-import { House, Mail, MapPin, Phone } from "lucide-react";
+import {
+  getContractsByClient,
+  getContractDownloadUrl,
+  syncClientContractStatus,
+  type ContractListItem,
+} from "@/api/api";
+import { House, Mail, MapPin, Phone, FileText, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ClientData, Property } from "@/types/types";
 
 interface Client {
@@ -17,6 +24,9 @@ const ClientPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedCounty, setSelectedCounty] = useState<string>("All");
+  const [contracts, setContracts] = useState<ContractListItem[]>([]);
+  const [contractsLoading, setContractsLoading] = useState(false);
+  const [downloadingContractId, setDownloadingContractId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchClientData = async () => {
@@ -50,6 +60,43 @@ const ClientPage = () => {
 
     fetchClientData();
   }, [clientId]);
+
+  const fetchContracts = useCallback(() => {
+    const id = clientData?.client?.id;
+    if (!id) return;
+    setContractsLoading(true);
+    syncClientContractStatus(id)
+      .catch(() => {})
+      .then(() => getContractsByClient(id))
+      .then(setContracts)
+      .catch(() => setContracts([]))
+      .finally(() => setContractsLoading(false));
+  }, [clientData?.client?.id]);
+
+  useEffect(() => {
+    fetchContracts();
+  }, [fetchContracts]);
+
+  // Refetch contracts when user returns to this tab (e.g. after sending from contract page)
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") fetchContracts();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [fetchContracts]);
+
+  const handleDownloadSigned = async (contractId: number) => {
+    setDownloadingContractId(contractId);
+    try {
+      const { url } = await getContractDownloadUrl(contractId);
+      window.open(url, "_blank");
+    } catch {
+      // Error could be shown via toast if you add useToast
+    } finally {
+      setDownloadingContractId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -97,11 +144,7 @@ const ClientPage = () => {
               Invoice
             </Button>
           </NavLink>
-          <NavLink
-            to={`/portal/contract?clientId=${
-              clientData.client.clientNumber ?? clientId ?? clientData.client.id
-            }`}
-          >
+          <NavLink to={`/portal/contract?clientId=${clientData.client.id}`}>
             <Button variant={"blue"} className="w-full">
               Create Contract
             </Button>
@@ -148,7 +191,7 @@ const ClientPage = () => {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Associated Property(s)</h1>
           <NavLink
-            to={`/portal/add-property?clientId=${clientData.client.clientNumber}`}
+            to={`/portal/add-property?clientId=${clientData.client.id}`}
           >
             <Button variant={"blue"} className="w-full">
               Add Properties
@@ -187,6 +230,95 @@ const ClientPage = () => {
           <h1 className="text-center text-gray-600 col-span-full">
             No properties found for the selected county.
           </h1>
+        )}
+      </div>
+
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold">Contracts & AOAs</h2>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={contractsLoading}
+            onClick={() => fetchContracts()}
+          >
+            {contractsLoading ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              "Refresh status"
+            )}
+          </Button>
+        </div>
+        {contractsLoading ? (
+          <div className="flex items-center gap-2 text-gray-600 py-4">
+            <LoaderCircle className="h-5 w-5 animate-spin" />
+            Loading contracts...
+          </div>
+        ) : contracts.length === 0 ? (
+          <p className="text-gray-600">No contracts or AOAs yet.</p>
+        ) : (
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="text-left p-3 font-medium">Type</th>
+                  <th className="text-left p-3 font-medium">Status</th>
+                  <th className="text-left p-3 font-medium">Property</th>
+                  <th className="text-left p-3 font-medium">Signed at</th>
+                  <th className="text-left p-3 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {contracts.map((c) => (
+                  <tr key={c.id} className="border-t">
+                    <td className="p-3">
+                      {c.type === "AOA" ? "AOA" : "Client contract"}
+                    </td>
+                    <td className="p-3">
+                      <Badge
+                        variant={
+                          c.status === "COMPLETED"
+                            ? "default"
+                            : c.status === "DECLINED" || c.status === "VOIDED"
+                              ? "destructive"
+                              : "secondary"
+                        }
+                      >
+                        {c.status}
+                      </Badge>
+                    </td>
+                    <td className="p-3">
+                      {c.property?.accountNumber ?? "—"}
+                    </td>
+                    <td className="p-3">
+                      {c.signedAt
+                        ? new Date(c.signedAt).toLocaleDateString()
+                        : "—"}
+                    </td>
+                    <td className="p-3">
+                      {c.status === "COMPLETED" ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={downloadingContractId === c.id}
+                          onClick={() => handleDownloadSigned(c.id)}
+                        >
+                          {downloadingContractId === c.id ? (
+                            <LoaderCircle className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <FileText className="h-4 w-4 mr-1" />
+                          )}
+                          Download signed
+                        </Button>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

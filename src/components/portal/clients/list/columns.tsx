@@ -36,11 +36,10 @@ export const clientsColumn: ColumnDef<Clients>[] = [
     accessorKey: "clientId",
     header: "Client #",
     cell: ({ row }) => {
-      const clientNum = row.original.clientNumber;
       const clientId = row.original.clientId;
 
       return (
-        <NavLink to={`/portal/client?clientId=${clientNum}`}>
+        <NavLink to={`/portal/client?clientId=${clientId}`}>
           <div className="text-blue-400 font-bold">#{clientId}</div>
         </NavLink>
       );

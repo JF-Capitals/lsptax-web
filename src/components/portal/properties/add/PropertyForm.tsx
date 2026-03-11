@@ -51,9 +51,19 @@ export default function AddPropertyForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    const numericClientId = clientId != null ? Number(clientId) : NaN;
+    if (!clientId || Number.isNaN(numericClientId) || numericClientId < 1) {
+      toast({
+        variant: "destructive",
+        title: "Invalid client",
+        description: "A valid client is required. Open Add Property from a client page.",
+      });
+      return;
+    }
+
     setLoading(true); // Set loading to true
     try {
-      // API v2: camelCase property fields
+      // API v2: camelCase property fields (no clientNumber - backend uses clientId only)
       const propertyData = {
         accountNumber: values.AccountNumber,
         nameOnCad: values.NAMEONCAD,
@@ -73,7 +83,7 @@ export default function AddPropertyForm() {
       };
 
       const newProperty = await addProperty({
-        clientId: Number(clientId!),
+        clientId: numericClientId,
         propertyData,
       });
       window.location.href = `/portal/property?propertyId=${newProperty?.property.id}`;
