@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ColumnDef,
   SortingState,
   getCoreRowModel,
   useReactTable,
@@ -27,15 +26,11 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getProspectColumns } from "./columns";
+import { Prospect } from "@/types/types";
 
-interface ProspectTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-}
-
-const ProspectTable = <TData, TValue>({
-  columns,
-}: ProspectTableProps<TData, TValue>) => {
-  const [prospects, setProspects] = useState<TData[]>([]);
+const ProspectTable = () => {
+  const [prospects, setProspects] = useState<Prospect[]>([]);
   const [total, setTotal] = useState(0);
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
@@ -61,7 +56,7 @@ const ProspectTable = <TData, TValue>({
     }
   };
 
-  const fetchProspects = async (opts?: { limit?: number; offset?: number }) => {
+  const fetchProspects = useCallback(async (opts?: { limit?: number; offset?: number }) => {
     const l = opts?.limit ?? limit;
     const o = opts?.offset ?? offset;
     try {
@@ -70,7 +65,7 @@ const ProspectTable = <TData, TValue>({
       const res = archived
         ? await getArchiveProspects(l, o)
         : await getProspects(l, o);
-      setProspects((res.data ?? []) as TData[]);
+      setProspects((res.data ?? []) as Prospect[]);
       setTotal(res.total);
       setLimit(res.limit);
       setOffset(res.offset);
@@ -81,11 +76,17 @@ const ProspectTable = <TData, TValue>({
     } finally {
       setLoading(false);
     }
-  };
+  }, [archived, limit, offset]);
+
+  const refetch = useCallback(() => {
+    fetchProspects({ limit, offset });
+  }, [fetchProspects, limit, offset]);
+
+  const columns = useMemo(() => getProspectColumns(refetch), [refetch]);
 
   useEffect(() => {
     fetchProspects({ limit, offset });
-  }, [archived, limit, offset]);
+  }, [fetchProspects]);
 
   const switchArchived = () => {
     setArchived((a) => !a);

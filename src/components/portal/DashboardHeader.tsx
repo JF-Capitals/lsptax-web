@@ -121,7 +121,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
   const location = useLocation();
   const currentPath = location.pathname.split("/portal/")[1];
 
-  const username = localStorage.getItem("username");
+  const username = localStorage.getItem("username") || "User";
 
   async function logoutHandler() {
     try {
@@ -149,7 +149,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
         {isDashboard ? (
           <HeaderDescriptionItem
             icon=""
-            label={`Welcome,${username}`}
+            label={`Welcome, ${username}`}
             desc="This is your dashboard."
           />
         ) : currentHeader ? (

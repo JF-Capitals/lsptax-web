@@ -1,4 +1,9 @@
 /** API v2: POST /action/archive-entity toggles archive state. Body: { tableName, id }. */
+function getAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function handleArchiveUnarchive(
   resource: "invoice" | "client" | "property",
   id: string,
@@ -18,6 +23,7 @@ export async function handleArchiveUnarchive(
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({ tableName, id: numericId }),
       }

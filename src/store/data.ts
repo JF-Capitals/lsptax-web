@@ -361,13 +361,15 @@ export const generateInvoices = async (options: {
   invoiceDefaults?: Record<string, unknown>;
 }) => {
   try {
+    const headers = {
+      ...(getAuthHeaders() as Record<string, string>),
+      "Content-Type": "application/json",
+    };
     const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/invoice/generate`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(options),
       }
     );
@@ -686,16 +688,25 @@ export const downloadInvoicesCSV = async () => {
 
 export const getPreviewDocuments = async ({ prospectId }: { prospectId: Number }) => {
   try {
+    const headers = {
+      ...(getAuthHeaders() as Record<string, string>),
+      "Content-Type": "application/json",
+    };
     const response = await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/action/preview-signed-pdf`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({ prospectId }),
       }
     );
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      throw new Error(text || "Failed to preview documents");
+    }
     return response.json();
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error previewing documents:", error);
+    throw error;
+  }
 };

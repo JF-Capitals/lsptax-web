@@ -55,7 +55,6 @@ export default function LoginPage() {
     setLoading(true); // Set loading to true
     try {
       const { email, password } = values;
-      console.log({ email, password });
       const response = await loginUser(email, password);
 
       // Assuming response contains token and user info
@@ -123,8 +122,8 @@ export default function LoginPage() {
                                 className="w-full"
                                 id="username"
                                 placeholder="johndoe@mail.com"
-                                type="username"
-                                autoComplete="username"
+                                type="email"
+                                autoComplete="email"
                                 {...field}
                               />
                             </FormControl>

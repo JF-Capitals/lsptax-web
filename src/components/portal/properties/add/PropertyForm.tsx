@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { addProperty } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 import { LoaderCircle } from "lucide-react";
@@ -38,6 +38,7 @@ const formSchema = z.object({
 
 export default function AddPropertyForm() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get("clientId");
   const [loading, setLoading] = useState(false); // Track loading state
@@ -86,14 +87,18 @@ export default function AddPropertyForm() {
         clientId: numericClientId,
         propertyData,
       });
-      window.location.href = `/portal/property?propertyId=${newProperty?.property.id}`;
 
       toast({
         title: "Property Added",
         description: "The property has been successfully added.",
       });
 
-      form.reset();
+      const propertyId = newProperty?.property?.id;
+      if (propertyId != null) {
+        navigate(`/portal/property?propertyId=${propertyId}`);
+      } else {
+        form.reset();
+      }
     } catch (error) {
       console.error("Error adding property:", error);
       toast({

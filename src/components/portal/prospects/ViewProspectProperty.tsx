@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { NavLink, useSearchParams } from "react-router-dom";
+import { NavLink, useSearchParams, useNavigate } from "react-router-dom";
 import { getProspectProperty } from "@/store/data";
 import { Button } from "@/components/ui/button";
 import { PropertyData } from "@/types/types";
 import { useToast } from "@/hooks/use-toast";
 import { deleteProspectProperty } from "@/api/api";
 
-const ViewProspectProperty = ({ propertyId,prospectId }: { propertyId: string, prospectId:number }) => {
+const ViewProspectProperty = ({ propertyId, prospectId }: { propertyId: string; prospectId: number }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [property, setProperty] = useState<PropertyData>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -49,8 +50,7 @@ const ViewProspectProperty = ({ propertyId,prospectId }: { propertyId: string, p
         title: "Property Deleted",
         description: "The property has been successfully deleted.",
       });
-      // Redirect or refresh after deletion
-      window.location.href = `/portal/prospect?id=${prospectId}`;
+      navigate(`/portal/prospect?id=${prospectId}`);
     } catch (error) {
       console.error("Error deleting property:", error);
       toast({

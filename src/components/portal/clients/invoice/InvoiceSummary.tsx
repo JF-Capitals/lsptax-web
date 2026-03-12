@@ -50,7 +50,7 @@ const InvoiceSummary: React.FC<{
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-gray-100">
-      <div className="text-center space-x-4 flex jusitfy-center align-center items-center">
+      <div className="text-center space-x-4 flex justify-center align-center items-center">
         <Select
           onValueChange={(value) => setSelectedYear(Number(value))}
           value={selectedYear.toString()}

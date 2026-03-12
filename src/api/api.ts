@@ -23,11 +23,12 @@ export const loginUser = async (email: string, password: string) => {
     // Parse JSON response
     const data = await response.json();
 
-    // Save token and username in localStorage
+    // Save token and username in localStorage (API may return user with id, email only; fallback to email or "User")
     const { token, user } = data;
+    const displayName = user?.name ?? user?.email ?? email ?? "User";
     localStorage.setItem("token", token);
-    localStorage.setItem("username", user.name);
-    localStorage.setItem("email", email); // Save username
+    localStorage.setItem("username", displayName);
+    localStorage.setItem("email", email);
     localStorage.setItem("user", JSON.stringify(user)); // Save user info
 
     return data; // Return parsed data for further use
@@ -462,7 +463,7 @@ export const deleteProspectProperty = async (propertyId: string) => {
 
 export const deleteClient = async (id: Number) => {
   try {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/action/delete-client`, {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/action/delete-client`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -472,11 +473,15 @@ export const deleteClient = async (id: Number) => {
         id,
       }),
     });
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      throw new Error(text || "Failed to delete client");
+    }
   } catch (error: unknown) {
     let errorMessage = "Client Deletion Failed. Please try again.";
 
     if (error instanceof Error) {
-      console.log({ error });
+      console.error("Error deleting client:", error);
       errorMessage = error.message;
     }
 
@@ -486,7 +491,7 @@ export const deleteClient = async (id: Number) => {
 
 export const deleteProspect = async (id: Number) => {
   try {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/action/delete-prospect`, {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/action/delete-prospect`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -496,11 +501,15 @@ export const deleteProspect = async (id: Number) => {
         id,
       }),
     });
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      throw new Error(text || "Failed to delete prospect");
+    }
   } catch (error: unknown) {
     let errorMessage = "Prospect Deletion Failed. Please try again.";
 
     if (error instanceof Error) {
-      console.log({ error });
+      console.error("Error deleting prospect:", error);
       errorMessage = error.message;
     }
 
@@ -548,7 +557,7 @@ export const changeProspectStatus = async ({
   newStatus: String;
 }) => {
   try {
-    await fetch(
+    const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/action/change-prospect-status`,
       {
         method: "POST",
@@ -562,11 +571,15 @@ export const changeProspectStatus = async ({
         }),
       }
     );
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      throw new Error(text || "Failed to change prospect status");
+    }
   } catch (error: unknown) {
     let errorMessage = "Prospect Status Updation Failed. Please try again.";
 
     if (error instanceof Error) {
-      console.log({ error });
+      console.error("Error changing prospect status:", error);
       errorMessage = error.message;
     }
 
@@ -576,7 +589,7 @@ export const changeProspectStatus = async ({
 
 export const sendContract = async ({ prospectId }: { prospectId: Number }) => {
   try {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/action/sign-aoa`, {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/action/sign-aoa`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -586,12 +599,16 @@ export const sendContract = async ({ prospectId }: { prospectId: Number }) => {
         prospectId,
       }),
     });
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      throw new Error(text || "Failed to send contract");
+    }
   } catch (error: unknown) {
     let errorMessage =
       "Not able to send Contract to prospect. Please try again.";
 
     if (error instanceof Error) {
-      console.log({ error });
+      console.error("Error sending contract:", error);
       errorMessage = error.message;
     }
 

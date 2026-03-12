@@ -11,7 +11,6 @@ import { getArchiveClients } from "@/store/data"; // Import the function
 import { Archive, Download, LoaderCircle, UserRoundPlus } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import TableBuilder from "../../TableBuilder";
-import UploadCsvButton from "./uploadCSV";
 
 interface ClientTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -146,12 +145,6 @@ const ClientTable = <TData, TValue>({
               <UserRoundPlus /> Add New Client
             </Button>
           </NavLink>
-          <UploadCsvButton
-            onSuccess={fetchClients}
-            onError={() =>
-              setError("Failed to upload CSV. Please try again later.")
-            }
-          />
           <Button onClick={handleCsvDownload} disabled={downloadingCsv}>
             {downloadingCsv ? (
               <LoaderCircle className="animate-spin" />

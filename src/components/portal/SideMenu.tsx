@@ -27,9 +27,9 @@ interface MenuOption {
 
 const menuOptions: MenuOption[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "clients/list-client", label: "Clients", icon: Users },
   { id: "properties", label: "Properties", icon: Building },
   { id: "invoices", label: "Invoices", icon: FileText },
-  { id: "clients/list-client", label: "Clients", icon: Users },
   { id: "prospects/list-prospect", label: "Prospects", icon: UserPlus },
   { id: "csv-uploads", label: "CSV Uploads", icon: UploadCloud },
   // { id: "forms/contract", label: "Contracts", icon: FileSignature },
