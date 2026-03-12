@@ -3,15 +3,9 @@ import { NavLink, useSearchParams } from "react-router-dom";
 import { getSingleProperty, generateInvoices } from "@/store/data";
 import { LoaderCircle, Mail, MapPin, Phone, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PropertyData } from "@/types/types";
-import { deleteProperty, previewAoa, sendAoaForClient } from "@/api/api";
+import { deleteProperty } from "@/api/api";
 import YearTable from "../yeardata/YearTable";
 import { useToast } from "@/hooks/use-toast";
 
@@ -24,10 +18,6 @@ const ViewProperty = () => {
   const [isDeleting, setIsDeleting] = useState(false); // Track deletion state
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false); // Track invoice section state
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false); // Track invoice generation state
-  const [isSendingAoa, setIsSendingAoa] = useState(false);
-  const [aoaPreviewOpen, setAoaPreviewOpen] = useState(false);
-  const [aoaPdfBase64, setAoaPdfBase64] = useState<string | null>(null);
-  const [aoaPreviewLoading, setAoaPreviewLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Track selected year
   const [searchParams, setSearchParams] = useSearchParams();
   const propertyId = parseInt(searchParams.get("propertyId") || "1");
@@ -193,64 +183,6 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
     }
   };
 
-  const clientIdNum = property?.clientDetails?.id;
-  const propertyIdNum = property?.propertyDetails?.id;
-
-  const handlePreviewAoa = async () => {
-    if (!property || clientIdNum == null || propertyIdNum == null) {
-      toast({
-        title: "Error",
-        description: "Client or property ID not available.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setAoaPreviewOpen(true);
-    setAoaPdfBase64(null);
-    setAoaPreviewLoading(true);
-    try {
-      const res = await previewAoa(clientIdNum, propertyIdNum);
-      setAoaPdfBase64(res.aoaPdf ?? null);
-    } catch (err) {
-      toast({
-        title: "Preview failed",
-        description: err instanceof Error ? err.message : "Could not load AOA preview.",
-        variant: "destructive",
-      });
-      setAoaPreviewOpen(false);
-    } finally {
-      setAoaPreviewLoading(false);
-    }
-  };
-
-  const handleSendAoa = async () => {
-    if (!property || clientIdNum == null || propertyIdNum == null) {
-      toast({
-        title: "Error",
-        description: "Client or property ID not available.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setIsSendingAoa(true);
-    try {
-      await sendAoaForClient(clientIdNum, propertyIdNum);
-      toast({
-        title: "✓ AOA sent",
-        description: "AOA has been sent to the client for signature. They will receive an email from DocuSign.",
-      });
-      setAoaPreviewOpen(false);
-    } catch (error) {
-      toast({
-        title: "Failed to send AOA",
-        description: error instanceof Error ? error.message : "Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSendingAoa(false);
-    }
-  };
-
   useEffect(() => {
     fetchProperty(propertyId);
   }, [propertyId]); // Refetch when propertyId changes
@@ -312,53 +244,11 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
             <Button className="w-full">View Invoices</Button>
           </NavLink>
 
-          <Button
-            className="w-full"
-            variant="outline"
-            onClick={handlePreviewAoa}
-            disabled={!clientIdNum || !propertyIdNum}
-          >
-            Preview AOA
-          </Button>
-
-          <Button
-            className="w-full"
-            variant="outline"
-            onClick={handleSendAoa}
-            disabled={isSendingAoa || !clientIdNum || !propertyIdNum}
-          >
-            {isSendingAoa ? "Sending..." : "Send AOA via Email"}
-          </Button>
-
-          <Dialog open={aoaPreviewOpen} onOpenChange={setAoaPreviewOpen}>
-            <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
-              <DialogHeader>
-                <DialogTitle>AOA preview</DialogTitle>
-              </DialogHeader>
-              {aoaPreviewLoading ? (
-                <div className="flex items-center justify-center py-12 gap-2 text-gray-600">
-                  <LoaderCircle className="h-6 w-6 animate-spin" />
-                  Loading preview...
-                </div>
-              ) : aoaPdfBase64 ? (
-                <>
-                  <iframe
-                    title="AOA preview"
-                    src={`data:application/pdf;base64,${aoaPdfBase64}`}
-                    className="w-full flex-1 min-h-[400px] rounded border"
-                  />
-                  <div className="flex justify-end gap-2 pt-2">
-                    <Button variant="outline" onClick={() => setAoaPreviewOpen(false)}>
-                      Close
-                    </Button>
-                    <Button onClick={handleSendAoa} disabled={isSendingAoa}>
-                      {isSendingAoa ? "Sending..." : "Send for signing"}
-                    </Button>
-                  </div>
-                </>
-              ) : null}
-            </DialogContent>
-          </Dialog>
+          <NavLink to={`/portal/aoa?propertyId=${property.propertyDetails.id}`}>
+            <Button className="w-full" variant="outline">
+              Create AOA
+            </Button>
+          </NavLink>
 
           <div className="flex gap-2 w-full">
             <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>

@@ -6,7 +6,6 @@ import PropertyForm from "@/components/portal/properties/add/PropertyForm";
 import ViewProperty from "@/components/portal/properties/view/ViewProperty";
 import EditProperty from "@/components/portal/properties/edit/EditProperty";
 import InvoicesTable from "@/components/portal/invoices/InvoicesTable";
-import ContractOwnerTable from "@/components/portal/contract-owner/ContractOwnersTable";
 import ClientTable from "@/components/portal/clients/list/ClientTable";
 import AddClient from "@/components/portal/clients/add/AddClient";
 import ClientPage from "@/components/portal/clients/ClientPage";
@@ -16,11 +15,14 @@ import ProspectTable from "@/components/portal/prospects/list/ProspectsTable";
 import InvoicePage from "@/components/portal/clients/invoice/InvoicePage";
 import { propertiesColumn } from "@/components/portal/properties/columns";
 import { invoicesColumn } from "@/components/portal/invoices/columns";
-import { contractOwnerColumns } from "@/components/portal/contract-owner/columns";
 import { clientsColumn } from "@/components/portal/clients/list/columns";
 import ProtectedRoute from "@/utils/ProtectedRoute";
 import MoveFromProspect from "@/components/portal/clients/add/MoveFromProspect";
+import ContractForm from "@/components/portal/clients/contract/ContractForm";
+import AppointmentForm from "@/components/portal/properties/aoa/AppointmentForm";
+import PropertyAoaPage from "@/components/portal/properties/aoa/PropertyAoaPage";
 import ProspectPage from "@/components/portal/prospects/ProspectPage";
+import ProspectContractPage from "@/components/portal/prospects/contract/ProspectContractPage";
 import AddProspectPropertyForm from "@/components/portal/prospects/AddProspectProperty";
 import ProspectProspertyTable from "@/components/portal/prospects/ProspectPropertyTable";
 import EditProspectProperty from "@/components/portal/prospects/EditProspectProperty";
@@ -45,10 +47,6 @@ const AdminRoutes = () => {
           element={<InvoicesTable columns={invoicesColumn} />}
         />
         <Route
-          path="/contract-owner"
-          element={<ContractOwnerTable columns={contractOwnerColumns} />}
-        />
-        <Route
           path="/clients/list-client"
           element={<ClientTable columns={clientsColumn} />}
         />
@@ -68,6 +66,7 @@ const AdminRoutes = () => {
         />
 
         <Route path="/prospect" element={<ProspectPage />} />
+        <Route path="/prospect/contract" element={<ProspectContractPage />} />
         <Route path="/prospect/preview-docs" element={<PreviewSignedPdf />} />
         <Route path="/prospect/add-prospect" element={<AddProspect />} />
         <Route
@@ -75,6 +74,9 @@ const AdminRoutes = () => {
           element={<AddProspectPropertyForm />}
         />
         <Route path="/prospect/property" element={<ProspectProspertyTable />} />
+        <Route path="/contract" element={<ContractForm />} />
+        <Route path="/aoa" element={<PropertyAoaPage />} />
+        <Route path="/agent" element={<AppointmentForm />} />
         <Route path="/invoice" element={<InvoicePage />} />
         <Route path="/csv-uploads" element={<CsvUploadsPage />} />
       </Routes>

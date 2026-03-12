@@ -84,12 +84,6 @@ const headerData = [
     desc: "See all Invoices here.",
   },
   {
-    id: "contract-owner",
-    icon: "",
-    label: "Contract Owner",
-    desc: "See all Contract Owner here.",
-  },
-  {
     id: "clients/list-client",
     icon: "",
     label: "Clients",
@@ -102,16 +96,16 @@ const headerData = [
     desc: "View, search for and add new Prospect.",
   },
   {
-    id: "forms/contract",
+    id: "contract",
     icon: "",
     label: "Contracts",
-    desc: "View, search for and add new Contracts.",
+    desc: "Create and send client contract.",
   },
   {
-    id: "forms/agent",
+    id: "agent",
     icon: "",
-    label: "Agents",
-    desc: "View, search for and add new Agents.",
+    label: "Appointment of Agent (AOA)",
+    desc: "Create and send Appointment of Agent (Form 50-162).",
   },
 ];
 
@@ -130,7 +124,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
       toast({
         title: "Logged Out!",
       });
-      navigate("/login"); // Relative routejhg
+      navigate("/login");
     } catch (error) {}
   }
 
