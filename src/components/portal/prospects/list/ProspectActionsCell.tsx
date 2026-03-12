@@ -70,7 +70,7 @@ export function ProspectActionsCell({
     <div className="flex gap-2">
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" size="icon">
+          <Button variant="destructive" size="icon" aria-label="Delete prospect">
             <Trash2 className="h-4 w-4" />
           </Button>
         </AlertDialogTrigger>
@@ -96,7 +96,7 @@ export function ProspectActionsCell({
 
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="default" size="icon">
+          <Button variant="default" size="icon" aria-label="Move to client">
             <UserRoundPlus className="h-4 w-4" />
           </Button>
         </AlertDialogTrigger>

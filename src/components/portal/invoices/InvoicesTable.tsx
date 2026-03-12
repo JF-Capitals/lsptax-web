@@ -143,6 +143,7 @@ const InvoicesTable = <TData, TValue>({
               size="sm"
               onClick={clearSearch}
               className="absolute right-1 h-6 w-6 p-0"
+              aria-label="Clear search"
             >
               <X className="h-4 w-4" />
             </Button>

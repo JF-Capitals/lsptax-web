@@ -35,7 +35,6 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
     accessorKey: "clientId",
     header: "Client #",
     cell: ({ row }) => {
-      // const id = row.original.clientId;
       const clientNum = row.original.clientId;
 
       return <div className="text-blue-400 font-bold">#{clientNum}</div>;
@@ -45,7 +44,6 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
     accessorKey: "propertyAccount",
     header: "Property Account#",
     cell: ({ row }) => {
-      // const id = row.original.clientId;
       const propertyAccount = row.original.propertyAccount;
 
       return (
@@ -64,14 +62,6 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
       const details = row.original.propertyDetails;
       return (
         <div className=" gap-4">
-          {/* <div className="flex flex-col">
-            <h1 className="text-xs font-bold text-muted-foreground">Type:</h1>
-            {details.type}
-          </div>
-          <div className="flex flex-col">
-            <h1 className="text-xs font-bold text-muted-foreground">Class:</h1>{" "}
-            {details.class ? details.class : "N/A"}
-          </div> */}
           <div className="flex flex-col">
             <h1 className="text-xs font-bold text-muted-foreground">
               Assessor:
@@ -111,24 +101,7 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
         </div>
       );
     },
-  },  
-
-  // {
-  //   accessorKey: "hearingDate",
-  //   header: "Hearing Date",
-  //   cell: ({ row }) => {
-  //     const hearingDate = row.original.hearingDate;
-  //     return <div className="">{(hearingDate)}</div>;
-  //   },
-  // },
-  // {
-  //   accessorKey: "aoaSigned",
-  //   header: "AOA Signed",
-  //   cell: ({ row }) => {
-  //     const aoaSigned = row.original.aoaSigned;
-  //     return <div>{(aoaSigned)}</div>;
-  //   },
-  // },
+  },
   {
     accessorKey: "addedOn",
     header: "Added On",
@@ -137,102 +110,4 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
       return <div>{formatDate(addedOn)}</div>;
     },
   },
-  // {
-  //   header: "Actions",
-  //   id: "actions",
-  //   cell: ({ row }) => {
-  //     const propertyId = row.original.propertyId;
-  //     const [activeModal, setActiveModal] = useState<string | null>(null);
-
-  //     return (
-  //       <>
-  //         <TooltipProvider>
-  //           <div className="flex">
-  //             {/* Edit Button */}
-  //             <NavLink to={`/portal/edit-properties?propertyId=${propertyId}`}>
-  //               <Tooltip>
-  //                 <TooltipTrigger asChild>
-  //                   <Button size="icon" variant="ghost">
-  //                     <FilePenLine />
-  //                   </Button>
-  //                 </TooltipTrigger>
-  //                 <TooltipContent>Edit Property</TooltipContent>
-  //               </Tooltip>
-  //             </NavLink>
-
-  //             {/* View Button */}
-  //             <NavLink to={`/portal/view-properties?propertyId=${propertyId}`}>
-  //               <Tooltip>
-  //                 <TooltipTrigger asChild>
-  //                   <Button size="icon" variant="ghost">
-  //                     <Eye />
-  //                   </Button>
-  //                 </TooltipTrigger>
-  //                 <TooltipContent>View Property</TooltipContent>
-  //               </Tooltip>
-  //             </NavLink>
-
-  //             {/* House Button */}
-  //             <NavLink to={`/portal/invoices?propertyId=${propertyId}`}>
-  //               <Tooltip>
-  //                 <TooltipTrigger asChild>
-  //                   <Button size="icon" variant="ghost">
-  //                     <File />
-  //                   </Button>
-  //                 </TooltipTrigger>
-  //                 <TooltipContent>See Invoices</TooltipContent>
-  //               </Tooltip>
-  //             </NavLink>
-
-  //             {/* Archive or Unarchive Button */}
-  //             <Tooltip>
-  //               <TooltipTrigger asChild>
-  //                 <Button
-  //                   size="icon"
-  //                   variant="ghost"
-  //                   onClick={() =>
-  //                     row.original.status === 1
-  //                       ? setActiveModal("archive")
-  //                       : setActiveModal("unarchive")
-  //                   }
-  //                 >
-  //                   {row.original.status === 1 ? <Archive /> : <RefreshCcw />}
-  //                 </Button>
-  //               </TooltipTrigger>
-  //               <TooltipContent>
-  //                 {row.original.status === 1
-  //                   ? "Archive Property"
-  //                   : "Unarchive Property"}
-  //               </TooltipContent>
-  //             </Tooltip>
-  //           </div>
-  //         </TooltipProvider>
-
-  //         <ArchiveModal
-  //           isOpen={activeModal === "archive"}
-  //           onClose={() => setActiveModal(null)}
-  //           title="Are you sure?"
-  //           description="This will archive the property"
-  //           onAction={() => {
-  //             handleArchiveUnarchive("property", propertyId, "archive");
-  //             setActiveModal(null);
-  //           }}
-  //           actionType="Archive" // Pass the action type as "Archive"
-  //         />
-
-  //         <ArchiveModal
-  //           isOpen={activeModal === "unarchive"}
-  //           onClose={() => setActiveModal(null)}
-  //           title="Are you sure?"
-  //           description="This will unarchive the property"
-  //           onAction={() => {
-  //             handleArchiveUnarchive("property", propertyId, "unarchive");
-  //             setActiveModal(null);
-  //           }}
-  //           actionType="Unarchive" // Pass the action type as "Unarchive"
-  //         />
-  //       </>
-  //     );
-  //   },
-  // },
 ];

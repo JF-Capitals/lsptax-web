@@ -193,7 +193,6 @@ const Contact = () => {
             </div>
 
             <Button
-              // variant="blue"
               disabled={loading}
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow-md transition-all"

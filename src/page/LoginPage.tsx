@@ -94,7 +94,7 @@ export default function LoginPage() {
           <div className="flex justify-between items-center w-full mb-12 ">
             <div>
               <NavLink to={"/"}>
-                <img className="" src={Logo} alt="" />
+                <img className="" src={Logo} alt="Lone Star Property Tax logo" />
               </NavLink>
             </div>
           </div>

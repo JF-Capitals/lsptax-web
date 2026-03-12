@@ -14,9 +14,9 @@ interface Stats {
 }
 
 const Dashboard = () => {
-  const [propData, setPropData] = useState<Properties | null>(null);
-  const [clientData, setClientData] = useState<Clients | null>(null);
-  const [prospectData, setProspectData] = useState<Prospect | null>(null);
+  const [propData, setPropData] = useState<Properties[]>([]);
+  const [clientData, setClientData] = useState<Clients[]>([]);
+  const [prospectData, setProspectData] = useState<Prospect[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true); // ✅ loading state added
 
@@ -35,9 +35,9 @@ const Dashboard = () => {
           getProspects(10, 0),
           dashboardData(),
         ]);
-        setPropData((fetchedPropRes.data ?? []) as Properties);
-        setClientData((fetchedClientRes.data ?? []) as Clients);
-        setProspectData((fetchedProspectRes.data ?? []) as Prospect);
+        setPropData((fetchedPropRes.data ?? []) as Properties[]);
+        setClientData((fetchedClientRes.data ?? []) as Clients[]);
+        setProspectData((fetchedProspectRes.data ?? []) as Prospect[]);
         setStats(dashboardStats);
       } catch (error) {
         console.error("Error fetching stats:", error);

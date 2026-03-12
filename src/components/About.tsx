@@ -16,7 +16,7 @@ const About = () => {
         className="w-full md:w-1/2 flex justify-center items-center mb-8 md:mb-0"
         data-aos="fade-left"
       >
-        <img src={aboutImage} alt="About Us" className="w-full max-w-[500px]" />
+        <img src={aboutImage} alt="Lone Star Property Tax - About Us" className="w-full max-w-[500px]" />
       </div>
 
       {/* Right Section - Text */}
@@ -50,7 +50,7 @@ const About = () => {
           className="flex items-center py-2"
           data-aos="fade-up"
           >
-            <img src={checkboxIcon} className="w-6 h-6 mr-4" alt="Checkbox" />
+            <img src={checkboxIcon} className="w-6 h-6 mr-4" alt="Included" aria-hidden />
             <h2 className="text-sm md:text-base">{item.title}</h2>
           </div>
         ))}

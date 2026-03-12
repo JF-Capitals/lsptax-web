@@ -9,7 +9,6 @@ import {
   UploadCloud,
   ChevronLeft,
   ChevronRight,
-  // FileSignature,
 } from "lucide-react";
 import {
   Tooltip,
@@ -32,7 +31,6 @@ const menuOptions: MenuOption[] = [
   { id: "invoices", label: "Invoices", icon: FileText },
   { id: "prospects/list-prospect", label: "Prospects", icon: UserPlus },
   { id: "csv-uploads", label: "CSV Uploads", icon: UploadCloud },
-  // { id: "forms/contract", label: "Contracts", icon: FileSignature },
 ];
 
 const SideMenu: React.FC = () => {
@@ -49,15 +47,17 @@ const SideMenu: React.FC = () => {
       >
         {/* Toggle Button */}
         <button
+          type="button"
           className="self-end mr-2 p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition"
           onClick={() => setIsOpen(!isOpen)}
+          aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
         >
           {isOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
         </button>
 
         {/* Logo */}
         <div className={`mt-6 transition-all ${isOpen ? "w-24" : "w-12"}`}>
-          <img src={mainLogo} alt="Logo" className="w-full" />
+          <img src={mainLogo} alt="Lone Star Property Tax portal logo" className="w-full" />
         </div>
 
         {/* Menu Items */}

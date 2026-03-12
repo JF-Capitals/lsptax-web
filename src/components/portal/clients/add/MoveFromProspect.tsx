@@ -22,14 +22,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { addClient } from "@/api/api";
 import { useEffect, useState } from "react";
-import { Prospect } from "@/types/types";
 import { getSingleProspect } from "@/store/data";
 
 const MoveFromProspect = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [prospectData, setProspectData] = useState<Prospect | null>(null);
   const [searchParams] = useSearchParams();
   const prospectId = searchParams.get("prospectId");
 
@@ -38,28 +36,26 @@ const MoveFromProspect = () => {
       try {
         if (prospectId) {
           const data = await getSingleProspect({ prospectId });
-          setProspectData(data);
-          // Update form values when prospect data is loaded
-          form.reset({
-            CLIENTNAME: data.clientName ?? "",
-            Email: data.email ?? "",
-            PHONENUMBER: data.phoneNumber ?? "",
-            MAILINGADDRESSCITYTXZIP: data.mailingAddressCityTxZip ?? "",
-            TypeOfAcct: "Real",
-            IsArchived: false,
-          });
+          if (data) {
+            form.reset({
+              CLIENTNAME: data.clientName ?? "",
+              Email: data.email ?? "",
+              PHONENUMBER: data.phoneNumber ?? "",
+              MAILINGADDRESSCITYTXZIP: data.mailingAddressCityTxZip ?? "",
+              TypeOfAcct: "Real",
+              IsArchived: false,
+            });
+          }
           setLoading(false);
         }
       } catch (error) {
         console.error("Failed to load prospect data", error);
-        // toast( tit"Could not load client data. Please try again later.");
         setError("Error getting prospect details");
       }
     }
     if (prospectId) {
       loadProspectData();
     }
-    console.log({ prospectData });
   }, [searchParams]);
 
   const formSchema = z.object({

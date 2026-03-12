@@ -22,7 +22,7 @@ interface Property {
   cadCounty: string;
   contingencyFee: string;
   flatFee: string;
-  existingInvoices: any[];
+  existingInvoices: unknown[];
 }
 
 interface ClientWithProperties {
@@ -38,7 +38,15 @@ const InvoiceGenerator = () => {
   const [selectedYears, setSelectedYears] = useState<number[]>([new Date().getFullYear()]);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<{
+    numOfClients: number;
+    numOfProspects: number;
+    numOfAgents: number;
+    totalInvoices?: number;
+    totalAmount?: number;
+    uniqueClients?: number;
+    uniqueProperties?: number;
+  } | null>(null);
   const { toast } = useToast();
 
   const getAuthHeaders = (): Record<string, string> => {
@@ -297,19 +305,19 @@ const InvoiceGenerator = () => {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold">{stats.totalInvoices}</div>
+                <div className="text-2xl font-bold">{stats.totalInvoices ?? 0}</div>
                 <div className="text-sm text-muted-foreground">Total Invoices</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">${stats.totalAmount.toLocaleString()}</div>
+                <div className="text-2xl font-bold">${(stats.totalAmount ?? 0).toLocaleString()}</div>
                 <div className="text-sm text-muted-foreground">Total Amount</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{stats.uniqueClients}</div>
+                <div className="text-2xl font-bold">{stats.uniqueClients ?? 0}</div>
                 <div className="text-sm text-muted-foreground">Unique Clients</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{stats.uniqueProperties}</div>
+                <div className="text-2xl font-bold">{stats.uniqueProperties ?? 0}</div>
                 <div className="text-sm text-muted-foreground">Unique Properties</div>
               </div>
             </div>

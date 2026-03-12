@@ -60,7 +60,7 @@ export function InvoiceActionsCell({
       {!isArchived ? (
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" aria-label="Archive invoice">
               <Archive size={8} />
             </Button>
           </AlertDialogTrigger>

@@ -36,9 +36,18 @@ const AdminPortal = () => {
       {/* Overlay for Small Screens */}
       {isMenuOpen && (
         <div
+          role="button"
+          tabIndex={0}
           className="fixed inset-0 bg-black bg-opacity-50 z-30 sm:hidden"
           onClick={() => setIsMenuOpen(false)}
-        ></div>
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setIsMenuOpen(false);
+            }
+          }}
+          aria-label="Close menu"
+        />
       )}
     </div>
   );

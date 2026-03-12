@@ -9,7 +9,6 @@ import { BellIcon, Menu, User2 } from "lucide-react";
 import { logoutUser } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-// import { useEffect, useState } from "react";
 
 const CurrentDate: React.FC = () => {
   const formatDate = (): string => {
@@ -136,7 +135,12 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
   return (
     <div className="flex justify-between p-4">
       {/* Hamburger Menu Button (Small Screens) */}
-      <button className="sm:hidden p-2 text-gray-700" onClick={onMenuToggle}>
+      <button
+        type="button"
+        className="sm:hidden p-2 text-gray-700"
+        onClick={onMenuToggle}
+        aria-label="Toggle menu"
+      >
         <Menu size={24} />
       </button>
       <div>
@@ -163,7 +167,8 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
         )}
       </div>
       <div className="flex justify-center align-center items-center gap-4">
-        <BellIcon size={20} />
+        <span className="sr-only">Notifications</span>
+        <BellIcon size={20} aria-hidden />
         <div className="flex justify-center align-center items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger>
@@ -189,7 +194,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
 const HeaderDescriptionItem = ({ icon, label, desc }: DashboardHeaderProps) => {
   return (
     <div className="">
-      {icon && <img src={icon} alt="" />}
+      {icon && <img src={icon} alt="" aria-hidden />}
       <p className="font-extrabold text-xl">{label}</p>
       <p className="text-sm font-thin">{desc ? desc : <CurrentDate />}</p>
     </div>

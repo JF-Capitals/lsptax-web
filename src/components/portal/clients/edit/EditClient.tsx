@@ -32,13 +32,10 @@ export default function EditClient() {
   const [searchParams] = useSearchParams();
     const { toast } = useToast();
   const clientId = searchParams.get("clientId");
-  console.log({ clientId });
   async function loadClientData() {
     try {
       if (clientId) {
         const data = await getSingleClient({ clientId: clientId });
-        console.log({ data });
-        // setClient(data);
         setLoading(false);
 
         const fields = {

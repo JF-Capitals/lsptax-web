@@ -107,21 +107,22 @@ export interface Invoice {
 }
 
 export interface InvoiceSummary {
-  id: any;
-  isArchived: any;
+  id: string | number;
+  isArchived: boolean;
   clientId: string;
   propertyNumbers: string[]; 
   totalInvoiceAmount: number;
   createdAt: string; 
 }
 
+export interface InvoiceProperty {
+  propertyDetails: Property;
+  invoice: Invoice[];
+}
+
 export interface InvoiceData {
   client: ClientData;
   properties: InvoiceProperty[];
-}
-interface InvoiceProperty{
-  propertyDetails: Property;
-  invoice: Invoice[];
 }
 
 export interface PropertyData {

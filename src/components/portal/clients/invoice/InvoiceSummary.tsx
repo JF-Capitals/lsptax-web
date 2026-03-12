@@ -1,5 +1,5 @@
 import React from "react";
-import { InvoiceData } from "@/types/types";
+import { InvoiceData, InvoiceProperty, Invoice } from "@/types/types";
 import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
 import {
@@ -17,8 +17,8 @@ const InvoiceSummary: React.FC<{
   selectedYear: number;
   setSelectedYear: (year: number) => void;
 }> = ({ invoice, selectedYear, setSelectedYear }) => {
-  const getYearlyInvoiceData = (property: any) => {
-    return property.invoice.find((inv: any) => inv.year === selectedYear);
+  const getYearlyInvoiceData = (property: InvoiceProperty) => {
+    return property.invoice.find((inv: Invoice) => inv.year === selectedYear);
   };
 
   const calculateFees = () => {
@@ -41,7 +41,7 @@ const InvoiceSummary: React.FC<{
     if (!invoice?.properties) return [];
     const years = new Set<number>();
     invoice.properties.forEach((property) => {
-      property.invoice.forEach((inv: any) => {
+      property.invoice.forEach((inv: Invoice) => {
         years.add(inv.year);
       });
     });

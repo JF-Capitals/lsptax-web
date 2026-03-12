@@ -16,7 +16,6 @@ const ProspectPropertyPage = () => {
   useEffect(() => {
     const fetchProperty = async () => {
       const propertyId = searchParams.get("id");
-      console.log({ propertyId });
       if (!propertyId) {
         setError("Property ID is missing");
         setLoading(false);
@@ -27,7 +26,7 @@ const ProspectPropertyPage = () => {
         const propertyData = await getProspectProperty({ propertyId });
         setProperty(propertyData);
         setLoading(false);
-        console.log({ propertyData });
+        // propertyData contains full property details including invoices and history
       } catch (err) {
         console.error("Error:", err);
         setError("Failed to fetch property details");
@@ -37,7 +36,6 @@ const ProspectPropertyPage = () => {
     };
 
     fetchProperty();
-    // console.log({ property });
   }, [searchParams, propertyId]); // Trigger when searchParams changes
 
   if (loading) {
@@ -57,7 +55,6 @@ const ProspectPropertyPage = () => {
   }
 
   if (!property) {
-    console.log({ property });
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg font-semibold text-gray-700">

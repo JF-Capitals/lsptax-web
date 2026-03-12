@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { getSingleProperty } from "@/store/data";
-import { PropertyData } from "@/types/types";
+import { PropertyData, Invoice } from "@/types/types";
 import { editProperty } from "@/api/api";
 import { LoaderCircle } from "lucide-react";
 import { formatUSD, cleanNumberInput } from "@/utils/formatCurrency";
@@ -156,8 +156,6 @@ export default function EditProperty() {
         yearlyData: meaningfulYearlyData,
       };
       
-      console.log(`📝 Sending data for years:`, Object.keys(meaningfulYearlyData));
-      console.log(`📝 Yearly data:`, meaningfulYearlyData);
       
       await editProperty(
         propertyId!,
@@ -200,23 +198,24 @@ export default function EditProperty() {
     fetchProperty();
   }, [propertyId, form]);
 
-  const getInitialTableData = (invoices: any[] = []) => {
+  const getInitialTableData = (invoices: Invoice[] | unknown[] = []): TableRow[] => {
+    const list = invoices as Invoice[];
     return years.map((year) => {
-      const yearData = invoices?.find((invoice) => invoice.year === year);
+      const yearData = list?.find((inv) => inv?.year === year);
 
-      const noticeLandValue = parseFloat(cleanNumberInput(yearData?.noticeLandValue?.toString())) || 0;
+      const noticeLandValue = parseFloat(cleanNumberInput((yearData?.noticeLandValue?.toString()) ?? "")) || 0;
       const noticeImprovementValue =
-        parseFloat(cleanNumberInput(yearData?.noticeImprovementValue?.toString())) || 0;
+        parseFloat(cleanNumberInput((yearData?.noticeImprovementValue?.toString()) ?? "")) || 0;
       const noticeAppraisedValue =
-        parseFloat(cleanNumberInput(yearData?.noticeAppraisedValue?.toString())) || 0;
-      const finalLandValue = parseFloat(cleanNumberInput(yearData?.finalLandValue?.toString())) || 0;
+        parseFloat(cleanNumberInput((yearData?.noticeAppraisedValue?.toString()) ?? "")) || 0;
+      const finalLandValue = parseFloat(cleanNumberInput((yearData?.finalLandValue?.toString()) ?? "")) || 0;
       const finalImprovementValue =
-        parseFloat(cleanNumberInput(yearData?.finalImprovementValue?.toString())) || 0;
+        parseFloat(cleanNumberInput((yearData?.finalImprovementValue?.toString()) ?? "")) || 0;
       const finalAppraisedValue =
-        parseFloat(cleanNumberInput(yearData?.finalAppraisedValue?.toString())) || 0;
-      const taxRate = parseFloat(cleanNumberInput(yearData?.taxRate?.toString())) || 0;
-      const endingMarket = parseFloat(cleanNumberInput(yearData?.endingMarket?.toString())) || 0;
-      const endingAppraised = parseFloat(cleanNumberInput(yearData?.endingAppraised?.toString())) || 0;
+        parseFloat(cleanNumberInput((yearData?.finalAppraisedValue?.toString()) ?? "")) || 0;
+      const taxRate = parseFloat(cleanNumberInput((yearData?.taxRate?.toString()) ?? "")) || 0;
+      const endingMarket = parseFloat(cleanNumberInput((yearData?.endingMarket?.toString()) ?? "")) || 0;
+      const endingAppraised = parseFloat(cleanNumberInput((yearData?.endingAppraised?.toString()) ?? "")) || 0;
 
       // Parse contingency fee from string (e.g., "25%" -> 0.25)
       const contingencyFeeString =
@@ -270,7 +269,7 @@ export default function EditProperty() {
         "Ending Market": endingMarket.toString(),
         "Beginning Appraised": beginningAppraised.toString(),
         "Ending Appraised": endingAppraised.toString(),
-      };
+      } as TableRow;
     });
   };
   useEffect(() => {
@@ -279,7 +278,7 @@ export default function EditProperty() {
     }
   }, [property]);
 
-  const [tableData, setTableData] = useState<TableRow[]>(getInitialTableData());
+  const [tableData, setTableData] = useState<TableRow[]>(() => getInitialTableData());
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,

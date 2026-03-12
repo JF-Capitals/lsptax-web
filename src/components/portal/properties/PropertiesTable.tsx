@@ -1,14 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import {
   ColumnDef,
-  // SortingState,
-  // getCoreRowModel,
-  // useReactTable,
-  // getSortedRowModel,
-  // getPaginationRowModel,
   ColumnFiltersState,
-  // getFilteredRowModel,
-  // VisibilityState,
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";

@@ -11,6 +11,9 @@ enum ProspectStatus {
 
 const COLORS = ["#F29425", "#10A142", "#E54F53"]; // Colors for each status
 
+/** Maximum number of prospects to fetch for the dashboard chart. */
+const CHART_PROSPECTS_LIMIT = 100;
+
 const DonutChart: React.FC = () => {
   const [chartData, setChartData] = useState([
     { name: "Not Contacted", value: 0 },
@@ -20,7 +23,7 @@ const DonutChart: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await getProspects(100, 0);
+      const res = await getProspects(CHART_PROSPECTS_LIMIT, 0);
       const prospects = (res.data ?? []) as { status?: ProspectStatus }[];
 
       // Initialize counts
@@ -30,7 +33,7 @@ const DonutChart: React.FC = () => {
         [ProspectStatus.IN_PROGRESS]: 0,
       };
 
-      // Count occurrences of each status (from current page, max 100)
+      // Count occurrences of each status (from current page, max CHART_PROSPECTS_LIMIT)
       prospects.forEach((prospect) => {
         if (prospect.status != null && counts[prospect.status] !== undefined) {
           counts[prospect.status]++;

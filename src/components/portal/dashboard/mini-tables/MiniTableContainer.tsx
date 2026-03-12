@@ -8,9 +8,9 @@ import { propertiesColumn } from "./columns/propColumns";
 import { prospectColumn } from "./columns/prospectColumns";
 
 type MiniTableContainerProps = {
-  propData: Properties;
-  clientData: Clients;
-  prospectData: Prospect;
+  propData: Properties[];
+  clientData: Clients[];
+  prospectData: Prospect[];
 };
 
 const MiniTableContainer = ({
@@ -26,27 +26,27 @@ const MiniTableContainer = ({
       </div>
       {/* Second Item */}
       <div className=" rounded-xl ">
-        <MiniTableBuilder
+        <MiniTableBuilder<Prospect>
           data={prospectData}
-          columns={prospectColumn}
+          columns={prospectColumn as import("@tanstack/react-table").ColumnDef<Prospect, any>[]}
           label="Prospects"
           link="/portal/prospects/list-prospect"
         />
       </div>
       {/* Third Item */}
       <div className=" rounded-xl ">
-        <MiniTableBuilder
+        <MiniTableBuilder<Properties>
           data={propData}
-          columns={propertiesColumn}
+          columns={propertiesColumn as import("@tanstack/react-table").ColumnDef<Properties, any>[]}
           label="Properties"
           link="/portal/properties"
         />
       </div>
       {/* Fourth Item */}
       <div className=" rounded-xl ">
-        <MiniTableBuilder
+        <MiniTableBuilder<Clients>
           data={clientData}
-          columns={clientsColumn}
+          columns={clientsColumn as import("@tanstack/react-table").ColumnDef<Clients, any>[]}
           label="Clients"
           link="/portal/clients/list-clients"
         />

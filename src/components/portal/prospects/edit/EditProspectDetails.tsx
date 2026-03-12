@@ -66,7 +66,6 @@ export default function EditProspectDetails() {
       try {
         if (prospectId) {
           const data = await getSingleProspect({ prospectId: prospectId }); // Replace with actual API call
-          console.log("Fetched prospect data:", data);
           form.reset({
             TypeOfAcct: data.prospect.typeOfAcct || "",
             ProspectName: data.prospect.clientName || "",

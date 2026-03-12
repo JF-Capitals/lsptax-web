@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  ColumnDef,
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
@@ -38,9 +39,9 @@ export interface ServerPaginationProps {
   onPageSizeChange: (size: number) => void;
 }
 
-interface TableBuilderProps {
-  data: any;
-  columns: any;
+interface TableBuilderProps<TData> {
+  data: TData[];
+  columns: ColumnDef<TData, any>[];
   label: string;
   columnFilters?: ColumnFiltersState;
   setColumnFilters?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
@@ -48,14 +49,14 @@ interface TableBuilderProps {
   serverPagination?: ServerPaginationProps;
 }
 
-const TableBuilder = ({
+function TableBuilder<TData>({
   data,
   columns,
   label,
   columnFilters,
   setColumnFilters,
   serverPagination,
-}: TableBuilderProps) => {
+}: TableBuilderProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});

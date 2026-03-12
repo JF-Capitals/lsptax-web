@@ -1,5 +1,5 @@
 import React from "react";
-import { InvoiceData } from "@/types/types";
+import { InvoiceData, InvoiceProperty, Invoice } from "@/types/types";
 import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,8 @@ const InvoiceDetails: React.FC<{
   invoice?: InvoiceData;
   selectedYear: number;
 }> = ({ invoice, selectedYear }) => {
-  const getYearlyInvoiceData = (property: any) => {
-    return property.invoice.find((inv: any) => inv.year === selectedYear);
+  const getYearlyInvoiceData = (property: InvoiceProperty) => {
+    return property.invoice.find((inv: Invoice) => inv.year === selectedYear);
   };
 
   const calculateFees = () => {
@@ -66,8 +66,6 @@ const InvoiceDetails: React.FC<{
         max-width: 70px;
       }
           @media print {
-      /* Previous styles remain the same */
-      
       th, td {
         font-size: 8px;
         padding: 1px !important;

@@ -150,8 +150,6 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
         return;
       }
 
-      console.log(`🔄 Generating invoice for year: ${selectedYear}, property: ${accountNumber}, client: ${clientNumber}`);
-      
       const result = await generateInvoices({
         clientNumbers: [clientNumber],
         propertyAccountNumbers: [accountNumber],
@@ -397,17 +395,7 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
           {isInvoiceOpen ? <ChevronUp /> : <ChevronDown />}
         </span> */}
       </div>
-      <div
-        // className={` transition-all duration-300 ease-in-out ${
-        //   isInvoiceOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-        // }`}
-        // style={{
-        //   maxHeight: isInvoiceOpen
-        //     ? `${property.invoices.length * 250}px`
-        //     : "0px",
-        //   opacity: isInvoiceOpen ? 1 : 0,
-        // }}
-      >
+      <div>
         <div className="mt-4">
           <YearTable invoices={property.invoices} />
         </div>
