@@ -1,70 +1,60 @@
 import DashboardStats from "./dashboard/DashboardStats";
 import MiniTableContainer from "./dashboard/mini-tables/MiniTableContainer";
-import { useEffect, useState } from "react";
+import { useDashboardDataQuery } from "@/hooks/queries";
+import { Button } from "@/components/ui/button";
 import { Properties } from "./properties/columns";
-import { getClients, getProperties, getProspects } from "@/store/data";
 import { Clients } from "./clients/list/columns";
 import { Prospect } from "@/types/types";
-import { dashboardData } from "@/store/data";
-import { LoaderCircle } from "lucide-react";
-
-interface Stats {
-  numOfClients: number;
-  numOfProspects: number;
-}
+import { TableSkeleton } from "./TableSkeleton";
 
 const Dashboard = () => {
-  const [propData, setPropData] = useState<Properties[]>([]);
-  const [clientData, setClientData] = useState<Clients[]>([]);
-  const [prospectData, setProspectData] = useState<Prospect[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true); // ✅ loading state added
+  const {
+    stats,
+    propData,
+    clientData,
+    prospectData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useDashboardDataQuery();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true); // start loading
-        const [
-          fetchedPropRes,
-          fetchedClientRes,
-          fetchedProspectRes,
-          dashboardStats,
-        ] = await Promise.all([
-          getProperties(10, 0),
-          getClients(10, 0),
-          getProspects(10, 0),
-          dashboardData(),
-        ]);
-        setPropData((fetchedPropRes.data ?? []) as Properties[]);
-        setClientData((fetchedClientRes.data ?? []) as Clients[]);
-        setProspectData((fetchedProspectRes.data ?? []) as Prospect[]);
-        setStats(dashboardStats);
-      } catch (error) {
-        console.error("Error fetching stats:", error);
-      } finally {
-        setLoading(false); // stop loading
-      }
-    };
-    fetchData();
-  }, []);
+  if (isError) {
+    return (
+      <div className="flex flex-col justify-center items-center py-20 text-destructive">
+        <span className="text-lg font-semibold">
+          {error instanceof Error ? error.message : "Failed to load dashboard"}
+        </span>
+        <Button variant="blue" className="mt-4" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col">
+        <DashboardStats
+          stats={{ numOfClients: 0, numOfProspects: 0 }}
+          loading={true}
+        />
+        <TableSkeleton rows={5} columns={4} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col">
       <DashboardStats
-        stats={stats ?? { numOfClients: 0, numOfProspects: 0 }}
-        loading={loading}
+        stats={stats}
+        loading={false}
       />
-      {loading ? (
-        <div className="flex justify-center h-full items-center py-20">
-          <LoaderCircle className="animate-spin w-16 h-16" />
-        </div>
-      ) : (
-        <MiniTableContainer
-          prospectData={prospectData!}
-          propData={propData!}
-          clientData={clientData!}
-        />
-      )}
+      <MiniTableContainer
+        prospectData={(prospectData ?? []) as Prospect[]}
+        propData={(propData ?? []) as Properties[]}
+        clientData={(clientData ?? []) as Clients[]}
+      />
     </div>
   );
 };

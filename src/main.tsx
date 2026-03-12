@@ -1,11 +1,21 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
 import App from "./App.tsx";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { Toaster } from "./components/ui/toaster.tsx";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+      retry: 1,
+    },
+  },
+});
 
 // Initialize AOS
 AOS.init({
@@ -17,9 +27,11 @@ AOS.init({
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ErrorBoundary>
-      <Toaster />
-      <App />
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary>
+        <Toaster />
+        <App />
+      </ErrorBoundary>
+    </QueryClientProvider>
   </StrictMode>
 );

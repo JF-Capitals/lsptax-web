@@ -292,7 +292,7 @@ export default function CsvUploadsPage() {
           <Card>
             <CardHeader className="p-6">
               <CardTitle className="flex items-center gap-2">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#F2F7FF] text-[#384295] text-sm font-bold">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-muted text-brand-secondary text-sm font-bold">
                   1
                 </span>
                 Choose upload type
@@ -309,7 +309,7 @@ export default function CsvUploadsPage() {
                   }}
                   className={`group relative overflow-hidden rounded-xl border p-5 text-left transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                     uploadType === "clientsProperties"
-                      ? "border-[#384295] bg-gradient-to-br from-[#F2F7FF] to-white"
+                      ? "border-brand-secondary bg-gradient-to-br from-brand-muted to-white"
                       : "hover:bg-gray-50"
                   }`}
                 >
@@ -323,7 +323,7 @@ export default function CsvUploadsPage() {
                     <div
                       className={`h-10 w-10 rounded-lg flex items-center justify-center border ${
                         uploadType === "clientsProperties"
-                          ? "border-[#384295] text-[#384295] bg-white"
+                          ? "border-brand-secondary text-brand-secondary bg-white"
                           : "text-gray-600 bg-white"
                       }`}
                     >
@@ -343,7 +343,7 @@ export default function CsvUploadsPage() {
                   }}
                   className={`group relative overflow-hidden rounded-xl border p-5 text-left transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                     uploadType === "invoices"
-                      ? "border-[#384295] bg-gradient-to-br from-[#F2F7FF] to-white"
+                      ? "border-brand-secondary bg-gradient-to-br from-brand-muted to-white"
                       : "hover:bg-gray-50"
                   }`}
                 >
@@ -357,7 +357,7 @@ export default function CsvUploadsPage() {
                     <div
                       className={`h-10 w-10 rounded-lg flex items-center justify-center border ${
                         uploadType === "invoices"
-                          ? "border-[#384295] text-[#384295] bg-white"
+                          ? "border-brand-secondary text-brand-secondary bg-white"
                           : "text-gray-600 bg-white"
                       }`}
                     >
@@ -441,7 +441,7 @@ export default function CsvUploadsPage() {
           <Card>
             <CardHeader className="p-6">
               <CardTitle className="flex items-center gap-2">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#F2F7FF] text-[#384295] text-sm font-bold">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-muted text-brand-secondary text-sm font-bold">
                   2
                 </span>
                 Upload CSV
@@ -480,7 +480,7 @@ export default function CsvUploadsPage() {
                   setFileFromDrop(e.dataTransfer.files?.[0] ?? null);
                 }}
                 className={`rounded-xl border border-dashed p-6 transition ${
-                  isDragging ? "border-[#384295] bg-[#F2F7FF]" : "bg-white hover:bg-gray-50"
+                  isDragging ? "border-brand-secondary bg-brand-muted" : "bg-white hover:bg-gray-50"
                 }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -686,12 +686,12 @@ export default function CsvUploadsPage() {
 
                   {lastAction === "preview" && previewSignals.lists.length > 0 && (
                     <div className="space-y-3">
-                      {previewSignals.lists.slice(0, 4).map((list) => {
+                      {previewSignals.lists.slice(0, 4).map((list, listIdx) => {
                         const items = list.items;
                         const cols = guessColumns(items);
                         const rows = items.slice(0, 6);
                         return (
-                          <details key={list.label} className="group rounded-xl border bg-white">
+                          <details key={`${list.label}-${listIdx}`} className="group rounded-xl border bg-white">
                             <summary className="cursor-pointer select-none list-none p-4 flex items-center justify-between">
                               <div className="text-sm font-semibold">{list.label}</div>
                               <div className="text-xs text-muted-foreground">
@@ -704,8 +704,8 @@ export default function CsvUploadsPage() {
                                   <table className="min-w-full text-xs">
                                     <thead>
                                       <tr className="text-left text-muted-foreground">
-                                        {cols.map((c) => (
-                                          <th key={c} className="py-1 pr-4 font-medium">
+                                        {cols.map((c, colIdx) => (
+                                          <th key={colIdx} className="py-1 pr-4 font-medium">
                                             {c}
                                           </th>
                                         ))}
@@ -714,8 +714,8 @@ export default function CsvUploadsPage() {
                                     <tbody>
                                       {rows.map((r, idx) => (
                                         <tr key={idx} className="border-t">
-                                          {cols.map((c) => (
-                                            <td key={c} className="py-2 pr-4">
+                                          {cols.map((c, colIdx) => (
+                                            <td key={colIdx} className="py-2 pr-4">
                                               {isRecord(r) ? String(r[c] ?? "") : ""}
                                             </td>
                                           ))}

@@ -1,13 +1,16 @@
+import { getApiBaseUrl } from "./client";
+
 export const loginUser = async (email: string, password: string) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/auth/login`,
+      `${getApiBaseUrl()}/auth/login`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
+        credentials: "include",
       }
     );
 
@@ -37,7 +40,7 @@ export const logoutUser = async () => {
     const token = localStorage.getItem("token");
     if (token) {
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/auth/logout`,
+        `${getApiBaseUrl()}/auth/logout`,
         {
           method: "POST",
           headers: {

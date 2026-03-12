@@ -42,7 +42,7 @@ const Testimonials = () => {
   // const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <div className="bg-[#F7FAFF] flex flex-col justify-center items-center py-12 px-6">
+    <div className="bg-brand-background flex flex-col justify-center items-center py-12 px-6">
       <h1 className="text-3xl font-bold text-gray-800 tracking-wide text-center mb-6">
         Our Clients Speak for Us
       </h1>

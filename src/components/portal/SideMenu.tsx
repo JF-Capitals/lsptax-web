@@ -74,7 +74,7 @@ const SideMenu: React.FC = () => {
                     to={`/portal/${id}`}
                     className={`flex items-center p-4 rounded-lg transition-all ${
                       isActive
-                        ? "bg-[#F2F7FF] text-[#384295] font-semibold"
+                        ? "bg-brand-muted text-brand-secondary font-semibold"
                         : "text-gray-700 hover:bg-gray-100"
                     } ${
                       isOpen ? "justify-start gap-3 px-6" : "justify-center"
@@ -83,7 +83,7 @@ const SideMenu: React.FC = () => {
                     <Icon
                       size={24}
                       className={`${
-                        isActive ? "text-[#384295]" : "text-gray-600"
+                        isActive ? "text-brand-secondary" : "text-gray-600"
                       }`}
                     />
                     {isOpen && <span>{label}</span>}

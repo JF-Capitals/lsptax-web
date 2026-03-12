@@ -5,6 +5,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { propertiesColumn } from "@/components/portal/properties/columns";
 import { invoicesColumn } from "@/components/portal/invoices/columns";
 import { clientsColumn } from "@/components/portal/clients/list/columns";
+import NotFoundPage from "@/page/NotFoundPage";
 
 const Dashboard = lazy(() => import("@/components/portal/Dashboard"));
 const PropertiesTable = lazy(() => import("@/components/portal/properties/PropertiesTable"));
@@ -81,6 +82,7 @@ const AdminRoutes = () => {
       <Route path="/agent" element={<AppointmentForm />} />
       <Route path="/invoice" element={<InvoicePage />} />
       <Route path="/csv-uploads" element={<CsvUploadsPage />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
     </Suspense>
   );

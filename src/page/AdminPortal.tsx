@@ -3,17 +3,13 @@ import { Routes, Route } from "react-router-dom";
 import SideMenu from "@/components/portal/SideMenu";
 import AdminRoutes from "@/routes/adminRoutes";
 import DashboardHeader from "@/components/portal/DashboardHeader";
+import { Breadcrumbs } from "@/components/portal/Breadcrumbs";
 
 const AdminPortal = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div
-      className="h-screen overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg, #F8F9FD, #E3F2FD)", // Light bluish gradient
-      }}
-    >
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-background to-brand-muted/30">
       <div className="flex h-full">
         {/* Side Menu */}
         <div
@@ -26,11 +22,12 @@ const AdminPortal = () => {
         {/* Main Content */}
         <div className="flex-1 h-full overflow-hidden flex flex-col">
           <DashboardHeader onMenuToggle={() => setIsMenuOpen(!isMenuOpen)} />
-          <div className="flex-1 overflow-auto">
+          <main id="main" className="flex-1 overflow-auto" tabIndex={-1}>
+            <Breadcrumbs />
             <Routes>
               <Route path="/*" element={<AdminRoutes />} />
             </Routes>
-          </div>
+          </main>
         </div>
       </div>
       {/* Overlay for Small Screens */}

@@ -2,13 +2,13 @@ import { Mail, Phone, MapPin } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-[#14212A]">
+    <footer className="bg-brand-dark">
       <div className="container mx-auto px-4 py-8">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Office Address */}
           <div className="flex flex-col space-y-2">
-            <h3 className="text-lg font-bold flex items-center gap-2 text-[#0093FF]">
+            <h3 className="text-lg font-bold flex items-center gap-2 text-brand-blue">
               <MapPin className="w-4 h-4" />
               <span>Mailing Address</span>
             </h3>
@@ -20,7 +20,7 @@ const Footer = () => {
 
           {/* Contact Information */}
           <div className="flex flex-col space-y-2">
-            <h3 className="text-lg font-bold text-[#0093FF]">Contact Us</h3>
+            <h3 className="text-lg font-bold text-brand-blue">Contact Us</h3>
             <div className="space-y-2">
               <a
                 href="mailto:info@lsptax.com"
@@ -41,7 +41,7 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div className="flex flex-col space-y-2">
-            <h3 className="text-lg font-bold text-[#0093FF]">Quick Links</h3>
+            <h3 className="text-lg font-bold text-brand-blue">Quick Links</h3>
             <div className="flex flex-col space-y-1">
               {/* <NavLink
                 to="/portal/dashboard"

@@ -196,7 +196,13 @@ const HeaderDescriptionItem = ({ icon, label, desc }: DashboardHeaderProps) => {
     <div className="">
       {icon && <img src={icon} alt="" aria-hidden />}
       <p className="font-extrabold text-xl">{label}</p>
-      <p className="text-sm font-thin">{desc ? desc : <CurrentDate />}</p>
+      {desc ? (
+        <p className="text-sm font-thin">{desc}</p>
+      ) : (
+        <div className="text-sm font-thin">
+          <CurrentDate />
+        </div>
+      )}
     </div>
   );
 };

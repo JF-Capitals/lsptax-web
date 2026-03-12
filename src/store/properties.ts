@@ -1,12 +1,11 @@
-import { authFetch } from "@/api/client";
+import { authFetch, getApiBaseUrl } from "@/api/client";
 import {
   DEFAULT_PAGE_SIZE,
-  emptyPaginated,
   getFormattedDate,
   type PaginatedResponse,
 } from "./common";
 
-const base = () => import.meta.env.VITE_BACKEND_URL as string;
+const base = getApiBaseUrl;
 
 export const getProperties = async (
   limit = DEFAULT_PAGE_SIZE,
@@ -27,8 +26,7 @@ export const getProperties = async (
       hasMore: json.hasMore ?? false,
     };
   } catch (error) {
-    console.error("Error fetching properties:", error);
-    return emptyPaginated();
+    throw error;
   }
 };
 
@@ -50,8 +48,8 @@ export const getArchiveProperties = async (
       offset: json.offset ?? offset,
       hasMore: json.hasMore ?? false,
     };
-  } catch {
-    return emptyPaginated();
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -59,7 +57,6 @@ export const getSingleProperty = async ({ propertyId }: { propertyId: string }) 
   try {
     const response = await authFetch(`${base()}/api/property?propertyId=${propertyId}`);
     if (response.status === 404) {
-      console.warn(`Property with ID ${propertyId} not found.`);
       return null;
     }
     if (!response.ok) throw new Error("Failed to fetch properties");
@@ -75,7 +72,7 @@ export const getProspectProperty = async ({ propertyId }: { propertyId: string }
     if (!response.ok) throw new Error("Failed to fetch properties");
     return response.json();
   } catch {
-    return [{}];
+    return [];
   }
 };
 
@@ -92,8 +89,8 @@ export const downloadPropertiesCSV = async () => {
     a.click();
     a.remove();
     window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("Error downloading properties CSV:", error);
+  } catch {
+    // Error surfaced via UI if needed
   }
 };
 
@@ -103,6 +100,6 @@ export const getProtests = async () => {
     if (!response.ok) throw new Error("Failed to fetch properties");
     return response.json();
   } catch {
-    return [{}];
+    return [];
   }
 };

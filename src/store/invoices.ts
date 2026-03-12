@@ -1,12 +1,11 @@
-import { authFetch, getAuthHeaders } from "@/api/client";
+import { authFetch, getAuthHeaders, getApiBaseUrl } from "@/api/client";
 import {
   DEFAULT_PAGE_SIZE,
-  emptyPaginated,
   getFormattedDate,
   type PaginatedResponse,
 } from "./common";
 
-const base = () => import.meta.env.VITE_BACKEND_URL as string;
+const base = getApiBaseUrl;
 
 export const getInvoice = async ({ clientId }: { clientId: string }) => {
   try {
@@ -14,7 +13,7 @@ export const getInvoice = async ({ clientId }: { clientId: string }) => {
     if (!response.ok) throw new Error("Failed to fetch Invoices");
     return response.json();
   } catch {
-    return [{}];
+    return [];
   }
 };
 
@@ -24,7 +23,7 @@ export const getInvoiceByPropertyId = async ({ propertyId }: { propertyId: strin
     if (!response.ok) throw new Error("Failed to fetch Invoices");
     return response.json();
   } catch {
-    return [{}];
+    return [];
   }
 };
 
@@ -46,8 +45,8 @@ export const getAllInvoices = async (
       offset: json.offset ?? offset,
       hasMore: json.hasMore ?? false,
     };
-  } catch {
-    return emptyPaginated();
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -69,8 +68,8 @@ export const getArchiveInvoices = async (
       offset: json.offset ?? offset,
       hasMore: json.hasMore ?? false,
     };
-  } catch {
-    return emptyPaginated();
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -138,7 +137,7 @@ export const downloadInvoicesCSV = async () => {
     a.click();
     a.remove();
     window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("Error downloading invoices CSV:", error);
+  } catch {
+    // Error surfaced via UI if needed
   }
 };

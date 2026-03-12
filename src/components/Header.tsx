@@ -7,13 +7,13 @@ const Header = () => {
       {/* Mobile View */}
       <div className="flex md:hidden justify-between items-center p-4">
         <img src={logo} alt="Lone Star Property Tax logo" />
-        <a href="#contact" className="bg-[#E84F5A] text-white p-2 px-4 border rounded-full flex gap-2 cursor-pointer group">
+        <a href="#contact" className="bg-brand-accent text-white p-2 px-4 border rounded-full flex gap-2 cursor-pointer group">
           <img src={phoneLogo} alt="" className="group-hover:animate-vibrate" aria-hidden />
     Contact Us
         </a>
       </div>
       {/* Desktop View */}
-      <div className="hidden flex md:flex justify-around items-center  p-4">
+      <nav className="hidden md:flex justify-around items-center p-4" aria-label="Main navigation">
         <img src={logo} alt="Lone Star Property Tax logo" />
         <a
           href="#about"
@@ -45,11 +45,11 @@ const Header = () => {
         >
           <span className="relative"> Key Dates</span>
         </a>
-        <a href="#contact" className="bg-[#E84F5A] text-white p-4 px-8 border rounded-full flex gap-2 cursor-pointer group">
+        <a href="#contact" className="bg-brand-accent text-white p-4 px-8 border rounded-full flex gap-2 cursor-pointer group">
           <img src={phoneLogo} alt="" className="group-hover:animate-vibrate" aria-hidden />
           Contact Us
         </a>
-      </div>
+      </nav>
     </div>
   );
 };

@@ -1,19 +1,15 @@
-import { useEffect, useState, useRef } from "react";
-import {
-  ColumnDef,
-  ColumnFiltersState,
-} from "@tanstack/react-table";
-
+import { useEffect, useRef, useState } from "react";
+import { ColumnDef, ColumnFiltersState } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
-  getProperties,
-  getArchiveProperties,
   downloadPropertiesCSV,
-} from "@/store/data"; // Import both data-fetching functions
+} from "@/store/data";
 import TableBuilder from "../TableBuilder";
 import { Archive, Download, LoaderCircle } from "lucide-react";
 import { Properties } from "./columns";
 import { Input } from "@/components/ui/input";
+import { usePropertiesQuery } from "@/hooks/queries";
+import { TableSkeleton } from "../TableSkeleton";
 
 interface PropertiesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -22,20 +18,14 @@ interface PropertiesTableProps<TData, TValue> {
 const PropertiesTable = <TData extends Properties, TValue>({
   columns,
 }: PropertiesTableProps<TData, TValue>) => {
-  const [properties, setProperties] = useState<TData[]>([]);
-  const [total, setTotal] = useState(0);
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
   const [archived, setArchived] = useState(false);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastSearchRef = useRef(debouncedSearch);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -48,76 +38,64 @@ const PropertiesTable = <TData extends Properties, TValue>({
     };
   }, [searchTerm]);
 
+  const { data, isLoading, isError, refetch } = usePropertiesQuery({
+    limit,
+    offset,
+    search: debouncedSearch,
+    archived,
+  });
+
+  const properties = (data?.data ?? []) as TData[];
+  const total = data?.total ?? 0;
+  const hasMore = data?.hasMore ?? false;
+
   const handleCsvDownload = async () => {
     setDownloadingCsv(true);
     try {
       await downloadPropertiesCSV();
-    } catch (error) {
-      console.error("Error downloading CSV:", error);
-      setError("Failed to download CSV. Please try again later.");
+    } catch (err) {
+      console.error("Error downloading CSV:", err);
     } finally {
       setDownloadingCsv(false);
     }
   };
-
-  const fetchProperties = async (opts?: { limit?: number; offset?: number; search?: string }) => {
-    const l = opts?.limit ?? limit;
-    let o = opts?.offset ?? offset;
-    const search = opts?.search !== undefined ? opts.search : debouncedSearch;
-    if (search !== lastSearchRef.current) {
-      lastSearchRef.current = search;
-      o = 0;
-      setOffset(0);
-    }
-    try {
-      setLoading(true);
-      setError(null);
-      const res = archived
-        ? await getArchiveProperties(l, o, search || undefined)
-        : await getProperties(l, o, search || undefined);
-      setProperties((res.data ?? []) as TData[]);
-      setTotal(res.total);
-      setLimit(res.limit);
-      setOffset(res.offset);
-      setHasMore(res.hasMore);
-    } catch (err) {
-      console.error("Error fetching properties:", err);
-      setError(
-        archived
-          ? "Failed to load archived properties. Please try again later."
-          : "Failed to load active properties. Please try again later."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProperties({ limit, offset, search: debouncedSearch });
-  }, [archived, limit, offset, debouncedSearch]);
 
   const switchArchived = () => {
     setArchived((a) => !a);
     setOffset(0);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex justify-center h-96 items-center py-20">
-        <LoaderCircle className="animate-spin w-16 h-16 text-blue-500" />
-      </div>
+      <>
+        <div className="flex flex-col md:flex-row border rounded-xl items-center gap-4 bg-white m-4 p-4">
+          <div className="w-full">
+            <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+            <div className="h-5 w-48 bg-muted animate-pulse rounded mt-2" />
+          </div>
+          <div className="flex flex-col gap-2 w-full">
+            <div className="h-5 w-44 bg-muted animate-pulse rounded" />
+            <div className="h-10 max-w-md w-full bg-muted animate-pulse rounded" />
+          </div>
+          <div className="flex gap-2 w-full">
+            <div className="h-10 w-32 bg-muted animate-pulse rounded" />
+            <div className="h-10 w-24 bg-muted animate-pulse rounded" />
+          </div>
+        </div>
+        <TableSkeleton />
+      </>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
-      <div className="flex flex-col justify-center items-center py-20 text-red-500">
-        <span className="text-lg font-semibold">{error}</span>
-        <Button
-          variant="blue"
-          className="mt-4"
-          onClick={() => fetchProperties()}
-        >
+      <div className="flex flex-col justify-center items-center py-20 text-destructive">
+        <span className="text-lg font-semibold">
+          {archived
+            ? "Failed to load archived properties. Please try again later."
+            : "Failed to load active properties. Please try again later."}
+        </span>
+        <Button variant="blue" className="mt-4" onClick={() => refetch()}>
           Retry
         </Button>
       </div>
@@ -138,6 +116,7 @@ const PropertiesTable = <TData extends Properties, TValue>({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full max-w-md"
+            aria-label="Search properties"
           />
         </div>
         <div className="flex gap-2 w-full">
@@ -160,6 +139,15 @@ const PropertiesTable = <TData extends Properties, TValue>({
         label={archived ? "Archived Properties" : "All Properties"}
         columnFilters={columnFilters}
         setColumnFilters={setColumnFilters}
+        emptyState={
+          archived
+            ? undefined
+            : {
+                title: "No properties yet",
+                description: "Add a property to start tracking tax and client data.",
+                action: { label: "Add your first property", to: "/portal/add-property" },
+              }
+        }
         serverPagination={{
           total,
           limit,

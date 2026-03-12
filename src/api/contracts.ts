@@ -1,6 +1,6 @@
-import { getAuthHeaders } from "./client";
+import { getAuthHeaders, getApiBaseUrl } from "./client";
 
-const baseUrl = () => import.meta.env.VITE_BACKEND_URL as string;
+const baseUrl = getApiBaseUrl;
 
 export interface ContractListItem {
   id: number;

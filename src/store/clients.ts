@@ -1,12 +1,11 @@
-import { authFetch } from "@/api/client";
+import { authFetch, getApiBaseUrl } from "@/api/client";
 import {
   DEFAULT_PAGE_SIZE,
-  emptyPaginated,
   getFormattedDate,
   type PaginatedResponse,
 } from "./common";
 
-const base = () => import.meta.env.VITE_BACKEND_URL as string;
+const base = getApiBaseUrl;
 
 export const getClients = async (
   limit = DEFAULT_PAGE_SIZE,
@@ -27,8 +26,7 @@ export const getClients = async (
       hasMore: json.hasMore ?? false,
     };
   } catch (error) {
-    console.error("Error fetching clients:", error);
-    return emptyPaginated();
+    throw error;
   }
 };
 
@@ -72,8 +70,8 @@ export const getArchiveClients = async (
       offset: json.offset ?? offset,
       hasMore: json.hasMore ?? false,
     };
-  } catch {
-    return emptyPaginated();
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -94,15 +92,15 @@ async function downloadCsv(endpoint: string, filenamePrefix: string) {
 export const downloadClientsCSV = async () => {
   try {
     await downloadCsv("/api/download-clients-csv", "clients");
-  } catch (error) {
-    console.error("Error downloading clients CSV:", error);
+  } catch {
+    // Error surfaced via UI (e.g. toast) if needed
   }
 };
 
 export const downloadProspectsCSV = async () => {
   try {
     await downloadCsv("/api/download-prospects-csv", "prospects");
-  } catch (error) {
-    console.error("Error downloading prospects CSV:", error);
+  } catch {
+    // Error surfaced via UI if needed
   }
 };

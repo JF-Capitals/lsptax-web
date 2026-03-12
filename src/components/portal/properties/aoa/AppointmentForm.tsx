@@ -163,7 +163,7 @@ const AppointmentForm: React.FC = () => {
       <div className="flex flex-wrap gap-2 mb-4">
         <Button
           variant="default"
-          className="rounded-md p-2 px-6 bg-[#0093FF] hover:bg-[#0080e0]"
+          className="rounded-md p-2 px-6 bg-brand-blue hover:bg-brand-blue-hover"
           onClick={handleDownload}
           disabled={!hasPdf}
         >
@@ -172,7 +172,7 @@ const AppointmentForm: React.FC = () => {
         </Button>
         <Button
           variant="default"
-          className="rounded-md p-2 px-6 bg-[#0093FF] hover:bg-[#0080e0]"
+          className="rounded-md p-2 px-6 bg-brand-blue hover:bg-brand-blue-hover"
           onClick={handleSendForSigning}
           disabled={isSending || !hasPdf}
         >

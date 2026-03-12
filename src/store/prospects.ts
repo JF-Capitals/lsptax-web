@@ -1,11 +1,10 @@
-import { authFetch, getAuthHeaders } from "@/api/client";
+import { authFetch, getAuthHeaders, getApiBaseUrl } from "@/api/client";
 import {
   DEFAULT_PAGE_SIZE,
-  emptyPaginated,
   type PaginatedResponse,
 } from "./common";
 
-const base = () => import.meta.env.VITE_BACKEND_URL as string;
+const base = getApiBaseUrl;
 
 export const getProspects = async (
   limit = DEFAULT_PAGE_SIZE,
@@ -25,8 +24,7 @@ export const getProspects = async (
       hasMore: json.hasMore ?? false,
     };
   } catch (error) {
-    console.error("Error fetching prospects:", error);
-    return emptyPaginated();
+    throw error;
   }
 };
 
@@ -48,8 +46,7 @@ export const getArchiveProspects = async (
       hasMore: json.hasMore ?? false,
     };
   } catch (error) {
-    console.error("Error fetching prospects:", error);
-    return emptyPaginated();
+    throw error;
   }
 };
 

@@ -1,8 +1,8 @@
-import { getAuthHeaders } from "./client";
+import { getAuthHeaders, getApiBaseUrl } from "./client";
 
 const baseUrl = () => {
-  const url = import.meta.env.VITE_BACKEND_URL;
-  if (!url) throw new Error("Server URL is not configured. Please set VITE_BACKEND_URL.");
+  const url = getApiBaseUrl();
+  if (!url && !import.meta.env.DEV) throw new Error("Server URL is not configured. Please set VITE_BACKEND_URL.");
   return url;
 };
 

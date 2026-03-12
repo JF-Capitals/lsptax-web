@@ -1,6 +1,6 @@
-import { authFetch } from "@/api/client";
+import { authFetch, getApiBaseUrl } from "@/api/client";
 
-const base = () => import.meta.env.VITE_BACKEND_URL as string;
+const base = getApiBaseUrl;
 
 interface Stats {
   numOfClients: number;
@@ -8,14 +8,13 @@ interface Stats {
   numOfAgents: number;
 }
 
-export const dashboardData = async (): Promise<Stats | null> => {
+export const dashboardData = async (): Promise<Stats> => {
   try {
     const response = await authFetch(`${base()}/api/stats`);
     if (!response.ok) throw new Error("Failed to fetch dashboard stats");
     return response.json();
   } catch (error) {
-    console.error("Error fetching dashboard stats:", error);
-    return null;
+    throw error;
   }
 };
 
@@ -25,7 +24,7 @@ export const getContractOwner = async () => {
     if (!response.ok) throw new Error("Failed to fetch Contract Owners");
     return response.json();
   } catch {
-    return [{}];
+    return [];
   }
 };
 
@@ -37,7 +36,7 @@ export const getContractOwnerById = async ({ coId }: { coId: number }) => {
     if (!response.ok) throw new Error("Failed to fetch Contract Owner Details");
     return response.json();
   } catch {
-    return [{}];
+    return [];
   }
 };
 
@@ -47,7 +46,7 @@ export const getContracts = async () => {
     if (!response.ok) throw new Error("Failed to fetch Contracts");
     return response.json();
   } catch {
-    return [{}];
+    return [];
   }
 };
 
@@ -57,6 +56,6 @@ export const getAgents = async () => {
     if (!response.ok) throw new Error("Failed to fetch Agents");
     return response.json();
   } catch {
-    return [{}];
+    return [];
   }
 };

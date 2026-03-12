@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   SortingState,
   getCoreRowModel,
@@ -9,12 +9,7 @@ import {
   getFilteredRowModel,
   VisibilityState,
 } from "@tanstack/react-table";
-
-import {
-  downloadProspectsCSV,
-  getArchiveProspects,
-  getProspects,
-} from "@/store/data";
+import { downloadProspectsCSV } from "@/store/data";
 import TableBuilder from "../../TableBuilder";
 import { Input } from "@/components/ui/input";
 import { NavLink } from "react-router-dom";
@@ -28,65 +23,44 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getProspectColumns } from "./columns";
 import { Prospect } from "@/types/types";
+import { useProspectsQuery } from "@/hooks/queries";
+import { TableSkeleton } from "../../TableSkeleton";
 
 const ProspectTable = () => {
-  const [prospects, setProspects] = useState<Prospect[]>([]);
-  const [total, setTotal] = useState(0);
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [archived, setArchived] = useState(false);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
+
+  const { data, isLoading, isError, refetch } = useProspectsQuery({
+    limit,
+    offset,
+    archived,
+  });
+
+  const prospects = (data?.data ?? []) as Prospect[];
+  const total = data?.total ?? 0;
+  const hasMore = data?.hasMore ?? false;
+
+  const columns = useMemo(
+    () => getProspectColumns(() => { refetch(); }),
+    [refetch]
+  );
 
   const handleCsvDownload = async () => {
     setDownloadingCsv(true);
     try {
       await downloadProspectsCSV();
-    } catch (error) {
-      console.error("Error downloading CSV:", error);
-      setError("Failed to download CSV. Please try again later.");
+    } catch (err) {
+      console.error("Error downloading CSV:", err);
     } finally {
       setDownloadingCsv(false);
     }
   };
-
-  const fetchProspects = useCallback(async (opts?: { limit?: number; offset?: number }) => {
-    const l = opts?.limit ?? limit;
-    const o = opts?.offset ?? offset;
-    try {
-      setLoading(true);
-      setError(null);
-      const res = archived
-        ? await getArchiveProspects(l, o)
-        : await getProspects(l, o);
-      setProspects((res.data ?? []) as Prospect[]);
-      setTotal(res.total);
-      setLimit(res.limit);
-      setOffset(res.offset);
-      setHasMore(res.hasMore);
-    } catch (err) {
-      console.error("Error fetching prospects:", err);
-      setError("Failed to load prospects. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  }, [archived, limit, offset]);
-
-  const refetch = useCallback(() => {
-    fetchProspects({ limit, offset });
-  }, [fetchProspects, limit, offset]);
-
-  const columns = useMemo(() => getProspectColumns(refetch), [refetch]);
-
-  useEffect(() => {
-    fetchProspects({ limit, offset });
-  }, [fetchProspects]);
 
   const switchArchived = () => {
     setArchived((a) => !a);
@@ -116,27 +90,37 @@ const ProspectTable = () => {
     table.getColumn("status")?.setFilterValue(status || undefined);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-20">
-        <LoaderCircle className="animate-spin w-16 h-16 text-blue-500" />
-      </div>
+      <>
+        <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
+          <div className="flex flex-col p-4 w-full">
+            <div className="h-5 w-40 bg-muted animate-pulse rounded mb-2" />
+            <div className="h-10 max-w-sm bg-muted animate-pulse rounded" />
+          </div>
+          <div className="w-full">
+            <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+            <div className="h-5 w-48 bg-muted animate-pulse rounded mt-2" />
+          </div>
+          <div className="h-10 w-44 bg-muted animate-pulse rounded" />
+          <div className="h-10 w-36 bg-muted animate-pulse rounded" />
+          <div className="h-10 w-24 bg-muted animate-pulse rounded" />
+        </div>
+        <div className="flex justify-end mb-4">
+          <div className="h-10 w-32 bg-muted animate-pulse rounded" />
+        </div>
+        <TableSkeleton />
+      </>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
-      <div className="flex flex-col justify-center items-center py-20 text-red-500">
-        <span className="text-lg font-semibold">{error}</span>
-        <Button
-          variant="blue"
-          className="mt-4"
-          onClick={() => {
-            setError(null); // Reset error before retrying
-            setLoading(true);
-            fetchProspects();
-          }}
-        >
+      <div className="flex flex-col justify-center items-center py-20 text-destructive">
+        <span className="text-lg font-semibold">
+          Failed to load prospects. Please try again later.
+        </span>
+        <Button variant="blue" className="mt-4" onClick={() => refetch()}>
           Retry
         </Button>
       </div>
@@ -150,11 +134,12 @@ const ProspectTable = () => {
           <h1>Quick search a Prospect</h1>
           <Input
             placeholder="Search Prospect Name..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            value={(table.getColumn("prospectName")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("name")?.setFilterValue(event.target.value)
+              table.getColumn("prospectName")?.setFilterValue(event.target.value)
             }
             className="max-w-sm"
+            aria-label="Search prospects by name"
           />
         </div>
 
@@ -182,7 +167,6 @@ const ProspectTable = () => {
           )}
         </Button>
       </div>
-      {/* Filter Dropdown */}
       <div className="flex justify-end mb-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -221,6 +205,15 @@ const ProspectTable = () => {
         label="Prospects"
         columnFilters={columnFilters}
         setColumnFilters={setColumnFilters}
+        emptyState={
+          archived
+            ? undefined
+            : {
+                title: "No prospects yet",
+                description: "Add a prospect to start the conversion pipeline.",
+                action: { label: "Add your first prospect", to: "/portal/prospect/add-prospect" },
+              }
+        }
         serverPagination={{
           total,
           limit,

@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { LoaderCircle, FileText, Users, Building2, Calendar, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getApiBaseUrl } from "@/api/client";
 
 interface Client {
   clientNumber: string;
@@ -64,7 +65,7 @@ const InvoiceGenerator = () => {
   const fetchClients = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invoice/clients`, {
+      const response = await fetch(`${getApiBaseUrl()}/invoice/clients`, {
         headers: {
           ...getAuthHeaders(),
         },
@@ -96,7 +97,7 @@ const InvoiceGenerator = () => {
       setLoading(true);
       const clientNumbersParam = selectedClients.join(',');
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/invoice/properties?clientNumbers=${clientNumbersParam}`,
+        `${getApiBaseUrl()}/invoice/properties?clientNumbers=${clientNumbersParam}`,
         {
           headers: {
             ...getAuthHeaders(),
@@ -131,7 +132,7 @@ const InvoiceGenerator = () => {
       const clientNumbersParam = selectedClients.join(',');
       const yearsParam = selectedYears.join(',');
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/invoice/stats?clientNumbers=${clientNumbersParam}&years=${yearsParam}`,
+        `${getApiBaseUrl()}/invoice/stats?clientNumbers=${clientNumbersParam}&years=${yearsParam}`,
         {
           headers: {
             ...getAuthHeaders(),
@@ -170,7 +171,7 @@ const InvoiceGenerator = () => {
 
     try {
       setGenerating(true);
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invoice/generate`, {
+      const response = await fetch(`${getApiBaseUrl()}/invoice/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

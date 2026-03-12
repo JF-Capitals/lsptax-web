@@ -69,7 +69,7 @@ const InvoiceSummary: React.FC<{
 
         <Button
           variant={"blue"}
-          className="bg-[#0093FF] rounded-md p-2 px-6 ml-4 text-white"
+          className="bg-brand-blue rounded-md p-2 px-6 ml-4 text-white"
           onClick={() => reactToPrintFn()}
         >
           <Printer />

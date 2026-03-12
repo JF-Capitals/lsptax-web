@@ -28,6 +28,8 @@ import {
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { EmptyState } from "./EmptyState";
+import type { LucideIcon } from "lucide-react";
 
 export interface ServerPaginationProps {
   total: number;
@@ -39,6 +41,13 @@ export interface ServerPaginationProps {
   onPageSizeChange: (size: number) => void;
 }
 
+export interface EmptyStateConfig {
+  icon?: LucideIcon;
+  title: string;
+  description: string;
+  action?: { label: string; to?: string; onClick?: () => void };
+}
+
 interface TableBuilderProps<TData> {
   data: TData[];
   columns: ColumnDef<TData, any>[];
@@ -47,6 +56,8 @@ interface TableBuilderProps<TData> {
   setColumnFilters?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
   /** When set, table uses server-side pagination (no client-side paging); footer shows total and calls these handlers */
   serverPagination?: ServerPaginationProps;
+  /** When set, shown when data is empty instead of "No results." */
+  emptyState?: EmptyStateConfig;
 }
 
 function TableBuilder<TData>({
@@ -56,6 +67,7 @@ function TableBuilder<TData>({
   columnFilters,
   setColumnFilters,
   serverPagination,
+  emptyState,
 }: TableBuilderProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -119,6 +131,10 @@ function TableBuilder<TData>({
   const onPrev = isServerPagination ? serverPagination!.onPrev : () => { setPageIndex((i) => Math.max(0, i - 1)); table.previousPage(); };
   const onNext = isServerPagination ? serverPagination!.onNext : () => { setPageIndex((i) => i + 1); table.nextPage(); };
   const displayPageSize = isServerPagination ? serverPagination!.limit : pageSize;
+  const currentPage = isServerPagination && serverPagination
+    ? Math.floor(serverPagination.offset / serverPagination.limit) + 1
+    : pageIndex + 1;
+  const totalPages = total > 0 ? Math.ceil(total / displayPageSize) : 1;
 
   return (
     <div className="rounded-xl border m-4 bg-white p-4 flex flex-col overflow-y-auto h-[calc(100vh-260px)] ">
@@ -153,10 +169,10 @@ function TableBuilder<TData>({
         </div>
       </div>
 
-      <div className="overflow-auto scrollbar-custom flex-1">
+      <div className="overflow-auto scrollbar-custom flex-1 relative">
         <div className="overflow-x-auto h-full">
           <Table className="table-auto min-w-full">
-            <TableHeader>
+            <TableHeader className="sticky top-0 z-10 bg-white shadow-sm [&_tr]:border-b">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header, index) => (
@@ -166,6 +182,14 @@ function TableBuilder<TData>({
                         index > 1 ? "hidden md:table-cell" : ""
                       } text-gray-700 font-semibold`}
                       onClick={header.column.getToggleSortingHandler()}
+                      aria-sort={
+                        header.column.getIsSorted()
+                          ? header.column.getIsSorted() === "asc"
+                            ? "ascending"
+                            : "descending"
+                          : undefined
+                      }
+                      scope="col"
                     >
                       <div className="flex items-center justify-between">
                         {flexRender(
@@ -193,7 +217,7 @@ function TableBuilder<TData>({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    className={`min-h-[48px] ${
+                    className={`min-h-[48px] hover:bg-muted/50 ${
                       row.getIsSelected() ? "bg-muted" : ""
                     }`}
                   >
@@ -240,6 +264,20 @@ function TableBuilder<TData>({
                     </TableCell> */}
                   </TableRow>
                 ))
+              ) : emptyState ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length + 1}
+                    className="p-0 align-top"
+                  >
+                    <EmptyState
+                      icon={emptyState.icon}
+                      title={emptyState.title}
+                      description={emptyState.description}
+                      action={emptyState.action}
+                    />
+                  </TableCell>
+                </TableRow>
               ) : (
                 <TableRow>
                   <TableCell
@@ -255,23 +293,30 @@ function TableBuilder<TData>({
         </div>
       </div>
 
-      <div className="flex items-center justify-start space-x-2 py-4">
-        <Button
-          variant={"blue"}
-          size="sm"
-          onClick={onPrev}
-          disabled={!canPrev}
-        >
-          Previous
-        </Button>
-        <Button
-          variant={"blue"}
-          size="sm"
-          onClick={onNext}
-          disabled={!canNext}
-        >
-          Next
-        </Button>
+      <div className="flex items-center justify-between space-x-2 py-4">
+        <p className="text-sm text-muted-foreground" aria-live="polite">
+          Page {currentPage} of {totalPages}
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={"blue"}
+            size="sm"
+            onClick={onPrev}
+            disabled={!canPrev}
+            aria-label="Previous page"
+          >
+            Previous
+          </Button>
+          <Button
+            variant={"blue"}
+            size="sm"
+            onClick={onNext}
+            disabled={!canNext}
+            aria-label="Next page"
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

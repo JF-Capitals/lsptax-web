@@ -37,7 +37,7 @@ export function ContractPreviewAndSend({
       <div className="flex flex-wrap gap-2 mb-4">
         <Button
           variant="default"
-          className="rounded-md p-2 px-6 bg-[#0093FF] hover:bg-[#0080e0] text-white"
+          className="rounded-md p-2 px-6 bg-brand-blue hover:bg-brand-blue-hover text-white"
           onClick={onDownload}
           disabled={!hasPdf}
         >
@@ -46,7 +46,7 @@ export function ContractPreviewAndSend({
         </Button>
         <Button
           variant="default"
-          className="rounded-md p-2 px-6 bg-[#0093FF] hover:bg-[#0080e0] text-white"
+          className="rounded-md p-2 px-6 bg-brand-blue hover:bg-brand-blue-hover text-white"
           onClick={onSend}
           disabled={sendDisabled || isSending || !hasPdf}
         >
