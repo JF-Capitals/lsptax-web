@@ -50,6 +50,7 @@ export const addProspect = async (payload: {
 
 export const addClient = async (clientDetails: {
   clientName: string;
+  clientNumber: string;
   email: string;
   phoneNumber?: string;
   mailingAddressCityTxZip?: string;
@@ -60,6 +61,7 @@ export const addClient = async (clientDetails: {
   try {
     const body: Record<string, string> = {
       clientName: clientDetails.clientName,
+      clientNumber: clientDetails.clientNumber,
       email: clientDetails.email,
       phoneNumber: clientDetails.phoneNumber ?? "",
       mailingAddressCityTxZip: clientDetails.mailingAddressCityTxZip ?? "",

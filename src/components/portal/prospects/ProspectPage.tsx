@@ -1,13 +1,18 @@
 import { NavLink, useSearchParams } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { getSingleProspect } from "@/store/data";
+import {
+  getContractsByClient,
+  getContractDownloadUrl,
+  syncClientContractStatus,
+  type ContractListItem,
+} from "@/api/api";
 import { House, LoaderCircle, Mail, MapPin, Phone, FileText } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Property, Prospect } from "@/types/types";
 import { useToast } from "@/hooks/use-toast";
-import { downloadSignedPDF } from "@/api/api";
 
 interface ProspectData {
   prospect: Prospect;
@@ -28,6 +33,8 @@ const ProspectPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCounty, setSelectedCounty] = useState<string>("All");
+  const [contracts, setContracts] = useState<ContractListItem[]>([]);
+  const [contractsLoading, setContractsLoading] = useState(false);
   const [downloadingContractId, setDownloadingContractId] = useState<number | null>(null);
   const { toast } = useToast();
 
@@ -58,13 +65,38 @@ const ProspectPage = () => {
     return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, [fetchProspectData]);
 
-  const handleDownloadSigned = async (prospectId: number) => {
-    setDownloadingContractId(prospectId);
+  const fetchContracts = useCallback(() => {
+    const prospectId = prospectData?.prospect?.id;
+    if (!prospectId) return;
+    setContractsLoading(true);
+    syncClientContractStatus(prospectId)
+      .catch(() => {})
+      .then(() => getContractsByClient(prospectId))
+      .then(setContracts)
+      .catch(() => setContracts([]))
+      .finally(() => setContractsLoading(false));
+  }, [prospectData?.prospect?.id]);
+
+  useEffect(() => {
+    fetchContracts();
+  }, [fetchContracts]);
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") fetchContracts();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [fetchContracts]);
+
+  const handleDownloadSigned = async (contractId: number) => {
+    setDownloadingContractId(contractId);
     try {
-      await downloadSignedPDF({ prospectId });
+      const { url } = await getContractDownloadUrl(contractId);
+      window.open(url, "_blank");
       toast({
         title: "Download started",
-        description: "Signed documents have been downloaded.",
+        description: "Signed document opened in a new tab.",
       });
     } catch {
       toast({
@@ -102,7 +134,6 @@ const ProspectPage = () => {
   }
 
   const { prospect, properties } = prospectData;
-  const hasContractSent = prospect.status === "IN_PROGRESS" || prospect.status === "SIGNED";
 
   const uniqueCounties = Array.from(
     new Set(properties.map((p) => p.cadCounty ?? p.CADCOUNTY).filter(Boolean))
@@ -125,18 +156,11 @@ const ProspectPage = () => {
             {prospect.status}
           </span>
         </div>
-        <div className="flex gap-4">
-          <NavLink to={`/portal/edit-prospect?prospectId=${prospect.id}`}>
-            <Button variant="blue" className="w-full">
-              Edit Prospect Details
-            </Button>
-          </NavLink>
-          <NavLink to={`/portal/prospect/contract?id=${id}`}>
-            <Button variant="blue" className="w-full">
-              Create Contract
-            </Button>
-          </NavLink>
-        </div>
+        <NavLink to={`/portal/edit-prospect?prospectId=${prospect.id}`}>
+          <Button variant="blue" className="w-full">
+            Edit Prospect Details
+          </Button>
+        </NavLink>
       </div>
 
       <div className="gap-2 flex flex-col md:flex-row justify-between">
@@ -186,11 +210,32 @@ const ProspectPage = () => {
       <div className="mt-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold">Contracts & AOAs</h2>
-          <Button variant="outline" size="sm" onClick={() => fetchProspectData()}>
-            Refresh status
-          </Button>
+          <div className="flex gap-2">
+            <NavLink to={`/portal/prospect/contract?id=${id}`}>
+              <Button variant="blue" size="sm">
+                Create Contract
+              </Button>
+            </NavLink>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={contractsLoading}
+              onClick={() => fetchContracts()}
+            >
+              {contractsLoading ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                "Refresh status"
+              )}
+            </Button>
+          </div>
         </div>
-        {!hasContractSent ? (
+        {contractsLoading ? (
+          <div className="flex items-center gap-2 text-gray-600 py-4">
+            <LoaderCircle className="h-5 w-5 animate-spin" />
+            Loading contracts...
+          </div>
+        ) : contracts.length === 0 ? (
           <p className="text-gray-600">No contracts or AOAs yet. Use &quot;Create Contract&quot; to preview and send.</p>
         ) : (
           <div className="border rounded-lg overflow-hidden">
@@ -205,45 +250,53 @@ const ProspectPage = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-t">
-                  <td className="p-3">Contract</td>
-                  <td className="p-3">
-                    <Badge
-                      variant={
-                        prospect.status === "SIGNED"
-                          ? "default"
-                          : prospect.status === "DECLINED" || prospect.status === "VOIDED"
-                            ? "destructive"
-                            : "secondary"
-                      }
-                    >
-                      {prospect.status}
-                    </Badge>
-                  </td>
-                  <td className="p-3">
-                    {properties[0]?.accountNumber ?? properties[0]?.AccountNumber ?? "—"}
-                  </td>
-                  <td className="p-3">—</td>
-                  <td className="p-3">
-                    {prospect.status === "SIGNED" ? (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={downloadingContractId === prospect.id}
-                        onClick={() => handleDownloadSigned(prospect.id)}
+                {contracts.map((c) => (
+                  <tr key={c.id} className="border-t">
+                    <td className="p-3">
+                      {c.type === "AOA" ? "AOA" : "Client contract"}
+                    </td>
+                    <td className="p-3">
+                      <Badge
+                        variant={
+                          c.status === "COMPLETED"
+                            ? "default"
+                            : c.status === "DECLINED" || c.status === "VOIDED"
+                              ? "destructive"
+                              : "secondary"
+                        }
                       >
-                        {downloadingContractId === prospect.id ? (
-                          <LoaderCircle className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <FileText className="h-4 w-4 mr-1" />
-                        )}
-                        Download signed
-                      </Button>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                </tr>
+                        {c.status}
+                      </Badge>
+                    </td>
+                    <td className="p-3">
+                      {c.property?.accountNumber ?? "—"}
+                    </td>
+                    <td className="p-3">
+                      {c.signedAt
+                        ? new Date(c.signedAt).toLocaleDateString()
+                        : "—"}
+                    </td>
+                    <td className="p-3">
+                      {c.status === "COMPLETED" ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={downloadingContractId === c.id}
+                          onClick={() => handleDownloadSigned(c.id)}
+                        >
+                          {downloadingContractId === c.id ? (
+                            <LoaderCircle className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <FileText className="h-4 w-4 mr-1" />
+                          )}
+                          Download signed
+                        </Button>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

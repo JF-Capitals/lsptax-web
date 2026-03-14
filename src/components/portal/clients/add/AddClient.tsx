@@ -25,7 +25,7 @@ import { useState } from "react";
 
 const formSchema = z.object({
   TypeOfAcct: z.string().optional(),
-  CLIENTNumber: z.string().optional(),
+  CLIENTNumber: z.string().min(1, "Client number is required"),
   CLIENTNAME: z.string().min(1, "Client name is required"),
   Email: z.string().email("Invalid email address"),
   BillingEmail: z
@@ -53,6 +53,7 @@ export default function AddClientForm() {
     defaultValues: {
       IsArchived: false,
       CLIENTNAME: "",
+      CLIENTNumber: "",
       Email: "",
       BillingEmail: "",
       PHONENUMBER: "",
@@ -76,9 +77,10 @@ export default function AddClientForm() {
         return;
       }
 
-      // API v2: camelCase field names
+      // API v2: camelCase field names; clientNumber is required (docs)
       const clientPayload = {
         clientName: values.CLIENTNAME,
+        clientNumber: values.CLIENTNumber,
         email: values.Email,
         phoneNumber: values.PHONENUMBER,
         mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP,
@@ -132,6 +134,18 @@ export default function AddClientForm() {
                 <FormItem>
                   <FormLabel>Client Name</FormLabel>
                   <Input {...field} className="border-gray-300 rounded-lg" />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="CLIENTNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Client Number</FormLabel>
+                  <Input {...field} className="border-gray-300 rounded-lg" placeholder="User-entered client number" />
                   <FormMessage />
                 </FormItem>
               )}

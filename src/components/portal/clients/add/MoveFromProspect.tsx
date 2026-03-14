@@ -38,10 +38,11 @@ const MoveFromProspect = () => {
           const data = await getSingleProspect({ prospectId });
           if (data) {
             form.reset({
-              CLIENTNAME: data.clientName ?? "",
-              Email: data.email ?? "",
-              PHONENUMBER: data.phoneNumber ?? "",
-              MAILINGADDRESSCITYTXZIP: data.mailingAddressCityTxZip ?? "",
+              CLIENTNAME: data.prospect.clientName ?? "",
+              CLIENTNumber: "",
+              Email: data.prospect.email ?? "",
+              PHONENUMBER: data.prospect.phoneNumber ?? "",
+              MAILINGADDRESSCITYTXZIP: data.prospect.mailingAddressCityTxZip ?? "",
               TypeOfAcct: "Real",
               IsArchived: false,
             });
@@ -60,7 +61,7 @@ const MoveFromProspect = () => {
 
   const formSchema = z.object({
     TypeOfAcct: z.string().optional(),
-    CLIENTNumber: z.string().optional(),
+    CLIENTNumber: z.string().min(1, "Client number is required"),
     CLIENTNAME: z.string().min(1, "Client name is required"),
     Email: z.string().email("Invalid email address"),
     PHONENUMBER: z.string().min(1, "Phone number is required"),
@@ -72,6 +73,7 @@ const MoveFromProspect = () => {
     defaultValues: {
       IsArchived: false,
       CLIENTNAME: "",
+      CLIENTNumber: "",
       Email: "",
       PHONENUMBER: "",
       MAILINGADDRESSCITYTXZIP: "",
@@ -84,6 +86,7 @@ const MoveFromProspect = () => {
       if (values) {
         await addClient({
           clientName: values.CLIENTNAME,
+          clientNumber: values.CLIENTNumber,
           email: values.Email,
           phoneNumber: values.PHONENUMBER,
           mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP,
@@ -139,6 +142,17 @@ const MoveFromProspect = () => {
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <Input {...field} placeholder="Full name" />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="CLIENTNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Client Number</FormLabel>
+                <Input {...field} placeholder="User-entered client number" />
                 <FormMessage />
               </FormItem>
             )}
