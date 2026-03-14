@@ -39,36 +39,34 @@ const Contact = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-     setLoading(true);
+    setLoading(true);
     try {
-      await addProspect(
-        values.ProspectName,
-        values.Email,
-        values.PHONENUMBER || "",
-        values.MAILINGADDRESS || "",
-        values.MAILINGADDRESSCITYTXZIP || ""
-      );
+      await addProspect({
+        clientName: String(values.ProspectName ?? "").trim(),
+        email: String(values.Email ?? "").trim(),
+        phoneNumber: values.PHONENUMBER ? String(values.PHONENUMBER).trim() : "",
+        mailingAddress: values.MAILINGADDRESS ? String(values.MAILINGADDRESS).trim() : "",
+        mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP ? String(values.MAILINGADDRESSCITYTXZIP).trim() : "",
+      });
       toast({
         title: "Great! We'll be in touch soon to start your savings journey.",
       });
       form.reset();
     } catch (error) {
       console.error("Error submitting form:", error);
-      let errorMessage = "Failed to add prospect. Please try again.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to add prospect. Please try again.";
+      const isEmailExists = /already|already present|duplicate|exists/i.test(errorMessage);
       toast({
         variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description:
-          errorMessage === "Email Already Present"
-            ? "This email is already registered. Try a different one."
-            : "There was a problem with your request.",
+        title: "Something went wrong",
+        description: isEmailExists
+          ? "This email is already registered. Try a different one."
+          : errorMessage,
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
     } finally {
-      setLoading(false); // Set loading to false after submission
+      setLoading(false);
     }
   }
 
@@ -195,7 +193,6 @@ const Contact = () => {
             </div>
 
             <Button
-              // variant="blue"
               disabled={loading}
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow-md transition-all"

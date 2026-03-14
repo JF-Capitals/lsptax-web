@@ -1,16 +1,16 @@
 import { Button } from "@/components/ui/button";
+import type { Table } from "@tanstack/react-table";
 
-interface PaginationProps {
-  table: any; // Adjust the type if you have a more specific table data type
+interface PaginationProps<TData> {
+  table: Table<TData>;
 }
 
-const Pagination = ({ table }: PaginationProps) => {
-  const { pageIndex, pageCount } = table.getState().pagination;
-
-  // Generate an array of page numbers to display, including the current page and a few around it
+function Pagination<TData>({ table }: PaginationProps<TData>) {
+  const { pageIndex } = table.getState().pagination;
+  const pageCount = table.getPageCount();
   const pageNumbers: number[] = [];
-  const startPage = Math.max(pageIndex - 2, 0); // Show 2 pages before the current page
-  const endPage = Math.min(pageIndex + 2, pageCount - 1); // Show 2 pages after the current page
+  const startPage = Math.max(pageIndex - 2, 0);
+  const endPage = Math.min(pageIndex + 2, pageCount - 1);
 
   // Create the page numbers array
   for (let i = startPage; i <= endPage; i++) {
@@ -25,6 +25,7 @@ const Pagination = ({ table }: PaginationProps) => {
         size="sm"
         onClick={() => table.previousPage()}
         disabled={!table.getCanPreviousPage()}
+        aria-label="Previous page"
       >
         {"<<"}
       </Button>
@@ -50,11 +51,12 @@ const Pagination = ({ table }: PaginationProps) => {
         size="sm"
         onClick={() => table.nextPage()}
         disabled={!table.getCanNextPage()}
+        aria-label="Next page"
       >
         {">>"}
       </Button>
     </div>
   );
-};
+}
 
 export default Pagination;

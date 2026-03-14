@@ -60,7 +60,7 @@ const WhyUs = () => {
 const WhyUsBox: React.FC<WhyUsBoxProps> = ({ logo, label, desc }) => {
   return (
     <div
-      className="flex flex-col border w-64 h-full m-8 justify-center items-center rounded-2xl shadow transition-all duration-300 hover:bg-[#14212A] hover:text-white group"
+      className="flex flex-col border w-64 h-full m-8 justify-center items-center rounded-2xl shadow transition-all duration-300 hover:bg-brand-dark hover:text-white group"
       data-aos="flip-right"
     >
       <img

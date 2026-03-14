@@ -24,6 +24,13 @@ html, body {
 
 @layer base {
   :root {
+    --brand-primary: #14ADD6;
+    --brand-secondary: #384295;
+    --brand-dark: #14212A;
+    --brand-accent: #E84F5A;
+    --brand-background: #F7FAFF;
+    --brand-blue: #0093FF;
+    --brand-muted: #F2F7FF;
     --background: 0 0% 100%;
     --foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;

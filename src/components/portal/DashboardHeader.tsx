@@ -9,7 +9,6 @@ import { BellIcon, Menu, User2 } from "lucide-react";
 import { logoutUser } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-// import { useEffect, useState } from "react";
 
 const CurrentDate: React.FC = () => {
   const formatDate = (): string => {
@@ -84,12 +83,6 @@ const headerData = [
     desc: "See all Invoices here.",
   },
   {
-    id: "contract-owner",
-    icon: "",
-    label: "Contract Owner",
-    desc: "See all Contract Owner here.",
-  },
-  {
     id: "clients/list-client",
     icon: "",
     label: "Clients",
@@ -102,16 +95,16 @@ const headerData = [
     desc: "View, search for and add new Prospect.",
   },
   {
-    id: "forms/contract",
+    id: "contract",
     icon: "",
     label: "Contracts",
-    desc: "View, search for and add new Contracts.",
+    desc: "Create and send client contract.",
   },
   {
-    id: "forms/agent",
+    id: "agent",
     icon: "",
-    label: "Agents",
-    desc: "View, search for and add new Agents.",
+    label: "Appointment of Agent (AOA)",
+    desc: "Create and send Appointment of Agent (Form 50-162).",
   },
 ];
 
@@ -121,7 +114,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
   const location = useLocation();
   const currentPath = location.pathname.split("/portal/")[1];
 
-  const username = localStorage.getItem("username");
+  const username = localStorage.getItem("username") || "User";
 
   async function logoutHandler() {
     try {
@@ -130,7 +123,7 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
       toast({
         title: "Logged Out!",
       });
-      navigate("/login"); // Relative routejhg
+      navigate("/login");
     } catch (error) {}
   }
 
@@ -142,14 +135,19 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
   return (
     <div className="flex justify-between p-4">
       {/* Hamburger Menu Button (Small Screens) */}
-      <button className="sm:hidden p-2 text-gray-700" onClick={onMenuToggle}>
+      <button
+        type="button"
+        className="sm:hidden p-2 text-gray-700"
+        onClick={onMenuToggle}
+        aria-label="Toggle menu"
+      >
         <Menu size={24} />
       </button>
       <div>
         {isDashboard ? (
           <HeaderDescriptionItem
             icon=""
-            label={`Welcome,${username}`}
+            label={`Welcome, ${username}`}
             desc="This is your dashboard."
           />
         ) : currentHeader ? (
@@ -169,7 +167,8 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
         )}
       </div>
       <div className="flex justify-center align-center items-center gap-4">
-        <BellIcon size={20} />
+        <span className="sr-only">Notifications</span>
+        <BellIcon size={20} aria-hidden />
         <div className="flex justify-center align-center items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger>
@@ -195,9 +194,15 @@ const DashboardHeader = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
 const HeaderDescriptionItem = ({ icon, label, desc }: DashboardHeaderProps) => {
   return (
     <div className="">
-      {icon && <img src={icon} alt="" />}
+      {icon && <img src={icon} alt="" aria-hidden />}
       <p className="font-extrabold text-xl">{label}</p>
-      <p className="text-sm font-thin">{desc ? desc : <CurrentDate />}</p>
+      {desc ? (
+        <p className="text-sm font-thin">{desc}</p>
+      ) : (
+        <div className="text-sm font-thin">
+          <CurrentDate />
+        </div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { InvoiceData } from "@/types/types";
+import { InvoiceData, InvoiceProperty, Invoice } from "@/types/types";
 import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,8 @@ const InvoiceDetails: React.FC<{
   invoice?: InvoiceData;
   selectedYear: number;
 }> = ({ invoice, selectedYear }) => {
-  const getYearlyInvoiceData = (property: any) => {
-    return property.invoice.find((inv: any) => inv.year === selectedYear);
+  const getYearlyInvoiceData = (property: InvoiceProperty) => {
+    return property.invoice.find((inv: Invoice) => inv.year === selectedYear);
   };
 
   const calculateFees = () => {
@@ -66,8 +66,6 @@ const InvoiceDetails: React.FC<{
         max-width: 70px;
       }
           @media print {
-      /* Previous styles remain the same */
-      
       th, td {
         font-size: 8px;
         padding: 1px !important;
@@ -85,7 +83,7 @@ const InvoiceDetails: React.FC<{
       <div className="text-center">
         <Button
           variant={"blue"}
-          className="bg-[#0093FF] rounded-md p-2 px-6 ml-4 text-white"
+          className="bg-brand-blue rounded-md p-2 px-6 ml-4 text-white"
           onClick={() => reactToPrintFn()}
         >
           <Printer />
@@ -114,9 +112,9 @@ const InvoiceDetails: React.FC<{
             </div>
             <div>
               <div>
-                <p>{invoice?.client?.CLIENTNAME}</p>
-                <p>{invoice?.client?.MAILINGADDRESS}</p>
-                <p>{invoice?.client?.MAILINGADDRESSCITYTXZIP}</p>
+                <p>{invoice?.client?.clientName}</p>
+                <p>{invoice?.client?.mailingAddress}</p>
+                <p>{invoice?.client?.mailingAddressCityTxZip}</p>
               </div>
             </div>
           </div>
@@ -178,16 +176,16 @@ const InvoiceDetails: React.FC<{
                   return (
                     <tr key={property.propertyDetails.id}>
                       <td className="border border-gray-300 px-4 py-2">
-                        {invoice.client.TypeOfAcct}
+                        {invoice.client.typeOfAcct}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {property.propertyDetails.CADMailingADDRESS}
+                        {property.propertyDetails.cadMailingAddress}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {property.propertyDetails.CADCOUNTY}
+                        {property.propertyDetails.cadCounty}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
-                        {property.propertyDetails.AccountNumber}
+                        {property.propertyDetails.accountNumber}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
                         {selectedYear} Protest

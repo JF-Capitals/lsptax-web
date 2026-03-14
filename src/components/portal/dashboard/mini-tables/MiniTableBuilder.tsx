@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 
 import {
+  ColumnDef,
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
@@ -24,19 +25,19 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
 
-interface TableBuilderProps {
-  data: any;
-  columns: any;
+interface TableBuilderProps<TData> {
+  data: TData[];
+  columns: ColumnDef<TData, any>[];
   label: string;
   link: string;
 }
 
-const MiniTableBuilder = ({
+function MiniTableBuilder<TData>({
   data,
   columns,
   label,
   link,
-}: TableBuilderProps) => {
+}: TableBuilderProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -148,6 +149,6 @@ const MiniTableBuilder = ({
       </div>
     </div>
   );
-};
+}
 
 export default MiniTableBuilder;

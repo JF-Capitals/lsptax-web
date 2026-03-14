@@ -66,17 +66,16 @@ export default function EditProspectDetails() {
       try {
         if (prospectId) {
           const data = await getSingleProspect({ prospectId: prospectId }); // Replace with actual API call
-          console.log("Fetched prospect data:", data);
           form.reset({
-            TypeOfAcct: data.prospect.TypeOfAcct || "",
-            ProspectName: data.prospect.ProspectName || "",
-            Email: data.prospect.Email || "",
-            BillingEmail: data.prospect.BillingEmail || "",
-            PHONENUMBER: data.prospect.PHONENUMBER || "",
-            MAILINGADDRESS: data.prospect.MAILINGADDRESS || "",
+            TypeOfAcct: data.prospect.typeOfAcct || "",
+            ProspectName: data.prospect.clientName || "",
+            Email: data.prospect.email || "",
+            BillingEmail: data.prospect.billingEmail || "",
+            PHONENUMBER: data.prospect.phoneNumber || "",
+            MAILINGADDRESS: data.prospect.mailingAddress || "",
             MAILINGADDRESSCITYTXZIP:
-              data.prospect.MAILINGADDRESSCITYTXZIP || "",
-            BillingAddress: data.prospect.BillingAddress || "",
+              data.prospect.mailingAddressCityTxZip || "",
+            BillingAddress: data.prospect.billingAddress || "",
             useSameAsMailing: false,
             useSameAsEmail: false,
           });

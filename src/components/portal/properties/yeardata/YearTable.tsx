@@ -1,5 +1,4 @@
 import { Invoice } from "@/types/types";
-// import formatDate from "@/utils/formatDate";
 import React from "react";
 import { formatUSD } from "@/utils/formatCurrency";
 

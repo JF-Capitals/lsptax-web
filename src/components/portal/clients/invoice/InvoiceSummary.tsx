@@ -1,5 +1,5 @@
 import React from "react";
-import { InvoiceData } from "@/types/types";
+import { InvoiceData, InvoiceProperty, Invoice } from "@/types/types";
 import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
 import {
@@ -17,8 +17,8 @@ const InvoiceSummary: React.FC<{
   selectedYear: number;
   setSelectedYear: (year: number) => void;
 }> = ({ invoice, selectedYear, setSelectedYear }) => {
-  const getYearlyInvoiceData = (property: any) => {
-    return property.invoice.find((inv: any) => inv.year === selectedYear);
+  const getYearlyInvoiceData = (property: InvoiceProperty) => {
+    return property.invoice.find((inv: Invoice) => inv.year === selectedYear);
   };
 
   const calculateFees = () => {
@@ -41,7 +41,7 @@ const InvoiceSummary: React.FC<{
     if (!invoice?.properties) return [];
     const years = new Set<number>();
     invoice.properties.forEach((property) => {
-      property.invoice.forEach((inv: any) => {
+      property.invoice.forEach((inv: Invoice) => {
         years.add(inv.year);
       });
     });
@@ -50,7 +50,7 @@ const InvoiceSummary: React.FC<{
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-gray-100">
-      <div className="text-center space-x-4 flex jusitfy-center align-center items-center">
+      <div className="text-center space-x-4 flex justify-center align-center items-center">
         <Select
           onValueChange={(value) => setSelectedYear(Number(value))}
           value={selectedYear.toString()}
@@ -69,7 +69,7 @@ const InvoiceSummary: React.FC<{
 
         <Button
           variant={"blue"}
-          className="bg-[#0093FF] rounded-md p-2 px-6 ml-4 text-white"
+          className="bg-brand-blue rounded-md p-2 px-6 ml-4 text-white"
           onClick={() => reactToPrintFn()}
         >
           <Printer />
@@ -95,16 +95,16 @@ const InvoiceSummary: React.FC<{
               Invoice Date: {new Date().toLocaleDateString()}
             </p>
             <p className="font-bold">
-              Invoice Number: INV-{invoice?.client.CLIENTNumber}-{selectedYear}
+              Invoice Number: INV-{invoice?.client.clientNumber}-{selectedYear}
             </p>
           </div>
         </div>
 
         {/* Client Info */}
         <div className="flex flex-col border-2 border-black p-1 mb-4">
-          <p className="font-bold">{invoice?.client?.CLIENTNAME}</p>
-          <p>{invoice?.client?.MAILINGADDRESS}</p>
-          <p>{invoice?.client?.MAILINGADDRESSCITYTXZIP}</p>
+          <p className="font-bold">{invoice?.client?.clientName}</p>
+          <p>{invoice?.client?.mailingAddress}</p>
+          <p>{invoice?.client?.mailingAddressCityTxZip}</p>
         </div>
 
         <div className="text-center font-bold mb-4 underline">
@@ -136,10 +136,10 @@ const InvoiceSummary: React.FC<{
                 return (
                   <tr key={property.propertyDetails.id}>
                     <td className="border border-gray-300 px-4 py-2">
-                      {property.propertyDetails.MAILINGADDRESS}
+                      {property.propertyDetails.mailingAddress}
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
-                      {property.propertyDetails.AccountNumber}
+                      {property.propertyDetails.accountNumber}
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
                       {selectedYear} Protest

@@ -2,6 +2,10 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Development & CORS
+
+In development, the Vite dev server proxies API requests to your backend so you avoid CORS. Copy `.env.example` to `.env` and set `VITE_BACKEND_URL` to your backend base URL (e.g. `http://localhost:3000`). The proxy forwards `/api`, `/auth`, `/invoice`, and `/action` to that URL. The app uses relative URLs in dev so the browser only talks to the dev server.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh

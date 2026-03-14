@@ -1,8 +1,15 @@
 import { NavLink, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getSingleClient } from "@/store/data";
-import { House, Mail, MapPin, Phone } from "lucide-react";
+import {
+  getContractsByClient,
+  getContractDownloadUrl,
+  syncClientContractStatus,
+  type ContractListItem,
+} from "@/api/api";
+import { House, Mail, MapPin, Phone, FileText, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ClientData, Property } from "@/types/types";
 
 interface Client {
@@ -17,6 +24,9 @@ const ClientPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedCounty, setSelectedCounty] = useState<string>("All");
+  const [contracts, setContracts] = useState<ContractListItem[]>([]);
+  const [contractsLoading, setContractsLoading] = useState(false);
+  const [downloadingContractId, setDownloadingContractId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchClientData = async () => {
@@ -51,6 +61,43 @@ const ClientPage = () => {
     fetchClientData();
   }, [clientId]);
 
+  const fetchContracts = useCallback(() => {
+    const id = clientData?.client?.id;
+    if (!id) return;
+    setContractsLoading(true);
+    syncClientContractStatus(id)
+      .catch(() => {})
+      .then(() => getContractsByClient(id))
+      .then(setContracts)
+      .catch(() => setContracts([]))
+      .finally(() => setContractsLoading(false));
+  }, [clientData?.client?.id]);
+
+  useEffect(() => {
+    fetchContracts();
+  }, [fetchContracts]);
+
+  // Refetch contracts when user returns to this tab (e.g. after sending from contract page)
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") fetchContracts();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [fetchContracts]);
+
+  const handleDownloadSigned = async (contractId: number) => {
+    setDownloadingContractId(contractId);
+    try {
+      const { url } = await getContractDownloadUrl(contractId);
+      window.open(url, "_blank");
+    } catch {
+      // Error could be shown via toast if you add useToast
+    } finally {
+      setDownloadingContractId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="text-center text-gray-500 mt-10">
@@ -76,10 +123,10 @@ const ClientPage = () => {
   }
 
   const uniqueCounties = Array.from(
-    new Set(clientData.properties.map((p) => p.CADCOUNTY))
+    new Set(clientData.properties.map((p) => p.cadCounty))
   );
   const filteredProperties = clientData.properties.filter((p) =>
-    selectedCounty === "All" ? true : p.CADCOUNTY === selectedCounty
+    selectedCounty === "All" ? true : p.cadCounty === selectedCounty
   );
 
   return (
@@ -97,6 +144,11 @@ const ClientPage = () => {
               Invoice
             </Button>
           </NavLink>
+          <NavLink to={`/portal/contract?clientId=${clientData.client.id}`}>
+            <Button variant={"blue"} className="w-full">
+              Create Contract
+            </Button>
+          </NavLink>
         </div>
       </div>
 
@@ -106,28 +158,28 @@ const ClientPage = () => {
             <tbody>
               <tr>
                 <td className="font-medium">Client Name:</td>
-                <td>{clientData.client.CLIENTNAME}</td>
+                <td>{clientData.client.clientName}</td>
               </tr>
               <tr>
                 <td className="font-medium">Phone:</td>
                 <td>
                   <Phone size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.client.PHONENUMBER}
+                  {clientData.client.phoneNumber}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">Email:</td>
                 <td>
                   <Mail size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.client.Email}
+                  {clientData.client.email}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">Address:</td>
                 <td>
                   <MapPin size={18} className="inline text-indigo-600 mr-2" />
-                  {clientData.client.MAILINGADDRESS},{" "}
-                  {clientData.client.MAILINGADDRESSCITYTXZIP}
+                  {clientData.client.mailingAddress},{" "}
+                  {clientData.client.mailingAddressCityTxZip}
                 </td>
               </tr>
             </tbody>
@@ -139,7 +191,7 @@ const ClientPage = () => {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Associated Property(s)</h1>
           <NavLink
-            to={`/portal/add-property?clientId=${clientData.client.CLIENTNumber}`}
+            to={`/portal/add-property?clientId=${clientData.client.id}`}
           >
             <Button variant={"blue"} className="w-full">
               Add Properties
@@ -180,6 +232,95 @@ const ClientPage = () => {
           </h1>
         )}
       </div>
+
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold">Contracts & AOAs</h2>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={contractsLoading}
+            onClick={() => fetchContracts()}
+          >
+            {contractsLoading ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              "Refresh status"
+            )}
+          </Button>
+        </div>
+        {contractsLoading ? (
+          <div className="flex items-center gap-2 text-gray-600 py-4">
+            <LoaderCircle className="h-5 w-5 animate-spin" />
+            Loading contracts...
+          </div>
+        ) : contracts.length === 0 ? (
+          <p className="text-gray-600">No contracts or AOAs yet.</p>
+        ) : (
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="text-left p-3 font-medium">Type</th>
+                  <th className="text-left p-3 font-medium">Status</th>
+                  <th className="text-left p-3 font-medium">Property</th>
+                  <th className="text-left p-3 font-medium">Signed at</th>
+                  <th className="text-left p-3 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {contracts.map((c) => (
+                  <tr key={c.id} className="border-t">
+                    <td className="p-3">
+                      {c.type === "AOA" ? "AOA" : "Client contract"}
+                    </td>
+                    <td className="p-3">
+                      <Badge
+                        variant={
+                          c.status === "COMPLETED"
+                            ? "default"
+                            : c.status === "DECLINED" || c.status === "VOIDED"
+                              ? "destructive"
+                              : "secondary"
+                        }
+                      >
+                        {c.status}
+                      </Badge>
+                    </td>
+                    <td className="p-3">
+                      {c.property?.accountNumber ?? "—"}
+                    </td>
+                    <td className="p-3">
+                      {c.signedAt
+                        ? new Date(c.signedAt).toLocaleDateString()
+                        : "—"}
+                    </td>
+                    <td className="p-3">
+                      {c.status === "COMPLETED" ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={downloadingContractId === c.id}
+                          onClick={() => handleDownloadSigned(c.id)}
+                        >
+                          {downloadingContractId === c.id ? (
+                            <LoaderCircle className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <FileText className="h-4 w-4 mr-1" />
+                          )}
+                          Download signed
+                        </Button>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -188,9 +329,9 @@ export default ClientPage;
 
 const PropertyBox: React.FC<Property> = ({
   id,
-  AccountNumber,
-  NAMEONCAD,
-  CADCOUNTY,
+  accountNumber,
+  nameOnCad,
+  cadCounty,
 }) => {
   return (
     <NavLink to={`/portal/property?propertyId=${id}`} className="block">
@@ -198,15 +339,15 @@ const PropertyBox: React.FC<Property> = ({
         <div className="flex items-center gap-3 mb-4">
           <House size={24} className="text-indigo-500" />
           <h2 className="text-lg font-semibold text-gray-800">
-            {AccountNumber}
+            {accountNumber}
           </h2>
         </div>
         <div className="text-sm text-gray-600 mb-2">
-          <span className="font-medium text-gray-700">County:</span> {CADCOUNTY}
+          <span className="font-medium text-gray-700">County:</span> {cadCounty}
         </div>
         <div className="text-sm text-gray-600">
           <span className="font-medium text-gray-700">CAD Details:</span>{" "}
-          {NAMEONCAD}
+          {nameOnCad}
         </div>
       </div>
     </NavLink>

@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { addProperty } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 import { LoaderCircle } from "lucide-react";
@@ -38,6 +38,7 @@ const formSchema = z.object({
 
 export default function AddPropertyForm() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get("clientId");
   const [loading, setLoading] = useState(false); // Track loading state
@@ -51,38 +52,53 @@ export default function AddPropertyForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    const numericClientId = clientId != null ? Number(clientId) : NaN;
+    if (!clientId || Number.isNaN(numericClientId) || numericClientId < 1) {
+      toast({
+        variant: "destructive",
+        title: "Invalid client",
+        description: "A valid client is required. Open Add Property from a client page.",
+      });
+      return;
+    }
+
     setLoading(true); // Set loading to true
     try {
+      // API v2: camelCase property fields (no clientNumber - backend uses clientId only)
       const propertyData = {
-        StatusNotes: values.StatusNotes,
-        OtherNotes: values.OtherNotes,
-        NAMEONCAD: values.NAMEONCAD,
-        MAILINGADDRESS: values.MAILINGADDRESS,
-        MAILINGADDRESSCITYTXZIP: values.MAILINGADDRESSCITYTXZIP,
-        CADMailingADDRESS: values.CADMailingADDRESS,
-        CADCITY: values.CADCITY,
-        CADZIPCODE: values.CADZIPCODE,
-        CADCOUNTY: values.CADCOUNTY,
-        AccountNumber: values.AccountNumber,
-        CONTACTOWNER: values.CONTACTOWNER,
-        SUBCONTRACTOWNER: values.SUBCONTRACTOWNER,
-        BPPFEE: values.BPPFEE,
-        CONTINGENCYFee: values.CONTINGENCYFee,
-        FlatFee: values.FlatFee,
+        accountNumber: values.AccountNumber,
+        nameOnCad: values.NAMEONCAD,
+        mailingAddress: values.MAILINGADDRESS,
+        mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP,
+        statusNotes: values.StatusNotes,
+        otherNotes: values.OtherNotes,
+        cadMailingAddress: values.CADMailingADDRESS,
+        cadCity: values.CADCITY,
+        cadZipCode: values.CADZIPCODE,
+        cadCounty: values.CADCOUNTY,
+        contactOwner: values.CONTACTOWNER,
+        subcontractOwner: values.SUBCONTRACTOWNER,
+        bppFee: values.BPPFEE,
+        contingencyFee: values.CONTINGENCYFee,
+        flatFee: values.FlatFee,
       };
 
       const newProperty = await addProperty({
-        CLIENTNumber: clientId!,
+        clientId: numericClientId,
         propertyData,
       });
-      window.location.href = `/portal/property?propertyId=${newProperty?.property.id}`;
 
       toast({
         title: "Property Added",
         description: "The property has been successfully added.",
       });
 
-      form.reset();
+      const propertyId = newProperty?.property?.id;
+      if (propertyId != null) {
+        navigate(`/portal/property?propertyId=${propertyId}`);
+      } else {
+        form.reset();
+      }
     } catch (error) {
       console.error("Error adding property:", error);
       toast({

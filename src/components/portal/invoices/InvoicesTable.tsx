@@ -1,15 +1,12 @@
-import { useEffect, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  downloadInvoicesCSV,
-  getAllInvoices,
-  getArchiveInvoices,
-} from "@/store/data";
+import { downloadInvoicesCSV } from "@/store/data";
 import TableBuilder from "../TableBuilder";
 import { Archive, Download, LoaderCircle, Search, X } from "lucide-react";
+import { useInvoicesQuery } from "@/hooks/queries";
+import { TableSkeleton } from "../TableSkeleton";
 
 interface InvoicesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -18,113 +15,80 @@ interface InvoicesTableProps<TData, TValue> {
 const InvoicesTable = <TData, TValue>({
   columns,
 }: InvoicesTableProps<TData, TValue>) => {
-  const [invoices, setInvoices] = useState<TData[]>([]);
-  const [allInvoices, setAllInvoices] = useState<TData[]>([]); // Store all invoices for filtering
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0);
   const [archived, setArchived] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
- 
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      debounceRef.current = null;
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchTerm]);
+
+  const { data, isLoading, isError, refetch } = useInvoicesQuery({
+    limit,
+    offset,
+    search: debouncedSearch,
+    archived,
+  });
+
+  const invoices = (data?.data ?? []) as TData[];
+  const total = data?.total ?? 0;
+  const hasMore = data?.hasMore ?? false;
+
   const handleCsvDownload = async () => {
     setDownloadingCsv(true);
     try {
       await downloadInvoicesCSV();
-    } catch (error) {
-      console.error("Error downloading CSV:", error);
-      setError("Failed to download CSV. Please try again later.");
+    } catch (err) {
+      console.error("Error downloading CSV:", err);
     } finally {
       setDownloadingCsv(false);
     }
   };
 
-  const fetchInvoiceData = async () => {
-    try {
-      setLoading(true);
-      setError(null); // Reset error state before fetching
-      const response = archived
-        ? await getArchiveInvoices()
-        : await getAllInvoices();
-      setAllInvoices(response);
-      setInvoices(response);
-    } catch (error) {
-      console.error("Error fetching invoice data:", error);
-      setError("Failed to load invoices. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
+  const switchArchived = () => {
+    setArchived((a) => !a);
+    setOffset(0);
   };
 
-  // Filter invoices based on search term
-  const filterInvoices = (term: string) => {
-    if (!term.trim()) {
-      setInvoices(allInvoices);
-      return;
-    }
+  const clearSearch = () => setSearchTerm("");
 
-    const filtered = allInvoices.filter((invoice: any) => {
-      const searchLower = term.toLowerCase();
-      
-      // Search by clientId (exact match or starts with)
-      const clientId = String(invoice.clientId || '');
-      if (clientId.toLowerCase() === searchLower || clientId.toLowerCase().startsWith(searchLower)) {
-        return true;
-      }
-      
-      // Search by accountNumber (property numbers) - exact match or starts with
-      if (invoice.propertyNumbers && Array.isArray(invoice.propertyNumbers)) {
-        return invoice.propertyNumbers.some((prop: any) => {
-          const propString = String(prop || '');
-          return propString.toLowerCase() === searchLower || propString.toLowerCase().startsWith(searchLower);
-        });
-      }
-      
-      // Search by accountNumber field directly (if it exists)
-      const accountNumber = String(invoice.accountNumber || '');
-      if (accountNumber.toLowerCase() === searchLower || accountNumber.toLowerCase().startsWith(searchLower)) {
-        return true;
-      }
-      
-      return false;
-    });
-    
-    setInvoices(filtered);
-  };
-
-  // Handle search input change
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    filterInvoices(value);
-  };
-
-  // Clear search
-  const clearSearch = () => {
-    setSearchTerm("");
-    setInvoices(allInvoices);
-  };
-
-
-
-  useEffect(() => {
-    fetchInvoiceData();
-    // Reset search when switching between archived and active
-    setSearchTerm("");
-  }, [archived]);
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex justify-center h-full items-center py-20">
-        <LoaderCircle className="animate-spin w-16 h-16 text-blue-500" />
-      </div>
+      <>
+        <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
+          <div className="w-full">
+            <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+            <div className="h-5 w-40 bg-muted animate-pulse rounded mt-2" />
+          </div>
+          <div className="relative flex items-center">
+            <div className="h-10 w-80 bg-muted animate-pulse rounded pl-10" />
+          </div>
+          <div className="h-10 w-40 bg-muted animate-pulse rounded" />
+          <div className="h-10 w-24 bg-muted animate-pulse rounded" />
+        </div>
+        <TableSkeleton />
+      </>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
-      <div className="flex flex-col justify-center items-center py-20 text-red-500">
-        <span className="text-lg font-semibold">{error}</span>
-        <Button variant="blue" className="mt-4" onClick={fetchInvoiceData}>
+      <div className="flex flex-col justify-center items-center py-20 text-destructive">
+        <span className="text-lg font-semibold">
+          Failed to load invoices. Please try again later.
+        </span>
+        <Button variant="blue" className="mt-4" onClick={() => refetch()}>
           Retry
         </Button>
       </div>
@@ -135,30 +99,19 @@ const InvoicesTable = <TData, TValue>({
     <div>
       <div className="flex border rounded-xl items-center gap-4 bg-white m-4 p-4">
         <div className="w-full">
-          <h2 className="text-2xl font-bold">{invoices.length}</h2>
-          <h3>
-            {searchTerm ? (
-              <>
-                Search Results ({invoices.length} of {allInvoices.length})
-                {invoices.length === 0 && (
-                  <span className="text-red-500 ml-2">No matches found</span>
-                )}
-              </>
-            ) : (
-              "Total number of Invoices"
-            )}
-          </h3>
+          <h2 className="text-2xl font-bold">{total}</h2>
+          <h3>Total number of Invoices</h3>
         </div>
-        
-        {/* Search Input */}
+
         <div className="relative flex items-center">
-          <Search className="absolute left-3 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 h-4 w-4 text-muted-foreground" aria-hidden />
           <Input
             type="text"
-            placeholder="Search by Client ID, Account Number, or Property Numbers..."
+            placeholder="Search by client number or property/account number..."
             value={searchTerm}
-            onChange={handleSearchChange}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 pr-10 w-80"
+            aria-label="Search invoices by client or property number"
           />
           {searchTerm && (
             <Button
@@ -166,13 +119,14 @@ const InvoicesTable = <TData, TValue>({
               size="sm"
               onClick={clearSearch}
               className="absolute right-1 h-6 w-6 p-0"
+              aria-label="Clear search"
             >
               <X className="h-4 w-4" />
             </Button>
           )}
         </div>
-        
-        <Button variant={"blue"} onClick={() => setArchived(!archived)}>
+
+        <Button variant={"blue"} onClick={switchArchived}>
           <Archive />
           {archived ? "View Active Invoices" : "View Archive"}
         </Button>
@@ -187,7 +141,24 @@ const InvoicesTable = <TData, TValue>({
       <TableBuilder
         data={invoices}
         columns={columns}
-        label="Filtered Invoices"
+        label="Invoices"
+        emptyState={{
+          title: "No invoices yet",
+          description: "Invoices will appear here once you generate them for clients.",
+          action: { label: "Go to clients", to: "/portal/clients/list-client" },
+        }}
+        serverPagination={{
+          total,
+          limit,
+          offset,
+          hasMore,
+          onPrev: () => setOffset((o) => Math.max(0, o - limit)),
+          onNext: () => setOffset((o) => o + limit),
+          onPageSizeChange: (size) => {
+            setLimit(size);
+            setOffset(0);
+          },
+        }}
       />
     </div>
   );

@@ -8,7 +8,7 @@ const Hero = () => {
   return (
     <div
       id="hero"
-      className="bg-[#F7FAFF] md:max-h-[90vh] flex flex-col md:flex-row items-center justify-between relative p-6 md:p-10 lg:p-18 pb-20 md:pb-32 z-1 overflow-hidden"
+      className="bg-brand-background md:max-h-[90vh] flex flex-col md:flex-row items-center justify-between relative p-6 md:p-10 lg:p-18 pb-20 md:pb-32 z-1 overflow-hidden"
     >
       {/* /h */}
       {/* Left Section */}
@@ -56,14 +56,14 @@ const Hero = () => {
           viewBox="0 0 610 640"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="absolute z-0 w-[80%] md:w-[90%] lg:w-[500px] h-auto top-0 right-0 md:hidden lg:block "
+          className="absolute z-0 w-[80%] md:w-[90%] lg:w-[500px] h-auto top-0 right-0 md:hidden lg:block text-brand-blue"
         >
           <circle
             opacity="0.5"
             cx="420"
             cy="180"
             r="370"
-            fill="#0093FF"
+            fill="currentColor"
             fillOpacity="0.8"
           />
         </svg>

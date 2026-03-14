@@ -1,13 +1,19 @@
 import { getPreviewDocuments, getSingleProspect } from "@/store/data";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Worker, Viewer } from "@react-pdf-viewer/core";
 import { changeProspectStatus, sendContract } from "@/api/api";
-import "@react-pdf-viewer/core/lib/styles/index.css";
 import { useToast } from "@/hooks/use-toast";
 import { Property, Prospect } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { LoaderCircle } from "lucide-react";
+
+function uint8ArrayToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
 
 interface ProspectData {
   prospect: Prospect;
@@ -133,13 +139,11 @@ const PreviewSignedPdf = () => {
           >
             <h2 className="text-lg font-semibold mb-2">{title}</h2>
             {data ? (
-              <Worker workerUrl="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js">
-                <Viewer
-                  fileUrl={URL.createObjectURL(
-                    new Blob([data], { type: "application/pdf" })
-                  )}
-                />
-              </Worker>
+              <iframe
+                title={title}
+                src={`data:application/pdf;base64,${uint8ArrayToBase64(data)}#toolbar=0&navpanes=0`}
+                className="w-full h-[75vh] min-h-[400px] rounded border bg-white"
+              />
             ) : (
               <div className="flex flex-col items-center justify-center h-32 text-gray-500">
                 <LoaderCircle className="w-6 h-6 animate-spin mb-2" />

@@ -32,26 +32,23 @@ export default function EditClient() {
   const [searchParams] = useSearchParams();
     const { toast } = useToast();
   const clientId = searchParams.get("clientId");
-  console.log({ clientId });
   async function loadClientData() {
     try {
       if (clientId) {
         const data = await getSingleClient({ clientId: clientId });
-        console.log({ data });
-        // setClient(data);
         setLoading(false);
 
         const fields = {
-          TypeOfAcct: data?.client.TypeOfAcct || "",
-          CLIENTNumber: data?.client.CLIENTNumber || "",
-          CLIENTNAME: data?.client.CLIENTNAME || "",
-          Email: data?.client.Email || "",
-          BillingEmail: data?.client.BillingEmail || "",
-          PHONENUMBER: data?.client.PHONENUMBER || "",
-          MAILINGADDRESS: data?.client.MAILINGADDRESS || "",
-          MAILINGADDRESSCITYTXZIP: data?.client.MAILINGADDRESSCITYTXZIP || "",
-          BillingAddress: data?.client.BillingAddress || "",
-          IsArchived: data?.client.IsArchived || false,
+          TypeOfAcct: data?.client.typeOfAcct || "",
+          CLIENTNumber: data?.client.clientNumber || "",
+          CLIENTNAME: data?.client.clientName || "",
+          Email: data?.client.email || "",
+          BillingEmail: data?.client.billingEmail || "",
+          PHONENUMBER: data?.client.phoneNumber || "",
+          MAILINGADDRESS: data?.client.mailingAddress || "",
+          MAILINGADDRESSCITYTXZIP: data?.client.mailingAddressCityTxZip || "",
+          BillingAddress: data?.client.billingAddress || "",
+          IsArchived: data?.client.isArchived || false,
           useSameAsEmail: false,
           useSameAsMailing: false,
         };
@@ -103,8 +100,22 @@ export default function EditClient() {
     setIsSubmitting(true); // Set loading state
     try {
       if (clientId) {
-        const { useSameAsEmail, useSameAsMailing, ...backendValues } = values;
-        await editClient(clientId, backendValues);
+        const { useSameAsEmail, useSameAsMailing } = values;
+        void useSameAsEmail;
+        void useSameAsMailing;
+
+        // API v2 expects camelCase fields in clientDetails
+        const clientDetails = {
+          clientName: values.CLIENTNAME,
+          email: values.Email,
+          phoneNumber: values.PHONENUMBER ?? "",
+          mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP ?? "",
+          typeOfAcct: values.TypeOfAcct ?? "",
+          billingEmail: values.BillingEmail ?? "",
+          billingAddress: values.BillingAddress ?? "",
+        };
+
+        await editClient(clientId, clientDetails);
       }
       toast({ title: "Client updated successfully!" });
     } catch (error) {

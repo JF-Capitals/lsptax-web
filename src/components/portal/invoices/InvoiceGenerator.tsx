@@ -5,24 +5,25 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { LoaderCircle, FileText, Users, Building2, Calendar, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getApiBaseUrl } from "@/api/client";
 
 interface Client {
-  CLIENTNumber: string;
-  CLIENTNAME: string;
-  Email: string;
-  PHONENUMBER: string;
+  clientNumber: string;
+  clientName: string;
+  email: string;
+  phoneNumber: string;
   propertyCount: number;
 }
 
 interface Property {
   id: number;
-  AccountNumber: string;
-  CADMailingADDRESS: string;
-  CADCITY: string;
-  CADCOUNTY: string;
-  CONTINGENCYFee: string;
-  FlatFee: string;
-  existingInvoices: any[];
+  accountNumber: string;
+  cadMailingAddress: string;
+  cadCity: string;
+  cadCounty: string;
+  contingencyFee: string;
+  flatFee: string;
+  existingInvoices: unknown[];
 }
 
 interface ClientWithProperties {
@@ -38,8 +39,21 @@ const InvoiceGenerator = () => {
   const [selectedYears, setSelectedYears] = useState<number[]>([new Date().getFullYear()]);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<{
+    numOfClients: number;
+    numOfProspects: number;
+    numOfAgents: number;
+    totalInvoices?: number;
+    totalAmount?: number;
+    uniqueClients?: number;
+    uniqueProperties?: number;
+  } | null>(null);
   const { toast } = useToast();
+
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
 
   // Available years (current year and 4 years back)
   const availableYears = Array.from(
@@ -51,7 +65,11 @@ const InvoiceGenerator = () => {
   const fetchClients = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invoice/clients`);
+      const response = await fetch(`${getApiBaseUrl()}/invoice/clients`, {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      });
       if (!response.ok) throw new Error("Failed to fetch clients");
       
       const data = await response.json();
@@ -79,7 +97,12 @@ const InvoiceGenerator = () => {
       setLoading(true);
       const clientNumbersParam = selectedClients.join(',');
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/invoice/properties?clientNumbers=${clientNumbersParam}`
+        `${getApiBaseUrl()}/invoice/properties?clientNumbers=${clientNumbersParam}`,
+        {
+          headers: {
+            ...getAuthHeaders(),
+          },
+        }
       );
       
       if (!response.ok) throw new Error("Failed to fetch properties");
@@ -109,7 +132,12 @@ const InvoiceGenerator = () => {
       const clientNumbersParam = selectedClients.join(',');
       const yearsParam = selectedYears.join(',');
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/invoice/stats?clientNumbers=${clientNumbersParam}&years=${yearsParam}`
+        `${getApiBaseUrl()}/invoice/stats?clientNumbers=${clientNumbersParam}&years=${yearsParam}`,
+        {
+          headers: {
+            ...getAuthHeaders(),
+          },
+        }
       );
       
       if (!response.ok) throw new Error("Failed to fetch statistics");
@@ -143,10 +171,11 @@ const InvoiceGenerator = () => {
 
     try {
       setGenerating(true);
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invoice/generate`, {
+      const response = await fetch(`${getApiBaseUrl()}/invoice/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           clientNumbers: selectedClients,
@@ -190,8 +219,8 @@ const InvoiceGenerator = () => {
       setSelectedClients(prev => prev.filter(cn => cn !== clientNumber));
       // Remove properties for this client from selection
       const clientProperties = propertiesByClient
-        .find(c => c.client.CLIENTNumber === clientNumber)
-        ?.properties.map(p => p.AccountNumber) || [];
+        .find(c => c.client.clientNumber === clientNumber)
+        ?.properties.map(p => p.accountNumber) || [];
       setSelectedProperties(prev => prev.filter(p => !clientProperties.includes(p)));
     }
   };
@@ -218,7 +247,7 @@ const InvoiceGenerator = () => {
   const selectAllProperties = () => {
     const allProperties = propertiesByClient
       .flatMap(c => c.properties)
-      .map(p => p.AccountNumber);
+      .map(p => p.accountNumber);
     setSelectedProperties(allProperties);
   };
 
@@ -277,19 +306,19 @@ const InvoiceGenerator = () => {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold">{stats.totalInvoices}</div>
+                <div className="text-2xl font-bold">{stats.totalInvoices ?? 0}</div>
                 <div className="text-sm text-muted-foreground">Total Invoices</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">${stats.totalAmount.toLocaleString()}</div>
+                <div className="text-2xl font-bold">${(stats.totalAmount ?? 0).toLocaleString()}</div>
                 <div className="text-sm text-muted-foreground">Total Amount</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{stats.uniqueClients}</div>
+                <div className="text-2xl font-bold">{stats.uniqueClients ?? 0}</div>
                 <div className="text-sm text-muted-foreground">Unique Clients</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{stats.uniqueProperties}</div>
+                <div className="text-2xl font-bold">{stats.uniqueProperties ?? 0}</div>
                 <div className="text-sm text-muted-foreground">Unique Properties</div>
               </div>
             </div>
@@ -317,21 +346,21 @@ const InvoiceGenerator = () => {
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {clients.map((client) => (
-                  <div key={client.CLIENTNumber} className="flex items-center space-x-3">
+                  <div key={client.clientNumber} className="flex items-center space-x-3">
                     <Checkbox
-                      id={client.CLIENTNumber}
-                      checked={selectedClients.includes(client.CLIENTNumber)}
+                      id={client.clientNumber}
+                      checked={selectedClients.includes(client.clientNumber)}
                       onCheckedChange={(checked) => 
-                        handleClientSelection(client.CLIENTNumber, checked as boolean)
+                        handleClientSelection(client.clientNumber, checked as boolean)
                       }
                     />
                     <label
-                      htmlFor={client.CLIENTNumber}
+                      htmlFor={client.clientNumber}
                       className="flex-1 cursor-pointer"
                     >
-                      <div className="font-medium">{client.CLIENTNAME}</div>
+                      <div className="font-medium">{client.clientName}</div>
                       <div className="text-sm text-muted-foreground">
-                        {client.CLIENTNumber} • {client.propertyCount} properties
+                        {client.clientNumber} • {client.propertyCount} properties
                       </div>
                     </label>
                   </div>
@@ -414,37 +443,37 @@ const InvoiceGenerator = () => {
             ) : (
               <div className="space-y-4">
                 {propertiesByClient.map((clientData) => (
-                  <div key={clientData.client.CLIENTNumber} className="space-y-2">
+                  <div key={clientData.client.clientNumber} className="space-y-2">
                     <h3 className="font-semibold text-lg">
-                      {clientData.client.CLIENTNAME} ({clientData.client.CLIENTNumber})
+                      {clientData.client.clientName} ({clientData.client.clientNumber})
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {clientData.properties.map((property) => (
-                        <div key={property.AccountNumber} className="flex items-center space-x-3 p-3 border rounded-lg">
+                        <div key={property.accountNumber} className="flex items-center space-x-3 p-3 border rounded-lg">
                           <Checkbox
-                            id={property.AccountNumber}
-                            checked={selectedProperties.includes(property.AccountNumber)}
+                            id={property.accountNumber}
+                            checked={selectedProperties.includes(property.accountNumber)}
                             onCheckedChange={(checked) => 
-                              handlePropertySelection(property.AccountNumber, checked as boolean)
+                              handlePropertySelection(property.accountNumber, checked as boolean)
                             }
                           />
                           <label
-                            htmlFor={property.AccountNumber}
+                            htmlFor={property.accountNumber}
                             className="flex-1 cursor-pointer"
                           >
-                            <div className="font-medium">{property.AccountNumber}</div>
+                            <div className="font-medium">{property.accountNumber}</div>
                             <div className="text-sm text-muted-foreground">
-                              {property.CADMailingADDRESS}, {property.CADCITY}, {property.CADCOUNTY}
+                              {property.cadMailingAddress}, {property.cadCity}, {property.cadCounty}
                             </div>
                             <div className="text-sm">
-                              {property.CONTINGENCYFee && (
+                              {property.contingencyFee && (
                                 <Badge variant="secondary" className="mr-1">
-                                  Contingency: ${property.CONTINGENCYFee}
+                                  Contingency: ${property.contingencyFee}
                                 </Badge>
                               )}
-                              {property.FlatFee && (
+                              {property.flatFee && (
                                 <Badge variant="outline">
-                                  Flat Fee: ${property.FlatFee}
+                                  Flat Fee: ${property.flatFee}
                                 </Badge>
                               )}
                             </div>

@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "@/assets/loginPageImage.png";
 import Logo from "@/assets/logo.png";
 import { z } from "zod";
@@ -30,9 +28,8 @@ import { ToastAction } from "@/components/ui/toast";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 
-// Improved schema with additional validation rules
 const formSchema = z.object({
-    email: z.string(),
+    email: z.string().email("Please enter a valid email address"),
     password: z
         .string()
         .min(6, { message: "Password must be at least 6 characters long" }),
@@ -55,7 +52,6 @@ export default function LoginPage() {
     setLoading(true); // Set loading to true
     try {
       const { email, password } = values;
-      console.log({ email, password });
       const response = await loginUser(email, password);
 
       // Assuming response contains token and user info
@@ -95,7 +91,7 @@ export default function LoginPage() {
           <div className="flex justify-between items-center w-full mb-12 ">
             <div>
               <NavLink to={"/"}>
-                <img className="" src={Logo} alt="" />
+                <img className="" src={Logo} alt="Lone Star Property Tax logo" />
               </NavLink>
             </div>
           </div>
@@ -121,10 +117,10 @@ export default function LoginPage() {
                             <FormControl>
                               <Input
                                 className="w-full"
-                                id="username"
+                                id="email"
                                 placeholder="johndoe@mail.com"
-                                type="username"
-                                autoComplete="username"
+                                type="email"
+                                autoComplete="email"
                                 {...field}
                               />
                             </FormControl>
@@ -161,9 +157,18 @@ export default function LoginPage() {
                           </FormItem>
                         )}
                       />
+                      <div className="text-right">
+                        <a
+                          href="#"
+                          className="text-sm text-muted-foreground hover:text-primary hover:underline"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          Forgot password?
+                        </a>
+                      </div>
                       <Button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-[#14ADD6] to-[#384295] flex items-center justify-center"
+                        className="w-full bg-gradient-to-r from-brand-primary to-brand-secondary flex items-center justify-center"
                         disabled={loading} // Disable button while loading
                       >
                         {loading ? (

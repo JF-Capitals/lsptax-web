@@ -50,7 +50,7 @@ const KeyDates = () => {
 const KeyDateItem: React.FC<KeyDateData> = ({ date, desc }) => {
   return (
     <div
-      className="flex flex-col md:flex-row justify-center items-center w-full border-b-2 p-8 hover:bg-[#F7FAFF] h-auto"
+      className="flex flex-col md:flex-row justify-center items-center w-full border-b-2 p-8 hover:bg-brand-background h-auto"
       data-aos="zoom-in-right"
     >
       <div className="text-center w-full md:w-1/3 text-xl text-blue-400 font-bold mb-4 md:mb-0">

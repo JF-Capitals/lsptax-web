@@ -6,9 +6,9 @@ import {
   FileText,
   Users,
   UserPlus,
+  UploadCloud,
   ChevronLeft,
   ChevronRight,
-  // FileSignature,
 } from "lucide-react";
 import {
   Tooltip,
@@ -26,11 +26,11 @@ interface MenuOption {
 
 const menuOptions: MenuOption[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "clients/list-client", label: "Clients", icon: Users },
   { id: "properties", label: "Properties", icon: Building },
   { id: "invoices", label: "Invoices", icon: FileText },
-  { id: "clients/list-client", label: "Clients", icon: Users },
   { id: "prospects/list-prospect", label: "Prospects", icon: UserPlus },
-  // { id: "forms/contract", label: "Contracts", icon: FileSignature },
+  { id: "csv-uploads", label: "CSV Uploads", icon: UploadCloud },
 ];
 
 const SideMenu: React.FC = () => {
@@ -47,15 +47,17 @@ const SideMenu: React.FC = () => {
       >
         {/* Toggle Button */}
         <button
+          type="button"
           className="self-end mr-2 p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition"
           onClick={() => setIsOpen(!isOpen)}
+          aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
         >
           {isOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
         </button>
 
         {/* Logo */}
         <div className={`mt-6 transition-all ${isOpen ? "w-24" : "w-12"}`}>
-          <img src={mainLogo} alt="Logo" className="w-full" />
+          <img src={mainLogo} alt="Lone Star Property Tax portal logo" className="w-full" />
         </div>
 
         {/* Menu Items */}
@@ -72,7 +74,7 @@ const SideMenu: React.FC = () => {
                     to={`/portal/${id}`}
                     className={`flex items-center p-4 rounded-lg transition-all ${
                       isActive
-                        ? "bg-[#F2F7FF] text-[#384295] font-semibold"
+                        ? "bg-brand-muted text-brand-secondary font-semibold"
                         : "text-gray-700 hover:bg-gray-100"
                     } ${
                       isOpen ? "justify-start gap-3 px-6" : "justify-center"
@@ -81,7 +83,7 @@ const SideMenu: React.FC = () => {
                     <Icon
                       size={24}
                       className={`${
-                        isActive ? "text-[#384295]" : "text-gray-600"
+                        isActive ? "text-brand-secondary" : "text-gray-600"
                       }`}
                     />
                     {isOpen && <span>{label}</span>}

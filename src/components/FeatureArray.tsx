@@ -51,7 +51,7 @@ const FeatureBox: React.FC<FeatureBoxProps> = ({ label, logo, delay }) => {
       data-aos="fade-up"
       data-aos-delay={delay} // Apply delay dynamically
     >
-      <img src={logo} alt="logo" className="w-16 h-16 mb-4" />
+      <img src={logo} alt={`${label} - Lone Star Property Tax`} className="w-16 h-16 mb-4" />
       <h2 className="font-semibold text-center text-lg">{label}</h2>
     </div>
   );
