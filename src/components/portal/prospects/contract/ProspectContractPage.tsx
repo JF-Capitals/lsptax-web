@@ -1,8 +1,8 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getPreviewDocuments, getSingleProspect } from "@/store/data";
+import { getSingleProspect } from "@/store/data";
 import { useToast } from "@/hooks/use-toast";
-import { sendContract, changeProspectStatus } from "@/api/api";
+import { previewContract, sendContractForClient } from "@/api/api";
 import { ContractPreviewAndSend } from "@/components/portal/shared/ContractPreviewAndSend";
 import { Property, Prospect } from "@/types/types";
 
@@ -36,22 +36,22 @@ export default function ProspectContractPage() {
     fetchProspect();
   }, [prospectIdParam]);
 
+  // Same flow as client: use /api/contracts/preview-contract (prospect id = Client.id)
   useEffect(() => {
-    if (!prospectIdParam) return;
-    const id = Number(prospectIdParam);
-    if (Number.isNaN(id)) return;
+    const id = prospectData?.prospect?.id;
+    if (!id) return;
     setLoading(true);
     setError(null);
-    getPreviewDocuments({ prospectId: id })
-      .then((res: { contractPdf?: string; aoaPdf?: string }) => {
-        setContractPdfBase64(res?.contractPdf ?? null);
+    previewContract(id)
+      .then((res) => {
+        setContractPdfBase64(res.contractPdf ?? null);
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : "Failed to load preview");
         setContractPdfBase64(null);
       })
       .finally(() => setLoading(false));
-  }, [prospectIdParam]);
+  }, [prospectData?.prospect?.id]);
 
   const handleDownload = () => {
     if (!contractPdfBase64) return;
@@ -82,10 +82,10 @@ export default function ProspectContractPage() {
   };
 
   const handleSend = async () => {
-    if (!prospectIdParam || !prospectData?.prospect?.id) {
+    if (!prospectData?.prospect?.id) {
       toast({
         title: "Error",
-        description: "Prospect data not loaded.",
+        description: "Prospect data not loaded or missing prospect ID.",
         variant: "destructive",
       });
       return;
@@ -93,13 +93,10 @@ export default function ProspectContractPage() {
     const id = prospectData.prospect.id;
     setIsSending(true);
     try {
-      await sendContract({ prospectId: id });
-      if (prospectData.prospect.status === "CONTACTED") {
-        await changeProspectStatus({ prospectId: id, newStatus: "IN_PROGRESS" });
-      }
+      await sendContractForClient(id);
       toast({
         title: "✓ Contract sent for signing",
-        description: "Contract has been sent. They will receive an email from DocuSign.",
+        description: "Contract has been sent to the prospect. They will receive an email from DocuSign.",
       });
       navigate(`/portal/prospect?id=${prospectIdParam}`);
     } catch (err) {
@@ -126,7 +123,7 @@ export default function ProspectContractPage() {
       hasEntity={!!prospectIdParam}
       emptyMessage={
         <p>
-          Open this page from a prospect (e.g. Prospect details → Create Contract) to load the contract.
+          Open this page with a prospect selected (e.g. Prospect details → Create Contract) to load the contract.
         </p>
       }
     />

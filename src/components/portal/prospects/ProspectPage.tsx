@@ -156,11 +156,18 @@ const ProspectPage = () => {
             {prospect.status}
           </span>
         </div>
-        <NavLink to={`/portal/edit-prospect?prospectId=${prospect.id}`}>
-          <Button variant="blue" className="w-full">
-            Edit Prospect Details
-          </Button>
-        </NavLink>
+        <div className="flex gap-4">
+          <NavLink to={`/portal/edit-prospect?prospectId=${prospect.id}`}>
+            <Button variant="blue" className="w-full">
+              Edit Prospect Details
+            </Button>
+          </NavLink>
+          <NavLink to={`/portal/prospect/contract?id=${id}`}>
+            <Button variant="blue" className="w-full">
+              Create Contract
+            </Button>
+          </NavLink>
+        </div>
       </div>
 
       <div className="gap-2 flex flex-col md:flex-row justify-between">
@@ -210,25 +217,18 @@ const ProspectPage = () => {
       <div className="mt-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold">Contracts & AOAs</h2>
-          <div className="flex gap-2">
-            <NavLink to={`/portal/prospect/contract?id=${id}`}>
-              <Button variant="blue" size="sm">
-                Create Contract
-              </Button>
-            </NavLink>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={contractsLoading}
-              onClick={() => fetchContracts()}
-            >
-              {contractsLoading ? (
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-              ) : (
-                "Refresh status"
-              )}
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={contractsLoading}
+            onClick={() => fetchContracts()}
+          >
+            {contractsLoading ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              "Refresh status"
+            )}
+          </Button>
         </div>
         {contractsLoading ? (
           <div className="flex items-center gap-2 text-gray-600 py-4">
