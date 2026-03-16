@@ -36,6 +36,15 @@ export function getProspectColumns(refetch: () => void | Promise<void>): ColumnD
       accessorFn: (row) => getProspectDisplayName(row),
     },
     {
+      id: "inquiryDate",
+      header: "Inquiry Date",
+      accessorFn: (row) => {
+        if (!row.inquireDate) return "";
+        const d = new Date(row.inquireDate);
+        return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString();
+      },
+    },
+    {
       accessorKey: "email",
       header: "Email",
     },

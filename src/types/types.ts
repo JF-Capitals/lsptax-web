@@ -136,6 +136,7 @@ export interface Prospect {
   clientName: string;
   email: string;
   phoneNumber: string;
+  inquireDate?: string;
   mailingAddress?: string;
   mailingAddressCityTxZip?: string;
   billingAddress?: string;
