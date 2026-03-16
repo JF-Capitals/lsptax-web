@@ -361,7 +361,7 @@ const ProspectPropertyBox: React.FC<{ property: Property }> = ({
 
   return (
     <NavLink
-      to={`/portal/edit-prospect-properties?id=${property.id}`}
+      to={`/portal/prospect/property?id=${property.id}`}
       className="block"
     >
       <div className="border rounded-2xl p-4 shadow-md hover:shadow-lg transition duration-300 bg-gradient-to-tr from-white to-gray-50 hover:from-blue-50 cursor-pointer h-full flex flex-col justify-between">

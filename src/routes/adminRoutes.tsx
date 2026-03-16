@@ -26,6 +26,7 @@ const AppointmentForm = lazy(() => import("@/components/portal/properties/aoa/Ap
 const PropertyAoaPage = lazy(() => import("@/components/portal/properties/aoa/PropertyAoaPage"));
 const ProspectPage = lazy(() => import("@/components/portal/prospects/ProspectPage"));
 const ProspectContractPage = lazy(() => import("@/components/portal/prospects/contract/ProspectContractPage"));
+const ProspectAoaPage = lazy(() => import("@/components/portal/prospects/aoa/ProspectAoaPage"));
 const AddProspectPropertyForm = lazy(() => import("@/components/portal/prospects/AddProspectProperty"));
 const ProspectProspertyTable = lazy(() => import("@/components/portal/prospects/ProspectPropertyTable"));
 const EditProspectProperty = lazy(() => import("@/components/portal/prospects/EditProspectProperty"));
@@ -77,6 +78,7 @@ const AdminRoutes = () => {
         element={<AddProspectPropertyForm />}
       />
       <Route path="/prospect/property" element={<ProspectProspertyTable />} />
+      <Route path="/prospect/aoa" element={<ProspectAoaPage />} />
       <Route path="/contract" element={<ContractForm />} />
       <Route path="/aoa" element={<PropertyAoaPage />} />
       <Route path="/agent" element={<AppointmentForm />} />

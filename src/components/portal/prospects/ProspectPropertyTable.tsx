@@ -76,6 +76,13 @@ const ProspectPropertyPage = () => {
           >
             <Button className="w-full">Edit Property</Button>
           </NavLink>
+          <NavLink
+            to={`/portal/prospect/aoa?propertyId=${property.propertyDetails.id}`}
+          >
+            <Button className="w-full" variant="outline">
+              Create AOA
+            </Button>
+          </NavLink>
         </div>
       </div>
 
