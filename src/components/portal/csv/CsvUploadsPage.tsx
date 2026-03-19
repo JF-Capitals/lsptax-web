@@ -47,9 +47,9 @@ const sampleCsv: Record<
 > = {
   clientsProperties: {
     headersLine:
-      'Client ID,Client Name,CAD Name,Mailing Address,"City, Zip Code",Property Address,County,City,Contact Number,Email Address,Account Number,Account Type,BPP FEE,Contingency Fee,Flat Fee',
+      'Client ID,Client Name,CAD Name,Mailing Address,City,Zip Code,Property Address,County,City,Contact Number,Email Address,Account Number,Account Type,BPP FEE,Contingency Fee,Flat Fee',
     sampleLine:
-      '1000,"HUSSAIN ALI","ALI, MOMIN-JAFFER","1327 KYLE HILL LN","SUGAR LAND, TEXAS 77479","1327 KYLE HILL LN, SUGAR LAND, TEXAS 77479",Fort Bend,"Sugar Land",7135056806,hali@lsptax.com,R226434,,,,,',
+      '1000,"HUSSAIN ALI","ALI MOMIN-JAFFER","1327 KYLE HILL LN",Sugar Land,77479,"1327 KYLE HILL LN SUGAR LAND TEXAS 77479",Fort Bend,Sugar Land,7135056806,hali@lsptax.com,R226434,,,25,',
   },
   invoices: {
     headersLine:

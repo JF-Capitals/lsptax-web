@@ -22,6 +22,7 @@ export interface ClientData {
   mailingAddress?: string;
   MAILINGADDRESSCITYTXZIP?: string;
   mailingAddressCityTxZip?: string;
+  contingencyFee?: string;
   IsArchived?: boolean;
   isArchived?: boolean;
   createdAt?: Date;
@@ -57,8 +58,6 @@ export interface Property {
   subcontractOwner?: string;
   BPPFEE?: string;
   bppFee?: string;
-  CONTINGENCYFee?: string;
-  contingencyFee?: string;
   FlatFee?: string;
   flatFee?: string;
   IsArchived?: boolean;
@@ -139,6 +138,7 @@ export interface Prospect {
   inquireDate?: string;
   mailingAddress?: string;
   mailingAddressCityTxZip?: string;
+  contingencyFee?: string;
   billingAddress?: string;
   billingEmail?: string;
   envelopeId?: string;

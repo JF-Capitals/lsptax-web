@@ -40,6 +40,10 @@ const formSchema = z.object({
   PHONENUMBER: z.string().min(1, "Phone number is required"),
   MAILINGADDRESS: z.string().min(1, "Mailing Address is required"),
   MAILINGADDRESSCITYTXZIP: z.string().min(1, "City, State, ZIP is required"),
+  contingencyFee: z
+    .string()
+    .regex(/^\d*$/, "Contingency fee must be numbers only (e.g. 25 for 25%)")
+    .optional(),
   IsArchived: z.boolean().optional(),
   useSameAsMailing: z.boolean().default(false),
   useSameAsEmail: z.boolean().default(false),
@@ -61,6 +65,7 @@ export default function AddClientForm() {
       MAILINGADDRESSCITYTXZIP: "",
       BillingAddress: "",
       TypeOfAcct: "Real",
+      contingencyFee: "",
       useSameAsMailing: false,
       useSameAsEmail: false,
     },
@@ -87,6 +92,7 @@ export default function AddClientForm() {
         typeOfAcct: values.TypeOfAcct ?? "Real",
         billingEmail: values.BillingEmail,
         billingAddress: values.BillingAddress,
+        contingencyFee: values.contingencyFee?.trim() || undefined,
       };
 
       await addClient(clientPayload);
@@ -181,6 +187,28 @@ export default function AddClientForm() {
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <Input {...field} className="border-gray-300 rounded-lg" />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="contingencyFee"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contingency Fee (%)</FormLabel>
+                  <Input
+                    {...field}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="e.g. 25"
+                    className="border-gray-300 rounded-lg"
+                    onChange={(e) => {
+                      field.onChange(e.target.value.replace(/\D/g, ""));
+                    }}
+                  />
                   <FormMessage />
                 </FormItem>
               )}

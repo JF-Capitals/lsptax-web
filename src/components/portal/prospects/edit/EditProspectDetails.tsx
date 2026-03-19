@@ -34,9 +34,13 @@ const formSchema = z.object({
   MAILINGADDRESS: z.string().min(1, "Mailing Address is required"),
   MAILINGADDRESSCITYTXZIP: z.string().min(1, "City, State, ZIP is required"),
   BillingAddress: z.string().min(1, "City, State, ZIP is required"),
+  contingencyFee: z
+    .string()
+    .regex(/^\d*$/, "Contingency fee must be numbers only (e.g. 25 for 25%)")
+    .optional(),
   IsArchived: z.boolean().optional(),
   useSameAsMailing: z.boolean().default(false),
-  useSameAsEmail: z.boolean().default(false), // Add this field
+  useSameAsEmail: z.boolean().default(false),
 });
 
 export default function EditProspectDetails() {
@@ -56,8 +60,9 @@ export default function EditProspectDetails() {
       MAILINGADDRESS: "",
       MAILINGADDRESSCITYTXZIP: "",
       BillingAddress: "",
-      useSameAsMailing: false, // Default value
-      useSameAsEmail: false, // Default value
+      contingencyFee: "",
+      useSameAsMailing: false,
+      useSameAsEmail: false,
     },
   });
   // Fetch prospect details and pre-fill the form
@@ -76,6 +81,7 @@ export default function EditProspectDetails() {
             MAILINGADDRESSCITYTXZIP:
               data.prospect.mailingAddressCityTxZip || "",
             BillingAddress: data.prospect.billingAddress || "",
+            contingencyFee: data.prospect.contingencyFee ?? "",
             useSameAsMailing: false,
             useSameAsEmail: false,
           });
@@ -96,13 +102,22 @@ export default function EditProspectDetails() {
   }, [prospectId, form, toast]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setLoading(true); // Set loading to true
+    setLoading(true);
     try {
       if (prospectId) {
-        // Exclude `useSameAsMailing` and `useSameAsEmail` from the values
-        const { useSameAsMailing, useSameAsEmail, ...filteredValues } = values;
-
-        await editProspect(prospectId, filteredValues); // Send only the filtered values
+        const { useSameAsMailing, useSameAsEmail, ...rest } = values;
+        const prospectDetails: Record<string, unknown> = {
+          clientName: rest.ProspectName,
+          email: rest.Email,
+          billingEmail: rest.BillingEmail,
+          phoneNumber: rest.PHONENUMBER,
+          mailingAddress: rest.MAILINGADDRESS,
+          mailingAddressCityTxZip: rest.MAILINGADDRESSCITYTXZIP,
+          billingAddress: rest.BillingAddress,
+          typeOfAcct: rest.TypeOfAcct,
+          contingencyFee: rest.contingencyFee?.trim() || undefined,
+        };
+        await editProspect(prospectId, prospectDetails);
       }
       toast({
         title: "✓ Prospect updated successfully",
@@ -179,6 +194,27 @@ export default function EditProspectDetails() {
               <FormItem>
                 <FormLabel>Phone</FormLabel>
                 <Input {...field} placeholder="+1 (555) 000-0000" />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="contingencyFee"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contingency Fee (%)</FormLabel>
+                <Input
+                  {...field}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder="e.g. 25"
+                  onChange={(e) => {
+                    field.onChange(e.target.value.replace(/\D/g, ""));
+                  }}
+                />
                 <FormMessage />
               </FormItem>
             )}

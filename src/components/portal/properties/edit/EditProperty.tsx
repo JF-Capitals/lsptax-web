@@ -76,7 +76,6 @@ const formSchema = z.object({
   contactOwner: z.string().nullable().default(""),
   subcontractOwner: z.string().nullable().default(""),
   bppFee: z.string().optional().default(""),
-  contingencyFee: z.string().optional().default(""),
   flatFee: z.string().optional().default(""),
   isArchived: z.boolean().optional().default(false),
 });
@@ -217,10 +216,9 @@ export default function EditProperty() {
       const endingMarket = parseFloat(cleanNumberInput((yearData?.endingMarket?.toString()) ?? "")) || 0;
       const endingAppraised = parseFloat(cleanNumberInput((yearData?.endingAppraised?.toString()) ?? "")) || 0;
 
-      // Parse contingency fee from string (e.g., "25%" -> 0.25)
-      const contingencyFeeString =
-        property?.propertyDetails.contingencyFee || "0%"; // Default to "0%" if not provided
-      const contingencyFeePercentage = parseFloat(contingencyFeeString); // Extract the numeric value
+      // Contingency fee is client-level in v2 ("25" -> 0.25)
+      const contingencyFeeString = property?.clientDetails?.contingencyFee || "0";
+      const contingencyFeePercentage = parseFloat(contingencyFeeString);
       const contingencyFee = contingencyFeePercentage / 100; // Convert to decimal (e.g., 25% -> 0.25)
 
       const noticeMarketValue = noticeLandValue + noticeImprovementValue;
@@ -261,7 +259,7 @@ export default function EditProperty() {
         "Under Arbitration": yearData?.underArbitration || false,
         "Tax Rate": yearData?.taxRate?.toString() || "0.00",
         "Taxable Savings": taxableSavings.toString(),
-        "Contingency Fee": contingencyFeeString, // Keep as string for display
+        "Contingency Fee": contingencyFeeString,
         "Invoice Amount": invoiceAmount.toString(),
         "Paid Date": yearData?.paidDate || "",
         "Payment Notes": yearData?.paymentNotes || "",
@@ -347,10 +345,10 @@ export default function EditProperty() {
         const endingMarket = parseFloat(cleanNumberInput(row["Ending Market"])) || 0;
         const endingAppraised = parseFloat(cleanNumberInput(row["Ending Appraised"])) || 0;
 
-        // Parse contingency fee from string (e.g., "25%" -> 0.25)
-        const contingencyFeeString = row["Contingency Fee"] || "0%"; // Default to "0%" if not provided
-        const contingencyFeePercentage = parseFloat(contingencyFeeString); // Extract the numeric value
-        const contingencyFee = contingencyFeePercentage / 100; // Convert to decimal (e.g., 25% -> 0.25)
+        // Contingency fee is client-level in v2 (not editable per property)
+        const contingencyFeeString = property?.clientDetails?.contingencyFee || "0";
+        const contingencyFeePercentage = parseFloat(contingencyFeeString);
+        const contingencyFee = contingencyFeePercentage / 100;
 
         // Calculate dependent fields
         const noticeMarketValue = noticeLandValue + noticeImprovementValue;
@@ -381,7 +379,7 @@ export default function EditProperty() {
           "Beginning Appraised": beginningAppraised.toString(),
           "Ending Market": endingMarket.toString(),
           "Ending Appraised": endingAppraised.toString(),
-          "Contingency Fee": contingencyFeeString, // Keep as string for display
+          "Contingency Fee": contingencyFeeString,
         };
       })
     );
@@ -553,19 +551,7 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="contingencyFee"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contingency Fee</FormLabel>
-                  <Input placeholder="Enter Contingency Fee" {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* <FormField
-              control={form.control}
-              name="FlatFee"
+              name="flatFee"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Flat Fee</FormLabel>
@@ -573,7 +559,8 @@ export default function EditProperty() {
                   <FormMessage />
                 </FormItem>
               )}
-            /> */}
+            />
+
           </div>
 
           {/* Status and Other Notes */}
@@ -640,6 +627,7 @@ export default function EditProperty() {
                   "Invoice Amount",
                   "Beginning Market",
                   "Beginning Appraised",
+                  "Contingency Fee",
                 ].includes(key);
 
                 return (

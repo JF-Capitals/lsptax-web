@@ -12,6 +12,7 @@ export const addProspect = async (payload: {
   phoneNumber?: string;
   mailingAddress?: string;
   mailingAddressCityTxZip?: string;
+  contingencyFee?: string;
 }) => {
   try {
     const response = await fetch(`${baseUrl()}/action/add-prospect`, {
@@ -26,6 +27,7 @@ export const addProspect = async (payload: {
         phoneNumber: payload.phoneNumber ?? "",
         mailingAddress: payload.mailingAddress ?? "",
         mailingAddressCityTxZip: payload.mailingAddressCityTxZip ?? "",
+        contingencyFee: payload.contingencyFee ?? "",
       }),
     });
     const text = await response.text();
@@ -57,6 +59,7 @@ export const addClient = async (clientDetails: {
   typeOfAcct?: string;
   billingEmail?: string;
   billingAddress?: string;
+  contingencyFee?: string;
 }) => {
   try {
     const body: Record<string, string> = {
@@ -69,6 +72,7 @@ export const addClient = async (clientDetails: {
     };
     if (clientDetails.billingEmail != null) body.billingEmail = clientDetails.billingEmail;
     if (clientDetails.billingAddress != null) body.billingAddress = clientDetails.billingAddress;
+    if (clientDetails.contingencyFee != null && clientDetails.contingencyFee !== "") body.contingencyFee = clientDetails.contingencyFee;
     const response = await fetch(`${baseUrl()}/action/add-client`, {
       method: "POST",
       headers: {

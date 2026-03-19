@@ -18,9 +18,8 @@ const InvoiceDetails: React.FC<{
     if (!invoice) return 0;
     return invoice.properties.reduce((total, property) => {
       const yearlyInvoice = getYearlyInvoiceData(property);
-      const contingencyFee = property.propertyDetails.CONTINGENCYFee || "25";
-      const cleanPercentage = contingencyFee.replace(/%/g, '');
-      const contingencyPercentage = Number(cleanPercentage);
+      const contingencyFee = invoice.client.contingencyFee || "0"; // v2: client-level "25"
+      const contingencyPercentage = Number(contingencyFee);
       const taxableSavings = yearlyInvoice?.taxableSavings || 0;
       const calculatedFee = taxableSavings * (contingencyPercentage / 100);
       return total + calculatedFee;
@@ -216,17 +215,14 @@ const InvoiceDetails: React.FC<{
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
                         {(() => {
-                          const contingencyFee = property.propertyDetails.CONTINGENCYFee || "25";
-                          // Remove any existing % signs and add one
-                          const cleanPercentage = contingencyFee.replace(/%/g, '');
-                          return `${cleanPercentage}%`;
+                          const contingencyFee = invoice.client.contingencyFee || "0";
+                          return `${contingencyFee}%`;
                         })()}
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
                         {(() => {
-                          const contingencyFee = property.propertyDetails.CONTINGENCYFee || "25";
-                          const cleanPercentage = contingencyFee.replace(/%/g, '');
-                          const contingencyPercentage = Number(cleanPercentage);
+                          const contingencyFee = invoice.client.contingencyFee || "0";
+                          const contingencyPercentage = Number(contingencyFee);
                           const taxableSavings = yearlyInvoice?.taxableSavings || 0;
                           const calculatedFee = taxableSavings * (contingencyPercentage / 100);
                           return formatUSD(calculatedFee);

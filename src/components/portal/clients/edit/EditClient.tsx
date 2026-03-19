@@ -48,6 +48,7 @@ export default function EditClient() {
           MAILINGADDRESS: data?.client.mailingAddress || "",
           MAILINGADDRESSCITYTXZIP: data?.client.mailingAddressCityTxZip || "",
           BillingAddress: data?.client.billingAddress || "",
+          contingencyFee: data?.client.contingencyFee ?? "",
           IsArchived: data?.client.isArchived || false,
           useSameAsEmail: false,
           useSameAsMailing: false,
@@ -82,6 +83,10 @@ export default function EditClient() {
     MAILINGADDRESS: z.string().optional(),
     MAILINGADDRESSCITYTXZIP: z.string().optional(),
     BillingAddress: z.string().optional(),
+    contingencyFee: z
+      .string()
+      .regex(/^\d*$/, "Contingency fee must be numbers only (e.g. 25 for 25%)")
+      .optional(),
     IsArchived: z.boolean().optional(),
     useSameAsEmail: z.boolean().default(false),
     useSameAsMailing: z.boolean().default(false),
@@ -90,6 +95,7 @@ export default function EditClient() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      contingencyFee: "",
       IsArchived: false,
       useSameAsEmail: false,
       useSameAsMailing: false,
@@ -113,6 +119,7 @@ export default function EditClient() {
           typeOfAcct: values.TypeOfAcct ?? "",
           billingEmail: values.BillingEmail ?? "",
           billingAddress: values.BillingAddress ?? "",
+          contingencyFee: values.contingencyFee?.trim() || undefined,
         };
 
         await editClient(clientId, clientDetails);
@@ -195,6 +202,30 @@ export default function EditClient() {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="contingencyFee"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contingency Fee (%)</FormLabel>
+                  <Input
+                    {...field}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="e.g. 25"
+                    className="border-gray-300 rounded-lg"
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/\D/g, "");
+                      field.onChange(v);
+                    }}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="TypeOfAcct"

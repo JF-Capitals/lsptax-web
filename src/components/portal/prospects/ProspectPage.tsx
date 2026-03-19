@@ -209,6 +209,12 @@ const ProspectPage = () => {
                     [prospect.mailingAddress, prospect.mailingAddressCityTxZip].filter(Boolean).join(", ")}
                 </td>
               </tr>
+              {(prospect.contingencyFee != null && prospect.contingencyFee !== "") && (
+                <tr>
+                  <td className="font-medium">Contingency Fee:</td>
+                  <td>{prospect.contingencyFee}%</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

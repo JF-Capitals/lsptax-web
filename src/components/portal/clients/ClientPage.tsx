@@ -182,6 +182,12 @@ const ClientPage = () => {
                   {clientData.client.mailingAddressCityTxZip}
                 </td>
               </tr>
+              {(clientData.client.contingencyFee != null && clientData.client.contingencyFee !== "") && (
+                <tr>
+                  <td className="font-medium">Contingency Fee:</td>
+                  <td>{clientData.client.contingencyFee}%</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

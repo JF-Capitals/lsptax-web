@@ -24,9 +24,13 @@ const formSchema = z.object({
   MAILINGADDRESS: z.string().min(1, "Mailing Address is required"),
   MAILINGADDRESSCITYTXZIP: z.string().min(1, "City, State, ZIP is required"),
   BillingAddress: z.string().min(1, "City, State, ZIP is required"),
+  contingencyFee: z
+    .string()
+    .regex(/^\d*$/, "Contingency fee must be numbers only (e.g. 25 for 25%)")
+    .optional(),
   IsArchived: z.boolean().optional(),
   useSameAsMailing: z.boolean().default(false),
-  useSameAsEmail: z.boolean().default(false), // Add this field
+  useSameAsEmail: z.boolean().default(false),
 });
 
 export default function AddProspectForm() {
@@ -40,7 +44,8 @@ export default function AddProspectForm() {
       BillingEmail: "",
       PHONENUMBER: "",
       MAILINGADDRESSCITYTXZIP: "",
-      useSameAsMailing: false, // Default value
+      contingencyFee: "",
+      useSameAsMailing: false,
       useSameAsEmail: false,
     },
   });
@@ -54,6 +59,7 @@ export default function AddProspectForm() {
         phoneNumber: values.PHONENUMBER || "",
         mailingAddress: values.MAILINGADDRESS || "",
         mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP || "",
+        contingencyFee: values.contingencyFee?.trim() || undefined,
       });
 
       toast({
@@ -137,6 +143,28 @@ export default function AddProspectForm() {
                   {...field}
                   placeholder="+1 (555) 000-0000"
                   className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="contingencyFee"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-gray-700">Contingency Fee (%)</FormLabel>
+                <Input
+                  {...field}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder="e.g. 25"
+                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  onChange={(e) => {
+                    field.onChange(e.target.value.replace(/\D/g, ""));
+                  }}
                 />
                 <FormMessage />
               </FormItem>

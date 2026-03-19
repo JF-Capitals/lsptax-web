@@ -43,7 +43,6 @@ const formSchema = z.object({
   contactOwner: z.string().optional(),
   subcontractOwner: z.string().optional(),
   bppFee: z.string().optional(),
-  contingencyFee: z.string().optional(),
   flatFee: z.string().optional(),
   isArchived: z.boolean().default(false),
 });
@@ -288,18 +287,6 @@ export default function EditProspectProperty() {
                 <FormItem>
                   <FormLabel>BPP Fee</FormLabel>
                   <Input placeholder="Enter BPP Fee" {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="contingencyFee"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contingency Fee</FormLabel>
-                  <Input placeholder="Enter Contingency Fee" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
