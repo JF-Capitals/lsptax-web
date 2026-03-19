@@ -62,23 +62,23 @@ type TableRow = {
 };
 
 const formSchema = z.object({
-  StatusNotes: z.string().nullable().default(""),
-  OtherNotes: z.string().nullable().default(""),
-  NAMEONCAD: z.string().optional().default(""),
-  MAILINGADDRESS: z.string().optional().default(""),
-  MAILINGADDRESSCITYTXZIP: z.string().optional().default(""),
-  CADMailingADDRESS: z.string().optional().default(""),
-  CADCITY: z.string().optional().default(""),
-  CADZIPCODE: z.string().optional().default(""),
-  CADCOUNTY: z.string().optional().default(""),
-  AccountNumber: z.string().optional().default(""),
-  CLIENTNumber: z.string().optional().default(""),
-  CONTACTOWNER: z.string().nullable().default(""),
-  SUBCONTRACTOWNER: z.string().nullable().default(""),
-  BPPFEE: z.string().optional().default(""),
-  CONTINGENCYFee: z.string().optional().default(""),
-  FlatFee: z.string().optional().default(""),
-  IsArchived: z.boolean().optional().default(false),
+  statusNotes: z.string().nullable().default(""),
+  otherNotes: z.string().nullable().default(""),
+  nameOnCad: z.string().optional().default(""),
+  mailingAddress: z.string().optional().default(""),
+  mailingAddressCityTxZip: z.string().optional().default(""),
+  cadMailingAddress: z.string().optional().default(""),
+  cadCity: z.string().optional().default(""),
+  cadZipCode: z.string().optional().default(""),
+  cadCounty: z.string().optional().default(""),
+  accountNumber: z.string().optional().default(""),
+  clientNumber: z.string().optional().default(""),
+  contactOwner: z.string().nullable().default(""),
+  subcontractOwner: z.string().nullable().default(""),
+  bppFee: z.string().optional().default(""),
+  contingencyFee: z.string().optional().default(""),
+  flatFee: z.string().optional().default(""),
+  isArchived: z.boolean().optional().default(false),
 });
 
 interface CompleteSubmission {
@@ -103,7 +103,7 @@ export default function EditProperty() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      IsArchived: false,
+      isArchived: false,
     },
   });
 
@@ -184,7 +184,7 @@ export default function EditProperty() {
         const property = await getSingleProperty({ propertyId });
         if (property) {
           setProperty(property);
-          form.reset(property.propertyDetails);
+          form.reset(property.propertyDetails ?? {});
         } else {
           setError("Property not found");
         }
@@ -219,7 +219,7 @@ export default function EditProperty() {
 
       // Parse contingency fee from string (e.g., "25%" -> 0.25)
       const contingencyFeeString =
-        property?.propertyDetails.CONTINGENCYFee || "0%"; // Default to "0%" if not provided
+        property?.propertyDetails.contingencyFee || "0%"; // Default to "0%" if not provided
       const contingencyFeePercentage = parseFloat(contingencyFeeString); // Extract the numeric value
       const contingencyFee = contingencyFeePercentage / 100; // Convert to decimal (e.g., 25% -> 0.25)
 
@@ -406,7 +406,7 @@ export default function EditProperty() {
             {/* Form Fields */}
             <FormField
               control={form.control}
-              name="NAMEONCAD"
+              name="nameOnCad"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name on CAD</FormLabel>
@@ -418,7 +418,7 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="MAILINGADDRESS"
+              name="mailingAddress"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mailing Address</FormLabel>
@@ -430,7 +430,7 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="MAILINGADDRESSCITYTXZIP"
+              name="mailingAddressCityTxZip"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mailing Address City/State/ZIP</FormLabel>
@@ -445,7 +445,7 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="CADMailingADDRESS"
+              name="cadMailingAddress"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>CAD Mailing Address</FormLabel>
@@ -457,7 +457,7 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="CADCITY"
+              name="cadCity"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>CAD City</FormLabel>
@@ -469,7 +469,7 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="CADZIPCODE"
+              name="cadZipCode"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>CAD ZIP Code</FormLabel>
@@ -481,7 +481,7 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="CADCOUNTY"
+              name="cadCounty"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>CAD County</FormLabel>
@@ -493,7 +493,7 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="AccountNumber"
+              name="accountNumber"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Account Number</FormLabel>
@@ -505,7 +505,7 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="CLIENTNumber"
+              name="clientNumber"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Client Number</FormLabel>
@@ -521,7 +521,7 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="CONTACTOWNER"
+              name="contactOwner"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contract Owner</FormLabel>
@@ -537,7 +537,7 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="SUBCONTRACTOWNER"
+              name="subcontractOwner"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Subcontract Owner</FormLabel>
@@ -553,7 +553,7 @@ export default function EditProperty() {
 
             <FormField
               control={form.control}
-              name="CONTINGENCYFee"
+              name="contingencyFee"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contingency Fee</FormLabel>
@@ -580,7 +580,7 @@ export default function EditProperty() {
           <div className="flex mt-4 gap-4 justify-between">
             <FormField
               control={form.control}
-              name="StatusNotes"
+              name="statusNotes"
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel>Status Notes</FormLabel>
@@ -595,7 +595,7 @@ export default function EditProperty() {
             />
             <FormField
               control={form.control}
-              name="OtherNotes"
+              name="otherNotes"
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel>Other Notes</FormLabel>

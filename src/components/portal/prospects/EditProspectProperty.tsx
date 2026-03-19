@@ -29,23 +29,23 @@ import { editProspectProperty } from "@/api/api";
 import { LoaderCircle } from "lucide-react";
 
 const formSchema = z.object({
-  StatusNotes: z.string().optional(),
-  OtherNotes: z.string().optional(),
-  NAMEONCAD: z.string().optional(),
-  MAILINGADDRESS: z.string().optional(),
-  MAILINGADDRESSCITYTXZIP: z.string().optional(),
-  CADMailingADDRESS: z.string().optional(),
-  CADCITY: z.string().optional(),
-  CADZIPCODE: z.string().optional(),
-  CADCOUNTY: z.string().optional(),
-  AccountNumber: z.string().optional(),
-  CLIENTNumber: z.string().optional(),
-  CONTACTOWNER: z.string().optional(),
-  SUBCONTRACTOWNER: z.string().optional(),
-  BPPFEE: z.string().optional(),
-  CONTINGENCYFee: z.string().optional(),
-  FlatFee: z.string().optional(),
-  IsArchived: z.boolean().default(false),
+  statusNotes: z.string().optional(),
+  otherNotes: z.string().optional(),
+  nameOnCad: z.string().optional(),
+  mailingAddress: z.string().optional(),
+  mailingAddressCityTxZip: z.string().optional(),
+  cadMailingAddress: z.string().optional(),
+  cadCity: z.string().optional(),
+  cadZipCode: z.string().optional(),
+  cadCounty: z.string().optional(),
+  accountNumber: z.string().optional(),
+  clientNumber: z.string().optional(),
+  contactOwner: z.string().optional(),
+  subcontractOwner: z.string().optional(),
+  bppFee: z.string().optional(),
+  contingencyFee: z.string().optional(),
+  flatFee: z.string().optional(),
+  isArchived: z.boolean().default(false),
 });
 
 interface CompleteSubmission {
@@ -68,7 +68,7 @@ export default function EditProspectProperty() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      IsArchived: false,
+      isArchived: false,
     },
   });
 
@@ -111,7 +111,7 @@ export default function EditProspectProperty() {
         const property = await getProspectProperty({ propertyId });
         if (property) {
           setProperty(property);
-          form.reset(property.propertyDetails);
+          form.reset(property.propertyDetails ?? {});
         } else {
           setError("Property not found");
         }
@@ -144,7 +144,7 @@ export default function EditProspectProperty() {
             {/* Form Fields */}
             <FormField
               control={form.control}
-              name="NAMEONCAD"
+              name="nameOnCad"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name on CAD</FormLabel>
@@ -156,7 +156,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="MAILINGADDRESS"
+              name="mailingAddress"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mailing Address</FormLabel>
@@ -168,7 +168,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="MAILINGADDRESSCITYTXZIP"
+              name="mailingAddressCityTxZip"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mailing Address City/State/ZIP</FormLabel>
@@ -183,7 +183,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="CADMailingADDRESS"
+              name="cadMailingAddress"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>CAD Mailing Address</FormLabel>
@@ -195,7 +195,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="CADCITY"
+              name="cadCity"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>CAD City</FormLabel>
@@ -207,7 +207,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="CADZIPCODE"
+              name="cadZipCode"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>CAD ZIP Code</FormLabel>
@@ -219,7 +219,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="CADCOUNTY"
+              name="cadCounty"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>CAD County</FormLabel>
@@ -231,7 +231,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="AccountNumber"
+              name="accountNumber"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Account Number</FormLabel>
@@ -243,7 +243,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="CLIENTNumber"
+              name="clientNumber"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Client Number</FormLabel>
@@ -259,7 +259,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="CONTACTOWNER"
+              name="contactOwner"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contract Owner</FormLabel>
@@ -271,7 +271,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="SUBCONTRACTOWNER"
+              name="subcontractOwner"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Subcontract Owner</FormLabel>
@@ -283,7 +283,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="BPPFEE"
+              name="bppFee"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>BPP Fee</FormLabel>
@@ -295,7 +295,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="CONTINGENCYFee"
+              name="contingencyFee"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contingency Fee</FormLabel>
@@ -307,7 +307,7 @@ export default function EditProspectProperty() {
 
             <FormField
               control={form.control}
-              name="FlatFee"
+              name="flatFee"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Flat Fee</FormLabel>
@@ -322,7 +322,7 @@ export default function EditProspectProperty() {
           <div className="flex gap-4 justify-between">
             <FormField
               control={form.control}
-              name="StatusNotes"
+              name="statusNotes"
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel>Status Notes</FormLabel>
@@ -333,7 +333,7 @@ export default function EditProspectProperty() {
             />
             <FormField
               control={form.control}
-              name="OtherNotes"
+              name="otherNotes"
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel>Other Notes</FormLabel>
