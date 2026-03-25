@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { ColumnDef, ColumnFiltersState } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { downloadClientsCSV } from "@/store/data";
-import { Archive, Download, LoaderCircle, UserRoundPlus } from "lucide-react";
+import { Archive, Download, LoaderCircle, Search, UserRoundPlus } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import TableBuilder from "../../TableBuilder";
 import { useClientsQuery } from "@/hooks/queries";
@@ -22,24 +22,17 @@ const ClientTable = <TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [appliedSearch, setAppliedSearch] = useState("");
 
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-      debounceRef.current = null;
-    }, 300);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchTerm]);
+  const commitSearch = () => {
+    setAppliedSearch(searchTerm.trim());
+    setOffset(0);
+  };
 
   const { data, isLoading, isError, refetch } = useClientsQuery({
     limit,
     offset,
-    search: debouncedSearch,
+    search: appliedSearch,
     archived,
   });
 
@@ -110,13 +103,30 @@ const ClientTable = <TData, TValue>({
         </div>
         <div className="flex flex-col w-full gap-2">
           <h1>Quick search a Client</h1>
-          <Input
-            placeholder="Search Name or Client Number..."
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            className="max-w-sm"
-            aria-label="Search clients by name or client number"
-          />
+          <div className="flex items-center gap-2 max-w-sm">
+            <Input
+              placeholder="Search Name or Client Number..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  commitSearch();
+                }
+              }}
+              className="flex-1 min-w-0"
+              aria-label="Search clients by name or client number"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={commitSearch}
+              aria-label="Run search"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         <div className="w-full flex gap-2 justify-end">
           <Button variant={"blue"} onClick={switchArchived}>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,24 +20,17 @@ const InvoicesTable = <TData, TValue>({
   const [archived, setArchived] = useState(false);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [appliedSearch, setAppliedSearch] = useState("");
 
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-      debounceRef.current = null;
-    }, 300);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchTerm]);
+  const commitSearch = () => {
+    setAppliedSearch(searchTerm.trim());
+    setOffset(0);
+  };
 
   const { data, isLoading, isError, refetch } = useInvoicesQuery({
     limit,
     offset,
-    search: debouncedSearch,
+    search: appliedSearch,
     archived,
   });
 
@@ -61,7 +54,11 @@ const InvoicesTable = <TData, TValue>({
     setOffset(0);
   };
 
-  const clearSearch = () => setSearchTerm("");
+  const clearSearch = () => {
+    setSearchTerm("");
+    setAppliedSearch("");
+    setOffset(0);
+  };
 
   if (isLoading) {
     return (
@@ -71,8 +68,9 @@ const InvoicesTable = <TData, TValue>({
             <div className="h-8 w-24 bg-muted animate-pulse rounded" />
             <div className="h-5 w-40 bg-muted animate-pulse rounded mt-2" />
           </div>
-          <div className="relative flex items-center">
-            <div className="h-10 w-80 bg-muted animate-pulse rounded pl-10" />
+          <div className="flex items-center gap-2">
+            <div className="h-10 flex-1 max-w-md w-80 bg-muted animate-pulse rounded" />
+            <div className="h-10 w-10 bg-muted animate-pulse rounded shrink-0" />
           </div>
           <div className="h-10 w-40 bg-muted animate-pulse rounded" />
           <div className="h-10 w-24 bg-muted animate-pulse rounded" />
@@ -103,27 +101,44 @@ const InvoicesTable = <TData, TValue>({
           <h3>Total number of Invoices</h3>
         </div>
 
-        <div className="relative flex items-center">
-          <Search className="absolute left-3 h-4 w-4 text-muted-foreground" aria-hidden />
-          <Input
-            type="text"
-            placeholder="Search by client number or property/account number..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-10 w-80"
-            aria-label="Search invoices by client or property number"
-          />
-          {searchTerm && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearSearch}
-              className="absolute right-1 h-6 w-6 p-0"
-              aria-label="Clear search"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
+        <div className="flex items-center gap-2">
+          <div className="relative flex flex-1 items-center max-w-md w-80 min-w-0">
+            <Input
+              type="text"
+              placeholder="Search by client number or property/account number..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  commitSearch();
+                }
+              }}
+              className="pr-9 w-full"
+              aria-label="Search invoices by client or property number"
+            />
+            {(searchTerm || appliedSearch) && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={clearSearch}
+                className="absolute right-1 h-7 w-7 p-0"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={commitSearch}
+            aria-label="Run search"
+          >
+            <Search className="h-4 w-4" />
+          </Button>
         </div>
 
         <Button variant={"blue"} onClick={switchArchived}>

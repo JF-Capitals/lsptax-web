@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +30,7 @@ export default function EditClient() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
     const { toast } = useToast();
   const clientId = searchParams.get("clientId");
   async function loadClientData() {
@@ -125,6 +126,9 @@ export default function EditClient() {
         await editClient(clientId, clientDetails);
       }
       toast({ title: "Client updated successfully!" });
+      if (clientId) {
+        navigate(`/portal/client?clientId=${encodeURIComponent(clientId)}`);
+      }
     } catch (error) {
       console.error("Failed to update client", error);
       toast({

@@ -20,10 +20,11 @@ export const clientsColumn: ColumnDef<Clients>[] = [
     header: "Client #",
     cell: ({ row }) => {
       const clientId = row.original.clientId;
+      const clientNumber = row.original.clientNumber ?? clientId;
 
       return (
         <NavLink to={`/portal/client?clientId=${clientId}`}>
-          <div className="text-blue-400 font-bold">#{clientId}</div>
+          <div className="text-blue-400 font-bold">#{clientNumber}</div>
         </NavLink>
       );
     },

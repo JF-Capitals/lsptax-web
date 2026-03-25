@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { ColumnDef, ColumnFiltersState } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
   downloadPropertiesCSV,
 } from "@/store/data";
 import TableBuilder from "../TableBuilder";
-import { Archive, Download, LoaderCircle } from "lucide-react";
+import { Archive, Download, LoaderCircle, Search } from "lucide-react";
 import { Properties } from "./columns";
 import { Input } from "@/components/ui/input";
 import { usePropertiesQuery } from "@/hooks/queries";
@@ -24,24 +24,17 @@ const PropertiesTable = <TData extends Properties, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [appliedSearch, setAppliedSearch] = useState("");
 
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-      debounceRef.current = null;
-    }, 300);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchTerm]);
+  const commitSearch = () => {
+    setAppliedSearch(searchTerm.trim());
+    setOffset(0);
+  };
 
   const { data, isLoading, isError, refetch } = usePropertiesQuery({
     limit,
     offset,
-    search: debouncedSearch,
+    search: appliedSearch,
     archived,
   });
 
@@ -111,13 +104,30 @@ const PropertiesTable = <TData extends Properties, TValue>({
         </div>
         <div className="flex flex-col gap-2 w-full">
           <h1 className="text-lg font-semibold">Quick Search Properties</h1>
-          <Input
-            placeholder="Search by property ID, account number, or client name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full max-w-md"
-            aria-label="Search properties"
-          />
+          <div className="flex items-center gap-2 w-full max-w-md">
+            <Input
+              placeholder="Search by property ID, account number, or client name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  commitSearch();
+                }
+              }}
+              className="flex-1 min-w-0"
+              aria-label="Search properties"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={commitSearch}
+              aria-label="Run search"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         <div className="flex gap-2 w-full">
           <Button onClick={switchArchived}>

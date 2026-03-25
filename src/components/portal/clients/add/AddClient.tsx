@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { addClient } from "@/api/api";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
   TypeOfAcct: z.string().optional(),
@@ -51,6 +52,7 @@ const formSchema = z.object({
 
 export default function AddClientForm() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -95,14 +97,24 @@ export default function AddClientForm() {
         contingencyFee: values.contingencyFee?.trim() || undefined,
       };
 
-      await addClient(clientPayload);
+      const data = await addClient(clientPayload);
 
       toast({
         title: "✓ Client added successfully",
         description: "The client has been added to the system.",
       });
 
-      form.reset();
+      const d = data as {
+        client?: { id?: unknown; clientNumber?: string };
+        id?: unknown;
+      };
+      const clientPageParam =
+        d?.client?.id != null && String(d.client.id) !== ""
+          ? String(d.client.id)
+          : d?.id != null && String(d.id) !== ""
+            ? String(d.id)
+            : values.CLIENTNumber;
+      navigate(`/portal/client?clientId=${encodeURIComponent(clientPageParam)}`);
     } catch (error) {
       if (error instanceof Error && error.message === "Email Already Present") {
         toast({

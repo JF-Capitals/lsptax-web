@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -63,6 +63,7 @@ export default function EditProspectProperty() {
   const [error, setError] = useState<string | null>(null);
   const [, setProperty] = useState<PropertyData | null>(null);
   const propertyId = searchParams.get("id");
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -92,6 +93,9 @@ export default function EditProspectProperty() {
 
       toast({ title: "Property updated successfully!" });
       setIsDialogOpen(false);
+      if (propertyId) {
+        navigate(`/portal/prospect/property?id=${encodeURIComponent(propertyId)}`);
+      }
     } catch (error) {
       toast({ title: "Failed to update property", variant: "destructive" });
     } finally {

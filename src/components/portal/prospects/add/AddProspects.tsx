@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { addProspect } from "@/api/api";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
   ProspectName: z.string().min(1, "Prospect name is required"),
@@ -35,6 +36,7 @@ const formSchema = z.object({
 
 export default function AddProspectForm() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false); // Track loading state
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,7 +55,7 @@ export default function AddProspectForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true); // Set loading to true
     try {
-      await addProspect({
+      const result = await addProspect({
         clientName: values.ProspectName,
         email: values.Email,
         phoneNumber: values.PHONENUMBER || "",
@@ -66,7 +68,13 @@ export default function AddProspectForm() {
         title: "✓ Prospect added successfully",
       });
 
-      form.reset();
+      const r = result as { prospect?: { id?: unknown }; id?: unknown };
+      const newId = r?.prospect?.id ?? r?.id;
+      if (newId != null && String(newId) !== "") {
+        navigate(`/portal/prospect?id=${encodeURIComponent(String(newId))}`);
+      } else {
+        form.reset();
+      }
     } catch (error) {
       if (error instanceof Error && error.message === "Email Already Present") {
         toast({

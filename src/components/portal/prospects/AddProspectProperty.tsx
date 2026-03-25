@@ -75,7 +75,7 @@ export default function AddProspectPropertyForm() {
         flatFee: values.FlatFee,
       };
 
-      await addProspectProperty({
+      const result = await addProspectProperty({
         id: Number(id!),
         propertyData,
       });
@@ -83,8 +83,13 @@ export default function AddProspectPropertyForm() {
       toast({
         title: "Added Property to Prospect",
       });
-      form.reset();
-      navigate(`/portal/prospect?id=${id}`);
+      const r = result as { property?: { id?: unknown }; id?: unknown };
+      const newPropId = r?.property?.id ?? r?.id;
+      if (newPropId != null && String(newPropId) !== "") {
+        navigate(`/portal/prospect/property?id=${encodeURIComponent(String(newPropId))}`);
+      } else {
+        navigate(`/portal/prospect?id=${encodeURIComponent(id!)}`);
+      }
     } catch (error) {
       console.error("Error adding property:", error);
       toast({

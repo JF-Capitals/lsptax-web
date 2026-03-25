@@ -21,6 +21,7 @@ export type CADOwner = {
 export type Properties = {
   propertyId: number;
   clientId: string;
+  clientNumber?: string;
   propertyAccount: string;
   propertyDetails: PropertyDetails;
   cadOwner: CADOwner;
@@ -35,9 +36,14 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
     accessorKey: "clientId",
     header: "Client #",
     cell: ({ row }) => {
-      const clientNum = row.original.clientId;
+      const clientId = row.original.clientId;
+      const clientNumber = row.original.clientNumber ?? clientId;
 
-      return <div className="text-blue-400 font-bold">#{clientNum}</div>;
+      return (
+        <NavLink to={`/portal/client?clientId=${clientId}`}>
+          <div className="text-blue-400 font-bold">#{clientNumber}</div>
+        </NavLink>
+      );
     },
   },
   {

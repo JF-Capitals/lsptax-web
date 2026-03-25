@@ -2,7 +2,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +26,7 @@ import { getSingleProspect } from "@/store/data";
 
 const MoveFromProspect = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchParams] = useSearchParams();
@@ -84,7 +85,7 @@ const MoveFromProspect = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       if (values) {
-        await addClient({
+        const data = await addClient({
           clientName: values.CLIENTNAME,
           clientNumber: values.CLIENTNumber,
           email: values.Email,
@@ -92,13 +93,23 @@ const MoveFromProspect = () => {
           mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP,
           typeOfAcct: values.TypeOfAcct ?? "Real",
         });
+
+        toast({
+          title: "✓ Client added successfully",
+        });
+
+        const d = data as {
+          client?: { id?: unknown; clientNumber?: string };
+          id?: unknown;
+        };
+        const clientPageParam =
+          d?.client?.id != null && String(d.client.id) !== ""
+            ? String(d.client.id)
+            : d?.id != null && String(d.id) !== ""
+              ? String(d.id)
+              : values.CLIENTNumber;
+        navigate(`/portal/client?clientId=${encodeURIComponent(clientPageParam)}`);
       }
-
-      toast({
-        title: "✓ Client added successfully",
-      });
-
-      form.reset();
     } catch (error) {
       if (error instanceof Error && error.message === "Email Already Present") {
         toast({

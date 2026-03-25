@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getSingleProspect } from "@/store/data";
 import { editProspect } from "@/api/api";
 
@@ -46,6 +46,7 @@ const formSchema = z.object({
 export default function EditProspectDetails() {
   const [searchParams] = useSearchParams();
   const prospectId = searchParams.get("prospectId");
+  const navigate = useNavigate();
 
   const { toast } = useToast();
   const [loading, setLoading] = useState(false); // Track loading state
@@ -122,6 +123,9 @@ export default function EditProspectDetails() {
       toast({
         title: "✓ Prospect updated successfully",
       });
+      if (prospectId) {
+        navigate(`/portal/prospect?id=${encodeURIComponent(prospectId)}`);
+      }
     } catch (error) {
       toast({
         variant: "destructive",
