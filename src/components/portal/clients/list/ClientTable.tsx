@@ -2,13 +2,20 @@ import { useState } from "react";
 import { ColumnDef, ColumnFiltersState } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { downloadClientsCSV } from "@/store/data";
+import { downloadClientsXlsx } from "@/store/data";
 import { Archive, Download, LoaderCircle, Search, UserRoundPlus } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import TableBuilder from "../../TableBuilder";
 import { useClientsQuery } from "@/hooks/queries";
 import { TableSkeleton } from "../../TableSkeleton";
 import { routes } from "@/routes/ROUTES";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ClientTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -24,6 +31,7 @@ const ClientTable = <TData, TValue>({
   const [downloadingCsv, setDownloadingCsv] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+  const [accountType, setAccountType] = useState<"all" | "real" | "bpp">("all");
 
   const commitSearch = () => {
     setAppliedSearch(searchTerm.trim());
@@ -35,6 +43,7 @@ const ClientTable = <TData, TValue>({
     offset,
     search: appliedSearch,
     archived,
+    accountType: accountType === "all" ? undefined : accountType,
   });
 
   const clients = (data?.data ?? []) as TData[];
@@ -44,7 +53,11 @@ const ClientTable = <TData, TValue>({
   const handleCsvDownload = async () => {
     setDownloadingCsv(true);
     try {
-      await downloadClientsCSV();
+      await downloadClientsXlsx({
+        search: appliedSearch || undefined,
+        accountType: accountType === "all" ? undefined : accountType,
+        archived,
+      });
     } catch (err) {
       console.error("Error downloading CSV:", err);
     } finally {
@@ -122,6 +135,24 @@ const ClientTable = <TData, TValue>({
             >
               <Search className="h-4 w-4" />
             </Button>
+          </div>
+          <div className="flex items-center gap-2 max-w-sm">
+            <Select
+              value={accountType}
+              onValueChange={(v) => {
+                setAccountType(v as "all" | "real" | "bpp");
+                setOffset(0);
+              }}
+            >
+              <SelectTrigger className="max-w-sm" aria-label="Filter clients by account type">
+                <SelectValue placeholder="Account type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All account types</SelectItem>
+                <SelectItem value="real">Real</SelectItem>
+                <SelectItem value="bpp">BPP</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="w-full flex gap-2 justify-end">

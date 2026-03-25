@@ -23,18 +23,20 @@ export function useClientsQuery({
   offset = 0,
   search = "",
   archived = false,
+  accountType,
 }: {
   limit?: number;
   offset?: number;
   search?: string;
   archived?: boolean;
+  accountType?: string;
 }) {
   return useQuery({
-    queryKey: ["clients", limit, offset, search, archived],
+    queryKey: ["clients", limit, offset, search, archived, accountType || ""],
     queryFn: () =>
       archived
-        ? getArchiveClients(limit, offset, search || undefined)
-        : getClients(limit, offset, search || undefined),
+        ? getArchiveClients(limit, offset, search || undefined, accountType || undefined)
+        : getClients(limit, offset, search || undefined, accountType || undefined),
     ...queryClientDefaults,
   });
 }
