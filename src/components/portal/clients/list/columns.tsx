@@ -51,10 +51,10 @@ export const clientsColumn: ColumnDef<Clients>[] = [
     accessorKey: "actions",
     header: "Actions",
     cell: ({ row }) => {
-      const { clientId: clientNum, clientNumber: clientId, clientName, isArchived } = row.original;
+      const { clientId, clientNumber, clientName, isArchived } = row.original;
       return (
         <ClientActionsCell
-          clientNum={clientNum}
+          clientNum={clientNumber}
           clientId={clientId}
           clientName={clientName}
           isArchived={isArchived}
