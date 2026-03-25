@@ -35,6 +35,7 @@ const formSchema = z.object({
   nameOnCad: z.string().optional(),
   mailingAddress: z.string().optional(),
   mailingAddressCityTxZip: z.string().optional(),
+  propertyAddress: z.string().optional(),
   cadMailingAddress: z.string().optional(),
   cadCity: z.string().optional(),
   cadZipCode: z.string().optional(),
@@ -180,6 +181,18 @@ export default function EditProspectProperty() {
                     placeholder="Enter Mailing Address City/State/ZIP"
                     {...field}
                   />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="propertyAddress"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Property Address</FormLabel>
+                  <Input placeholder="Enter Property Address" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
