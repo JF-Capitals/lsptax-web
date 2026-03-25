@@ -149,19 +149,18 @@ const ProspectPropertyPage = () => {
           <table className="table-auto w-full">
             <tbody>
               <tr>
-                <td className="font-medium">Assessor:</td>
-                <td>{property.propertyDetails.contactOwner}</td>
+                <td className="font-medium">Name on CAD:</td>
+                <td>{property.propertyDetails.nameOnCad || "—"}</td>
               </tr>
               <tr>
-                <td className="font-medium">Address:</td>
+                <td className="font-medium">Property Address:</td>
                 <td>
-                  {property.propertyDetails.cadMailingAddress + " "}
-                  {property.propertyDetails.cadZipCode + " "}
+                  {property.propertyDetails.propertyAddress || "—"}
                 </td>
               </tr>
               <tr>
                 <td className="font-medium">County:</td>
-                <td>{property.propertyDetails.cadCounty}</td>
+                <td>{property.propertyDetails.cadCounty || "—"}</td>
               </tr>
             </tbody>
           </table>

@@ -242,8 +242,6 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
   const mailingAddress = prop?.mailingAddress ?? "";
   const mailingCityZip = prop?.mailingAddressCityTxZip ?? "";
   const propertyAddress = prop?.propertyAddress ?? "";
-  const cadMailingAddress = prop?.cadMailingAddress ?? "";
-  const cadZipCode = prop?.cadZipCode ?? "";
   const cadCounty = prop?.cadCounty ?? "";
   const acctType = String(client?.typeOfAcct ?? client?.TypeOfAcct ?? "")
     .trim()
@@ -383,9 +381,7 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
               <tr>
                 <td className="font-medium">Property Address:</td>
                 <td>
-                  {propertyAddress ||
-                    [cadMailingAddress, cadZipCode].filter(Boolean).join(" ") ||
-                    "—"}
+                  {propertyAddress || "—"}
                 </td>
               </tr>
               <tr>
