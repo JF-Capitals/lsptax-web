@@ -6,6 +6,7 @@ import MiniTableBuilder from "./MiniTableBuilder";
 import { clientsColumn } from "./columns/clientColumns";
 import { propertiesColumn } from "./columns/propColumns";
 import { prospectColumn } from "./columns/prospectColumns";
+import { routes } from "@/routes/ROUTES";
 
 type MiniTableContainerProps = {
   propData: Properties[];
@@ -30,7 +31,7 @@ const MiniTableContainer = ({
           data={prospectData}
           columns={prospectColumn as import("@tanstack/react-table").ColumnDef<Prospect, any>[]}
           label="Prospects"
-          link="/portal/prospects/list-prospect"
+          link={routes.prospects.list()}
         />
       </div>
       {/* Third Item */}
@@ -39,7 +40,7 @@ const MiniTableContainer = ({
           data={propData}
           columns={propertiesColumn as import("@tanstack/react-table").ColumnDef<Properties, any>[]}
           label="Properties"
-          link="/portal/properties"
+          link={routes.properties.list()}
         />
       </div>
       {/* Fourth Item */}
@@ -48,7 +49,7 @@ const MiniTableContainer = ({
           data={clientData}
           columns={clientsColumn as import("@tanstack/react-table").ColumnDef<Clients, any>[]}
           label="Clients"
-          link="/portal/clients/list-clients"
+          link={routes.clients.list()}
         />
       </div>
     </div>

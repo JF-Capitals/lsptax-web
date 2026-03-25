@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { routes } from "@/routes/ROUTES";
 import { FileQuestion } from "lucide-react";
 
 export default function NotFoundPage() {
@@ -14,7 +15,7 @@ export default function NotFoundPage() {
       <p className="text-muted-foreground text-center mb-6 max-w-md">
         The page you’re looking for doesn’t exist or you don’t have access to it.
       </p>
-      <Link to="/portal/dashboard">
+      <Link to={routes.dashboard()}>
         <Button variant="blue">Back to Dashboard</Button>
       </Link>
     </div>

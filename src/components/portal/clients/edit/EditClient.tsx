@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { getSingleClient } from "@/store/data";
 import { LoaderCircle } from "lucide-react";
 import { editClient } from "@/api/api";
+import { routes } from "@/routes/ROUTES";
 
 
 export default function EditClient() {
@@ -33,46 +34,6 @@ export default function EditClient() {
   const navigate = useNavigate();
     const { toast } = useToast();
   const clientId = searchParams.get("clientId");
-  async function loadClientData() {
-    try {
-      if (clientId) {
-        const data = await getSingleClient({ clientId: clientId });
-        setLoading(false);
-
-        const fields = {
-          TypeOfAcct: data?.client.typeOfAcct || "",
-          CLIENTNumber: data?.client.clientNumber || "",
-          CLIENTNAME: data?.client.clientName || "",
-          Email: data?.client.email || "",
-          BillingEmail: data?.client.billingEmail || "",
-          PHONENUMBER: data?.client.phoneNumber || "",
-          MAILINGADDRESS: data?.client.mailingAddress || "",
-          MAILINGADDRESSCITYTXZIP: data?.client.mailingAddressCityTxZip || "",
-          BillingAddress: data?.client.billingAddress || "",
-          contingencyFee: data?.client.contingencyFee ?? "",
-          IsArchived: data?.client.isArchived || false,
-          useSameAsEmail: false,
-          useSameAsMailing: false,
-        };
-
-        Object.entries(fields).forEach(([key, value]) => {
-          form.setValue(key as keyof typeof fields, value);
-        });
-      }
-    } catch (error) {
-      console.error("Failed to load client data", error);
-      toast({
-        title: "Could not load client data. Please try again later.",
-        variant: "destructive",
-      });
-      setError("Error getting client details");
-    }
-  }
-  useEffect(() => {
-    if (clientId) {
-      loadClientData();
-    }
-  }, [searchParams]);
 
   const formSchema = z.object({
     TypeOfAcct: z.string().optional(),
@@ -103,32 +64,92 @@ export default function EditClient() {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsSubmitting(true); // Set loading state
-    try {
-      if (clientId) {
-        const { useSameAsEmail, useSameAsMailing } = values;
-        void useSameAsEmail;
-        void useSameAsMailing;
+  useEffect(() => {
+    if (!clientId) {
+      setLoading(false);
+      setError(
+        "Client ID is required. Open this page from the clients list with ?clientId=…"
+      );
+      return;
+    }
 
-        // API v2 expects camelCase fields in clientDetails
-        const clientDetails = {
-          clientName: values.CLIENTNAME,
-          email: values.Email,
-          phoneNumber: values.PHONENUMBER ?? "",
-          mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP ?? "",
-          typeOfAcct: values.TypeOfAcct ?? "",
-          billingEmail: values.BillingEmail ?? "",
-          billingAddress: values.BillingAddress ?? "",
-          contingencyFee: values.contingencyFee?.trim() || undefined,
+    let cancelled = false;
+    setLoading(true);
+    setError("");
+
+    (async () => {
+      try {
+        const data = await getSingleClient({ clientId });
+        if (cancelled) return;
+
+        const fields = {
+          TypeOfAcct: data?.client.typeOfAcct || "",
+          CLIENTNumber: data?.client.clientNumber || "",
+          CLIENTNAME: data?.client.clientName || "",
+          Email: data?.client.email || "",
+          BillingEmail: data?.client.billingEmail || "",
+          PHONENUMBER: data?.client.phoneNumber || "",
+          MAILINGADDRESS: data?.client.mailingAddress || "",
+          MAILINGADDRESSCITYTXZIP: data?.client.mailingAddressCityTxZip || "",
+          BillingAddress: data?.client.billingAddress || "",
+          contingencyFee: data?.client.contingencyFee ?? "",
+          IsArchived: data?.client.isArchived || false,
+          useSameAsEmail: false,
+          useSameAsMailing: false,
         };
 
-        await editClient(clientId, clientDetails);
+        Object.entries(fields).forEach(([key, value]) => {
+          form.setValue(key as keyof typeof fields, value);
+        });
+      } catch (err) {
+        console.error("Failed to load client data", err);
+        if (!cancelled) {
+          toast({
+            title: "Could not load client data. Please try again later.",
+            variant: "destructive",
+          });
+          setError("Error getting client details");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clientId, form, toast]);
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!clientId) {
+      toast({
+        title: "Missing client ID",
+        description: "Cannot save without clientId in the URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsSubmitting(true); // Set loading state
+    try {
+      const { useSameAsEmail, useSameAsMailing } = values;
+      void useSameAsEmail;
+      void useSameAsMailing;
+
+      // API v2 expects camelCase fields in clientDetails
+      const clientDetails = {
+        clientName: values.CLIENTNAME,
+        email: values.Email,
+        phoneNumber: values.PHONENUMBER ?? "",
+        mailingAddressCityTxZip: values.MAILINGADDRESSCITYTXZIP ?? "",
+        typeOfAcct: values.TypeOfAcct ?? "",
+        billingEmail: values.BillingEmail ?? "",
+        billingAddress: values.BillingAddress ?? "",
+        contingencyFee: values.contingencyFee?.trim() || undefined,
+      };
+
+      await editClient(clientId, clientDetails);
       toast({ title: "Client updated successfully!" });
-      if (clientId) {
-        navigate(`/portal/client?clientId=${encodeURIComponent(clientId)}`);
-      }
+      navigate(routes.client.detail(clientId));
     } catch (error) {
       console.error("Failed to update client", error);
       toast({
@@ -149,7 +170,14 @@ export default function EditClient() {
   }
 
   if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 min-h-[40vh] px-4 text-center">
+        <p className="text-lg font-semibold text-red-600">{error}</p>
+        <Button asChild variant="outline">
+          <Link to={routes.clients.list()}>Back to clients</Link>
+        </Button>
+      </div>
+    );
   }
 
   return (

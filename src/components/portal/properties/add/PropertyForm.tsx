@@ -15,6 +15,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { addProperty } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 import { LoaderCircle } from "lucide-react";
+import { routes } from "@/routes/ROUTES";
 
 const formSchema = z.object({
   StatusNotes: z.string().optional(),
@@ -95,7 +96,7 @@ export default function AddPropertyForm() {
 
       const propertyId = newProperty?.property?.id;
       if (propertyId != null) {
-        navigate(`/portal/property?propertyId=${propertyId}`);
+        navigate(routes.properties.view(propertyId));
       } else {
         form.reset();
       }

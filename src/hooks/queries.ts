@@ -11,6 +11,7 @@ import {
   dashboardData,
 } from "@/store/data";
 import { DEFAULT_PAGE_SIZE } from "@/store/common";
+import { QUERY_META_SUPPRESS_GLOBAL_ERROR_TOAST } from "@/routes/ROUTES";
 
 const queryClientDefaults = {
   staleTime: 60 * 1000,
@@ -103,6 +104,7 @@ export function useDashboardQuery() {
   return useQuery({
     queryKey: ["dashboard"],
     queryFn: dashboardData,
+    meta: QUERY_META_SUPPRESS_GLOBAL_ERROR_TOAST,
     ...queryClientDefaults,
   });
 }
@@ -116,16 +118,19 @@ export function useDashboardDataQuery() {
       {
         queryKey: ["properties", 10, 0, "", false],
         queryFn: () => getProperties(10, 0),
+        meta: QUERY_META_SUPPRESS_GLOBAL_ERROR_TOAST,
         ...queryClientDefaults,
       },
       {
         queryKey: ["clients", 10, 0, "", false],
         queryFn: () => getClients(10, 0),
+        meta: QUERY_META_SUPPRESS_GLOBAL_ERROR_TOAST,
         ...queryClientDefaults,
       },
       {
         queryKey: ["prospects", 10, 0, false],
         queryFn: () => getProspects(10, 0),
+        meta: QUERY_META_SUPPRESS_GLOBAL_ERROR_TOAST,
         ...queryClientDefaults,
       },
     ],

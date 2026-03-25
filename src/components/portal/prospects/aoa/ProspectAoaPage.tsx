@@ -5,6 +5,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { previewAoa, sendAoaForClient } from "@/api/api";
 import { ContractPreviewAndSend } from "@/components/portal/shared/ContractPreviewAndSend";
+import { routes } from "@/routes/ROUTES";
 
 export default function ProspectAoaPage() {
   const [searchParams] = useSearchParams();
@@ -100,7 +101,7 @@ export default function ProspectAoaPage() {
         description:
           "AOA has been sent to the prospect. They will receive an email from DocuSign.",
       });
-      navigate(`/portal/prospect/property?id=${propertyIdNum}`);
+      navigate(routes.prospect.property(propertyIdNum));
     } catch (error) {
       toast({
         title: "Failed to send AOA",

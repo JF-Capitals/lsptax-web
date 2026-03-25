@@ -2,7 +2,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { addClient } from "@/api/api";
 import { useEffect, useState } from "react";
 import { getSingleProspect } from "@/store/data";
+import { routes } from "@/routes/ROUTES";
 
 const MoveFromProspect = () => {
   const { toast } = useToast();
@@ -31,34 +32,6 @@ const MoveFromProspect = () => {
   const [error, setError] = useState("");
   const [searchParams] = useSearchParams();
   const prospectId = searchParams.get("prospectId");
-
-  useEffect(() => {
-    async function loadProspectData() {
-      try {
-        if (prospectId) {
-          const data = await getSingleProspect({ prospectId });
-          if (data) {
-            form.reset({
-              CLIENTNAME: data.prospect.clientName ?? "",
-              CLIENTNumber: "",
-              Email: data.prospect.email ?? "",
-              PHONENUMBER: data.prospect.phoneNumber ?? "",
-              MAILINGADDRESSCITYTXZIP: data.prospect.mailingAddressCityTxZip ?? "",
-              TypeOfAcct: "Real",
-              IsArchived: false,
-            });
-          }
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Failed to load prospect data", error);
-        setError("Error getting prospect details");
-      }
-    }
-    if (prospectId) {
-      loadProspectData();
-    }
-  }, [searchParams]);
 
   const formSchema = z.object({
     TypeOfAcct: z.string().optional(),
@@ -81,6 +54,49 @@ const MoveFromProspect = () => {
       TypeOfAcct: "Real",
     },
   });
+
+  useEffect(() => {
+    if (!prospectId) {
+      setLoading(false);
+      setError(
+        "Prospect ID is missing. Open this page from a prospect using Move to Client (?prospectId=…)."
+      );
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError("");
+
+    (async () => {
+      try {
+        const data = await getSingleProspect({ prospectId });
+        if (cancelled) return;
+        if (data) {
+          form.reset({
+            CLIENTNAME: data.prospect.clientName ?? "",
+            CLIENTNumber: "",
+            Email: data.prospect.email ?? "",
+            PHONENUMBER: data.prospect.phoneNumber ?? "",
+            MAILINGADDRESSCITYTXZIP: data.prospect.mailingAddressCityTxZip ?? "",
+            TypeOfAcct: "Real",
+            IsArchived: false,
+          });
+        } else {
+          setError("Prospect not found.");
+        }
+      } catch (err) {
+        console.error("Failed to load prospect data", err);
+        if (!cancelled) setError("Error getting prospect details");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [prospectId, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -108,7 +124,7 @@ const MoveFromProspect = () => {
             : d?.id != null && String(d.id) !== ""
               ? String(d.id)
               : values.CLIENTNumber;
-        navigate(`/portal/client?clientId=${encodeURIComponent(clientPageParam)}`);
+        navigate(routes.client.detail(clientPageParam));
       }
     } catch (error) {
       if (error instanceof Error && error.message === "Email Already Present") {
@@ -131,7 +147,14 @@ const MoveFromProspect = () => {
   }
 
   if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 min-h-[40vh] px-4 text-center">
+        <p className="text-lg font-semibold text-red-600">{error}</p>
+        <Button asChild variant="outline">
+          <Link to={routes.prospects.list()}>Back to prospects</Link>
+        </Button>
+      </div>
+    );
   }
   return (
     <Form {...form}>

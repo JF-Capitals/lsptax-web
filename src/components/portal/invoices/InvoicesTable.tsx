@@ -7,6 +7,7 @@ import TableBuilder from "../TableBuilder";
 import { Archive, Download, LoaderCircle, Search, X } from "lucide-react";
 import { useInvoicesQuery } from "@/hooks/queries";
 import { TableSkeleton } from "../TableSkeleton";
+import { routes } from "@/routes/ROUTES";
 
 interface InvoicesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -82,11 +83,8 @@ const InvoicesTable = <TData, TValue>({
 
   if (isError) {
     return (
-      <div className="flex flex-col justify-center items-center py-20 text-destructive">
-        <span className="text-lg font-semibold">
-          Failed to load invoices. Please try again later.
-        </span>
-        <Button variant="blue" className="mt-4" onClick={() => refetch()}>
+      <div className="flex flex-col justify-center items-center py-20 gap-2">
+        <Button variant="blue" onClick={() => refetch()}>
           Retry
         </Button>
       </div>
@@ -160,7 +158,7 @@ const InvoicesTable = <TData, TValue>({
         emptyState={{
           title: "No invoices yet",
           description: "Invoices will appear here once you generate them for clients.",
-          action: { label: "Go to clients", to: "/portal/clients/list-client" },
+          action: { label: "Go to clients", to: routes.clients.list() },
         }}
         serverPagination={{
           total,

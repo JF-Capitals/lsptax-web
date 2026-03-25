@@ -8,6 +8,7 @@ import { PropertyData } from "@/types/types";
 import { deleteProperty } from "@/api/api";
 import YearTable from "../yeardata/YearTable";
 import { useToast } from "@/hooks/use-toast";
+import { routes } from "@/routes/ROUTES";
 
 
 const ViewProperty = () => {
@@ -20,7 +21,15 @@ const ViewProperty = () => {
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false); // Track invoice generation state
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Track selected year
   const [searchParams, setSearchParams] = useSearchParams();
-  const propertyId = parseInt(searchParams.get("propertyId") || "1");
+  const propertyIdParam = searchParams.get("propertyId");
+  const parsedPropertyId =
+    propertyIdParam != null && propertyIdParam.trim() !== ""
+      ? Number.parseInt(propertyIdParam, 10)
+      : NaN;
+  const propertyId =
+    Number.isFinite(parsedPropertyId) && parsedPropertyId > 0
+      ? parsedPropertyId
+      : null;
   const [isNavigating, setIsNavigating] = useState<"prev" | "next" | null>(
     null
   ); // Track navigation state
@@ -97,6 +106,7 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
 };
 
   const handleDelete = async () => {
+    if (propertyId == null) return;
     if (!confirm("Are you sure you want to delete this property?")) {
       return;
     }
@@ -167,7 +177,9 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
       });
 
       // Refresh the property data to show the new invoice
-      await fetchProperty(propertyId);
+      if (propertyId != null) {
+        await fetchProperty(propertyId);
+      }
       
     } catch (error) {
       console.error("Error generating invoice:", error);
@@ -182,8 +194,14 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
   };
 
   useEffect(() => {
+    if (propertyId == null) {
+      setLoading(false);
+      setError("Property ID is required. Open this page from a property link with ?propertyId=…");
+      setProperty(null);
+      return;
+    }
     fetchProperty(propertyId);
-  }, [propertyId]); // Refetch when propertyId changes
+  }, [propertyId]);
 
   if (loading) {
     return (
@@ -211,6 +229,8 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
     );
   }
 
+  const activePropertyId = property.propertyDetails.id;
+
   const client = property.clientDetails;
   const prop = property.propertyDetails;
   const clientName = client?.clientName ?? "";
@@ -230,19 +250,17 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
       <div className="flex flex-col md:flex-row justify-between ">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">View Property</h1>
         <div className="flex gap-4 flex-col md:flex-row w-full md:w-auto">
-          <NavLink
-            to={`/portal/edit-properties?propertyId=${property.propertyDetails.id}`}
-          >
+          <NavLink to={routes.properties.edit(property.propertyDetails.id)}>
             <Button className="w-full">Edit Property</Button>
           </NavLink>
 
           <NavLink
-            to={`/portal/invoice?clientId=${clientNumber}`}
+            to={routes.invoices.byClient(clientNumber)}
           >
             <Button className="w-full">View Invoices</Button>
           </NavLink>
 
-          <NavLink to={`/portal/aoa?propertyId=${property.propertyDetails.id}`}>
+          <NavLink to={routes.properties.aoa(property.propertyDetails.id)}>
             <Button className="w-full" variant="outline">
               Create AOA
             </Button>
@@ -403,8 +421,8 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
 
       <div className="flex w-full justify-between mt-4">
         <Button
-          onClick={() => handleNavigation(propertyId - 1, "prev")}
-          disabled={propertyId <= 1 || isNavigating === "prev"} // Disable while navigating
+          onClick={() => handleNavigation(activePropertyId - 1, "prev")}
+          disabled={activePropertyId <= 1 || isNavigating === "prev"} // Disable while navigating
           className="flex items-center justify-center"
         >
           {isNavigating === "prev" ? (
@@ -417,7 +435,7 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
           )}
         </Button>
         <Button
-          onClick={() => handleNavigation(propertyId + 1, "next")}
+          onClick={() => handleNavigation(activePropertyId + 1, "next")}
           disabled={isNavigating === "next"} // Disable while navigating
           className="flex items-center justify-center"
         >

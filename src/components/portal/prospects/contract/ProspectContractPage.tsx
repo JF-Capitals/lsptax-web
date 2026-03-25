@@ -4,6 +4,7 @@ import { getSingleProspect } from "@/store/data";
 import { useToast } from "@/hooks/use-toast";
 import { previewContract, sendContractForClient } from "@/api/api";
 import { ContractPreviewAndSend } from "@/components/portal/shared/ContractPreviewAndSend";
+import { routes } from "@/routes/ROUTES";
 import { Property, Prospect } from "@/types/types";
 
 interface ProspectData {
@@ -98,7 +99,7 @@ export default function ProspectContractPage() {
         title: "✓ Contract sent for signing",
         description: "Contract has been sent to the prospect. They will receive an email from DocuSign.",
       });
-      navigate(`/portal/prospect?id=${prospectIdParam}`);
+      navigate(routes.prospect.detail(String(prospectIdParam)));
     } catch (err) {
       toast({
         title: "Failed to send contract",

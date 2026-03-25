@@ -11,6 +11,7 @@ import { House, Mail, MapPin, Phone, FileText, LoaderCircle } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ClientData, Property } from "@/types/types";
+import { routes } from "@/routes/ROUTES";
 
 interface Client {
   client: ClientData;
@@ -134,17 +135,17 @@ const ClientPage = () => {
       <div className="flex justify-between">
         <h1 className="text-4xl font-bold text-center mb-6">Client Details</h1>
         <div className="flex gap-4">
-          <NavLink to={`/portal/edit-client?clientId=${clientData.client.id}`}>
+          <NavLink to={routes.client.edit(clientData.client.id)}>
             <Button variant={"blue"} className="w-full">
               Edit Client Details
             </Button>
           </NavLink>
-          <NavLink to={`/portal/invoice?clientId=${clientData.client.id}`}>
+          <NavLink to={routes.invoices.byClient(clientData.client.id)}>
             <Button variant={"blue"} className="w-full">
               Invoice
             </Button>
           </NavLink>
-          <NavLink to={`/portal/contract?clientId=${clientData.client.id}`}>
+          <NavLink to={routes.client.contract(clientData.client.id)}>
             <Button variant={"blue"} className="w-full">
               Create Contract
             </Button>
@@ -197,7 +198,7 @@ const ClientPage = () => {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Associated Property(s)</h1>
           <NavLink
-            to={`/portal/add-property?clientId=${clientData.client.id}`}
+            to={routes.client.addProperty(clientData.client.id)}
           >
             <Button variant={"blue"} className="w-full">
               Add Properties
@@ -340,7 +341,7 @@ const PropertyBox: React.FC<Property> = ({
   cadCounty,
 }) => {
   return (
-    <NavLink to={`/portal/property?propertyId=${id}`} className="block">
+    <NavLink to={routes.properties.view(id)} className="block">
       <div className="border rounded-2xl p-4 shadow-md hover:shadow-lg transition duration-300 bg-gradient-to-tr from-white to-gray-50 hover:from-blue-50 cursor-pointer h-full flex flex-col justify-between">
         <div className="flex items-center gap-3 mb-4">
           <House size={24} className="text-indigo-500" />

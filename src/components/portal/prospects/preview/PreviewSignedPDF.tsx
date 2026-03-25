@@ -1,11 +1,12 @@
 import { getPreviewDocuments, getSingleProspect } from "@/store/data";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { changeProspectStatus, sendContract } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 import { Property, Prospect } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { LoaderCircle } from "lucide-react";
+import { routes } from "@/routes/ROUTES";
 
 function uint8ArrayToBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -29,6 +30,8 @@ const PreviewSignedPdf = () => {
   );
   const [clientData, setClientData] = useState<ProspectData | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const convertBase64ToUint8Array = (base64String: string): Uint8Array => {
@@ -40,33 +43,92 @@ const PreviewSignedPdf = () => {
   };
 
   useEffect(() => {
-    const fetchPreviewDocuments = async () => {
-      try {
-        const response = await getPreviewDocuments({ prospectId: Number(id) });
-        if (response?.aoaPdf)
-          setAoaPdfData(convertBase64ToUint8Array(response.aoaPdf));
-        if (response?.contractPdf)
-          setContractPdfData(convertBase64ToUint8Array(response.contractPdf));
-      } catch (error) {
-        console.error("Error fetching contract preview data:", error);
-      }
-    };
-
-    const fetchClientData = async () => {
-      try {
-        if (id) setClientData(await getSingleProspect({ prospectId: id }));
-      } catch (error) {
-        console.error("Error fetching client data:", error);
-      }
-    };
-
-    if (id) {
-      fetchPreviewDocuments();
-      fetchClientData();
+    if (!id) {
+      setLoading(false);
+      setError(null);
+      setClientData(null);
+      setAoaPdfData(null);
+      setContractPdfData(null);
+      return;
     }
+
+    const prospectIdNum = Number(id);
+    if (!Number.isFinite(prospectIdNum)) {
+      setLoading(false);
+      setError("Invalid prospect ID.");
+      setClientData(null);
+      setAoaPdfData(null);
+      setContractPdfData(null);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    (async () => {
+      try {
+        const [previewRes, prospectRes] = await Promise.all([
+          getPreviewDocuments({ prospectId: prospectIdNum }),
+          getSingleProspect({ prospectId: id }),
+        ]);
+        if (cancelled) return;
+        if (previewRes?.aoaPdf) {
+          setAoaPdfData(convertBase64ToUint8Array(previewRes.aoaPdf));
+        } else {
+          setAoaPdfData(null);
+        }
+        if (previewRes?.contractPdf) {
+          setContractPdfData(convertBase64ToUint8Array(previewRes.contractPdf));
+        } else {
+          setContractPdfData(null);
+        }
+        setClientData(prospectRes ?? null);
+      } catch (e) {
+        console.error("Error loading preview documents:", e);
+        if (!cancelled) {
+          setError("Failed to load preview documents.");
+          setClientData(null);
+          setAoaPdfData(null);
+          setContractPdfData(null);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
-  if (!clientData) {
+  if (!id) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 min-h-[40vh] px-4 text-center">
+        <p className="text-lg font-semibold text-red-600">Prospect ID is required</p>
+        <p className="text-muted-foreground max-w-md">
+          Open this page from a prospect so the URL includes{" "}
+          <code className="text-sm bg-muted px-1 rounded">?id=…</code>.
+        </p>
+        <Button asChild variant="outline">
+          <Link to={routes.prospects.list()}>Back to prospects</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 min-h-[40vh] px-4 text-center">
+        <p className="text-lg font-semibold text-red-600">{error}</p>
+        <Button asChild variant="outline">
+          <Link to={routes.prospects.list()}>Back to prospects</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen text-gray-500 bg-transparent">
         <LoaderCircle className="w-8 h-8 animate-spin mb-4" />
@@ -75,13 +137,24 @@ const PreviewSignedPdf = () => {
     );
   }
 
-  const handleSendContract = async (id: number) => {
+  if (!clientData) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 min-h-[40vh] px-4 text-center">
+        <p className="text-lg font-semibold text-gray-700">No prospect data available.</p>
+        <Button asChild variant="outline">
+          <Link to={routes.prospects.list()}>Back to prospects</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const handleSendContract = async (prospectId: number) => {
     setIsSending(true);
     try {
-      await sendContract({ prospectId: id });
+      await sendContract({ prospectId });
       toast({
         title: "Contract Sent Successfully",
-        description: `Contract sent to ID: ${id}`,
+        description: `Contract sent to ID: ${prospectId}`,
       });
       setClientData((prevData) =>
         prevData
@@ -93,11 +166,11 @@ const PreviewSignedPdf = () => {
       );
       if (clientData?.prospect.status === "CONTACTED") {
         await changeProspectStatus({
-          prospectId: id,
+          prospectId,
           newStatus: "IN_PROGRESS",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         variant: "destructive",
         title: "Failed to send contract",
@@ -146,8 +219,7 @@ const PreviewSignedPdf = () => {
               />
             ) : (
               <div className="flex flex-col items-center justify-center h-32 text-gray-500">
-                <LoaderCircle className="w-6 h-6 animate-spin mb-2" />
-                <p>Loading {title}...</p>
+                <p>No {title} available.</p>
               </div>
             )}
           </div>

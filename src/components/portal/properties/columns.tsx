@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import formatDate from "@/utils/formatDate";
 
 import { NavLink } from "react-router-dom";
+import { routes } from "@/routes/ROUTES";
 
 export type PropertyDetails = {
   type: string;
@@ -40,7 +41,7 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
       const clientNumber = row.original.clientNumber ?? clientId;
 
       return (
-        <NavLink to={`/portal/client?clientId=${clientId}`}>
+        <NavLink to={routes.client.detail(clientId)}>
           <div className="text-blue-400 font-bold">#{clientNumber}</div>
         </NavLink>
       );
@@ -54,7 +55,7 @@ export const propertiesColumn: ColumnDef<Properties>[] = [
 
       return (
         <NavLink
-          to={`/portal/property?propertyId=${row.original.propertyId}`}
+          to={routes.properties.view(row.original.propertyId)}
         >
           <div className="text-green-400 font-bold">#{propertyAccount}</div>
         </NavLink>

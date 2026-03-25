@@ -21,9 +21,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { getSingleProspect } from "@/store/data";
 import { editProspect } from "@/api/api";
+import { routes } from "@/routes/ROUTES";
 
 const formSchema = z.object({
   TypeOfAcct: z.string().optional(),
@@ -103,29 +104,33 @@ export default function EditProspectDetails() {
   }, [prospectId, form, toast]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!prospectId) {
+      toast({
+        variant: "destructive",
+        title: "Missing prospect",
+        description: "Cannot save without a prospect ID in the URL.",
+      });
+      return;
+    }
     setLoading(true);
     try {
-      if (prospectId) {
-        const { useSameAsMailing, useSameAsEmail, ...rest } = values;
-        const prospectDetails: Record<string, unknown> = {
-          clientName: rest.ProspectName,
-          email: rest.Email,
-          billingEmail: rest.BillingEmail,
-          phoneNumber: rest.PHONENUMBER,
-          mailingAddress: rest.MAILINGADDRESS,
-          mailingAddressCityTxZip: rest.MAILINGADDRESSCITYTXZIP,
-          billingAddress: rest.BillingAddress,
-          typeOfAcct: rest.TypeOfAcct,
-          contingencyFee: rest.contingencyFee?.trim() || undefined,
-        };
-        await editProspect(prospectId, prospectDetails);
-      }
+      const { useSameAsMailing, useSameAsEmail, ...rest } = values;
+      const prospectDetails: Record<string, unknown> = {
+        clientName: rest.ProspectName,
+        email: rest.Email,
+        billingEmail: rest.BillingEmail,
+        phoneNumber: rest.PHONENUMBER,
+        mailingAddress: rest.MAILINGADDRESS,
+        mailingAddressCityTxZip: rest.MAILINGADDRESSCITYTXZIP,
+        billingAddress: rest.BillingAddress,
+        typeOfAcct: rest.TypeOfAcct,
+        contingencyFee: rest.contingencyFee?.trim() || undefined,
+      };
+      await editProspect(prospectId, prospectDetails);
       toast({
         title: "✓ Prospect updated successfully",
       });
-      if (prospectId) {
-        navigate(`/portal/prospect?id=${encodeURIComponent(prospectId)}`);
-      }
+      navigate(routes.prospect.detail(prospectId));
     } catch (error) {
       toast({
         variant: "destructive",
@@ -141,6 +146,24 @@ export default function EditProspectDetails() {
     return (
       <div className="flex justify-center h-full items-center py-20">
         <LoaderCircle className="animate-spin w-16 h-16 text-blue-500" />
+      </div>
+    );
+  }
+
+  if (!prospectId) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 min-h-[40vh] px-4 text-center">
+        <p className="text-lg font-semibold text-red-600">
+          Prospect ID is required
+        </p>
+        <p className="text-muted-foreground max-w-md">
+          Open edit prospect from the prospects list so the URL includes{" "}
+          <code className="text-sm bg-muted px-1 rounded">?prospectId=…</code>
+          .
+        </p>
+        <Button asChild variant="outline">
+          <Link to={routes.prospects.list()}>Back to prospects</Link>
+        </Button>
       </div>
     );
   }

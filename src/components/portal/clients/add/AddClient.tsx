@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { addClient } from "@/api/api";
+import { routes } from "@/routes/ROUTES";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -114,7 +115,7 @@ export default function AddClientForm() {
           : d?.id != null && String(d.id) !== ""
             ? String(d.id)
             : values.CLIENTNumber;
-      navigate(`/portal/client?clientId=${encodeURIComponent(clientPageParam)}`);
+      navigate(routes.client.detail(clientPageParam));
     } catch (error) {
       if (error instanceof Error && error.message === "Email Already Present") {
         toast({

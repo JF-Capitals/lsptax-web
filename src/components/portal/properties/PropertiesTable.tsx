@@ -5,6 +5,7 @@ import {
   downloadPropertiesCSV,
 } from "@/store/data";
 import TableBuilder from "../TableBuilder";
+import { routes } from "@/routes/ROUTES";
 import { Archive, Download, LoaderCircle, Search } from "lucide-react";
 import { Properties } from "./columns";
 import { Input } from "@/components/ui/input";
@@ -82,13 +83,8 @@ const PropertiesTable = <TData extends Properties, TValue>({
 
   if (isError) {
     return (
-      <div className="flex flex-col justify-center items-center py-20 text-destructive">
-        <span className="text-lg font-semibold">
-          {archived
-            ? "Failed to load archived properties. Please try again later."
-            : "Failed to load active properties. Please try again later."}
-        </span>
-        <Button variant="blue" className="mt-4" onClick={() => refetch()}>
+      <div className="flex flex-col justify-center items-center py-20 gap-2">
+        <Button variant="blue" onClick={() => refetch()}>
           Retry
         </Button>
       </div>
@@ -155,7 +151,7 @@ const PropertiesTable = <TData extends Properties, TValue>({
             : {
                 title: "No properties yet",
                 description: "Add a property to start tracking tax and client data.",
-                action: { label: "Add your first property", to: "/portal/add-property" },
+                action: { label: "Add your first property", to: routes.properties.add() },
               }
         }
         serverPagination={{

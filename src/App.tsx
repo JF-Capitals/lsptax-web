@@ -5,6 +5,8 @@ import LandingPage from "./page/LandingPage";
 
 import ProtectedRoute from "./utils/ProtectedRoute";
 import LoginPage from "./page/LoginPage";
+import NotFoundPage from "./page/NotFoundPage";
+import { PortalRouteElements } from "./routes/portalRouteElements";
 
 function App() {
   return (
@@ -19,13 +21,16 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
-          path="/portal/*"
+          path="/portal"
           element={
-            <ProtectedRoute >
+            <ProtectedRoute>
               <AdminPortal />
             </ProtectedRoute>
           }
-        />
+        >
+          {PortalRouteElements()}
+        </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );

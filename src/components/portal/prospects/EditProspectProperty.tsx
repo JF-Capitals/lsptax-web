@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { getProspectProperty } from "@/store/data";
 import { PropertyData } from "@/types/types";
 import { editProspectProperty } from "@/api/api";
+import { routes } from "@/routes/ROUTES";
 import { LoaderCircle } from "lucide-react";
 
 const formSchema = z.object({
@@ -94,7 +95,7 @@ export default function EditProspectProperty() {
       toast({ title: "Property updated successfully!" });
       setIsDialogOpen(false);
       if (propertyId) {
-        navigate(`/portal/prospect/property?id=${encodeURIComponent(propertyId)}`);
+        navigate(routes.prospect.property(propertyId));
       }
     } catch (error) {
       toast({ title: "Failed to update property", variant: "destructive" });

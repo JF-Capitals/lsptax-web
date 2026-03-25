@@ -4,29 +4,30 @@ import { getProspectProperty } from "@/store/data";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProspectPropertyData } from "@/types/types";
+import { routes } from "@/routes/ROUTES";
 
 const ProspectPropertyPage = () => {
   const [property, setProperty] = useState<ProspectPropertyData>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchParams] = useSearchParams();
-  const propertyId = parseInt(searchParams.get("id") || "1");
-
+  const idParam = searchParams.get("id");
 
   useEffect(() => {
+    setError("");
+    setProperty(undefined);
+
     const fetchProperty = async () => {
-      const propertyId = searchParams.get("id");
-      if (!propertyId) {
+      if (!idParam) {
         setError("Property ID is missing");
         setLoading(false);
         return;
       }
 
+      setLoading(true);
       try {
-        const propertyData = await getProspectProperty({ propertyId });
+        const propertyData = await getProspectProperty({ propertyId: idParam });
         setProperty(propertyData);
-        setLoading(false);
-        // propertyData contains full property details including invoices and history
       } catch (err) {
         console.error("Error:", err);
         setError("Failed to fetch property details");
@@ -36,7 +37,7 @@ const ProspectPropertyPage = () => {
     };
 
     fetchProperty();
-  }, [searchParams, propertyId]); // Trigger when searchParams changes
+  }, [idParam]);
 
   if (loading) {
     return (
@@ -72,12 +73,12 @@ const ProspectPropertyPage = () => {
         </h1>
         <div className="flex gap-4 flex-col md:flex-row w-full md:w-auto">
           <NavLink
-            to={`/portal/edit-prospect-properties?id=${property.propertyDetails.id}`}
+            to={routes.editProspectProperties(property.propertyDetails.id)}
           >
             <Button className="w-full">Edit Property</Button>
           </NavLink>
           <NavLink
-            to={`/portal/prospect/aoa?propertyId=${property.propertyDetails.id}`}
+            to={routes.prospect.aoa(property.propertyDetails.id)}
           >
             <Button className="w-full" variant="outline">
               Create AOA

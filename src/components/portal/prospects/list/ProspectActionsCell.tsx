@@ -14,6 +14,7 @@ import {
 import { deleteProspect, moveProspectToClient } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { routes } from "@/routes/ROUTES";
 import { Prospect } from "@/types/types";
 
 function getProspectDisplayName(prospect: Prospect | Record<string, unknown>): string {
@@ -55,7 +56,7 @@ export function ProspectActionsCell({
         title: "Success",
         description: "Prospect successfully converted to client.",
       });
-      navigate(`/portal/client?clientId=${newClient.clientNumber}`);
+      navigate(routes.client.detail(newClient.clientNumber));
     } catch (error) {
       console.error("Error converting prospect to client:", error);
       toast({

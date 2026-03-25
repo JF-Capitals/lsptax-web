@@ -1,9 +1,25 @@
-import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { useState, Suspense } from "react";
+import { Outlet } from "react-router-dom";
 import SideMenu from "@/components/portal/SideMenu";
-import AdminRoutes from "@/routes/adminRoutes";
 import DashboardHeader from "@/components/portal/DashboardHeader";
 import { Breadcrumbs } from "@/components/portal/Breadcrumbs";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { Button } from "@/components/ui/button";
+import { PortalSuspenseFallback } from "@/routes/portalRouteElements";
+
+const AdminPortalErrorFallback = () => (
+  <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 p-8 text-center">
+    <h1 className="text-xl font-semibold text-foreground">
+      Portal couldn&apos;t load this view
+    </h1>
+    <p className="max-w-md text-muted-foreground text-sm">
+      Try again, or reload the page if the problem persists.
+    </p>
+    <Button type="button" variant="outline" onClick={() => window.location.reload()}>
+      Reload page
+    </Button>
+  </div>
+);
 
 const AdminPortal = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,7 +27,6 @@ const AdminPortal = () => {
   return (
     <div className="h-screen overflow-hidden bg-gradient-to-br from-background to-brand-muted/30">
       <div className="flex h-full">
-        {/* Side Menu */}
         <div
           className={`fixed z-40 top-0 left-0 h-full bg-white shadow transition-transform transform ${
             isMenuOpen ? "translate-x-0" : "-translate-x-full"
@@ -19,18 +34,18 @@ const AdminPortal = () => {
         >
           <SideMenu />
         </div>
-        {/* Main Content */}
         <div className="flex-1 h-full overflow-hidden flex flex-col">
           <DashboardHeader onMenuToggle={() => setIsMenuOpen(!isMenuOpen)} />
           <main id="main" className="flex-1 overflow-auto" tabIndex={-1}>
             <Breadcrumbs />
-            <Routes>
-              <Route path="/*" element={<AdminRoutes />} />
-            </Routes>
+            <ErrorBoundary fallback={<AdminPortalErrorFallback />}>
+              <Suspense fallback={<PortalSuspenseFallback />}>
+                <Outlet />
+              </Suspense>
+            </ErrorBoundary>
           </main>
         </div>
       </div>
-      {/* Overlay for Small Screens */}
       {isMenuOpen && (
         <div
           role="button"
@@ -49,4 +64,5 @@ const AdminPortal = () => {
     </div>
   );
 };
+
 export default AdminPortal;

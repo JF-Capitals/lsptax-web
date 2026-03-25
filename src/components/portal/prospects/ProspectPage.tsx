@@ -1,4 +1,4 @@
-import { NavLink, useSearchParams } from "react-router-dom";
+import { Link, NavLink, useSearchParams } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { getSingleProspect } from "@/store/data";
 import {
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Property, Prospect } from "@/types/types";
 import { useToast } from "@/hooks/use-toast";
+import { routes } from "@/routes/ROUTES";
 
 interface ProspectData {
   prospect: Prospect;
@@ -39,7 +40,12 @@ const ProspectPage = () => {
   const { toast } = useToast();
 
   const fetchProspectData = useCallback(async () => {
-    if (!id) return;
+    if (!id) {
+      setProspectData(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -117,6 +123,21 @@ const ProspectPage = () => {
     );
   }
 
+  if (!id) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 min-h-[40vh] px-4 text-center mt-10">
+        <p className="text-lg font-semibold text-red-600">Prospect ID is required</p>
+        <p className="text-muted-foreground max-w-md">
+          Open a prospect from the list so the URL includes{" "}
+          <code className="text-sm bg-muted px-1 rounded">?id=…</code>.
+        </p>
+        <Button asChild variant="outline">
+          <Link to={routes.prospects.list()}>Back to prospects</Link>
+        </Button>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="text-center text-red-500 mt-10 font-semibold">
@@ -157,12 +178,12 @@ const ProspectPage = () => {
           </span>
         </div>
         <div className="flex gap-4">
-          <NavLink to={`/portal/edit-prospect?prospectId=${prospect.id}`}>
+          <NavLink to={routes.editProspect(prospect.id)}>
             <Button variant="blue" className="w-full">
               Edit Prospect Details
             </Button>
           </NavLink>
-          <NavLink to={`/portal/prospect/contract?id=${id}`}>
+          <NavLink to={routes.prospect.contract(id)}>
             <Button variant="blue" className="w-full">
               Create Contract
             </Button>
@@ -312,7 +333,7 @@ const ProspectPage = () => {
       <div>
         <div className="flex justify-between items-center mb-4 mt-8">
           <h1 className="text-2xl font-bold">Associated Property(s)</h1>
-          <NavLink to={`/portal/prospect/add-property?id=${prospect.id}`}>
+          <NavLink to={routes.prospect.addProperty(prospect.id)}>
             <Button variant={"blue"} className="w-full">
               Add Properties
             </Button>
@@ -367,7 +388,7 @@ const ProspectPropertyBox: React.FC<{ property: Property }> = ({
 
   return (
     <NavLink
-      to={`/portal/prospect/property?id=${property.id}`}
+      to={routes.prospect.property(property.id)}
       className="block"
     >
       <div className="border rounded-2xl p-4 shadow-md hover:shadow-lg transition duration-300 bg-gradient-to-tr from-white to-gray-50 hover:from-blue-50 cursor-pointer h-full flex flex-col justify-between">

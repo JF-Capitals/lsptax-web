@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-table";
 import { downloadProspectsCSV } from "@/store/data";
 import TableBuilder from "../../TableBuilder";
+import { routes } from "@/routes/ROUTES";
 import { Input } from "@/components/ui/input";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -116,11 +117,8 @@ const ProspectTable = () => {
 
   if (isError) {
     return (
-      <div className="flex flex-col justify-center items-center py-20 text-destructive">
-        <span className="text-lg font-semibold">
-          Failed to load prospects. Please try again later.
-        </span>
-        <Button variant="blue" className="mt-4" onClick={() => refetch()}>
+      <div className="flex flex-col justify-center items-center py-20 gap-2">
+        <Button variant="blue" onClick={() => refetch()}>
           Retry
         </Button>
       </div>
@@ -156,7 +154,7 @@ const ProspectTable = () => {
           </Button>
         </div>
 
-        <NavLink to={`/portal/prospect/add-prospect`}>
+        <NavLink to={routes.prospect.add()}>
           <Button className="w-full">Add New Prospect</Button>
         </NavLink>
         <Button onClick={handleCsvDownload} disabled={downloadingCsv}>
@@ -211,7 +209,7 @@ const ProspectTable = () => {
             : {
                 title: "No prospects yet",
                 description: "Add a prospect to start the conversion pipeline.",
-                action: { label: "Add your first prospect", to: "/portal/prospect/add-prospect" },
+                action: { label: "Add your first prospect", to: routes.prospect.add() },
               }
         }
         serverPagination={{

@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
+import { PORTAL_BASE, routes } from "@/routes/ROUTES";
 
 const ROUTE_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
@@ -10,6 +11,7 @@ const ROUTE_LABELS: Record<string, string> = {
   clients: "Clients",
   "list-client": "Clients",
   "add-client": "Add Client",
+  "move-from-prospect": "Move to Client",
   client: "Client Details",
   "edit-client": "Edit Client",
   "move_to_client": "Move to Client",
@@ -35,13 +37,15 @@ function pathSegmentToLabel(segment: string): string {
 export function Breadcrumbs() {
   const location = useLocation();
   const pathname = location.pathname;
-  if (!pathname.startsWith("/portal/")) return null;
+  if (!pathname.startsWith(`${PORTAL_BASE}/`) && pathname !== PORTAL_BASE) return null;
 
   const segments = pathname.replace(/^\/portal\/?/, "").split("/").filter(Boolean);
   if (segments.length === 0) return null;
 
-  const crumbs: { path: string; label: string }[] = [{ path: "/portal/dashboard", label: "Dashboard" }];
-  let acc = "/portal";
+  const crumbs: { path: string; label: string }[] = [
+    { path: routes.dashboard(), label: "Dashboard" },
+  ];
+  let acc = PORTAL_BASE;
   const isOnlyDashboard = segments.length === 1 && segments[0] === "dashboard";
   if (!isOnlyDashboard) {
     for (let i = 0; i < segments.length; i++) {

@@ -5,6 +5,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { previewContract, sendContractForClient } from "@/api/api";
 import { ContractPreviewAndSend } from "@/components/portal/shared/ContractPreviewAndSend";
+import { routes } from "@/routes/ROUTES";
 
 interface Client {
   client: ClientData;
@@ -94,7 +95,7 @@ export default function ContractForm() {
         title: "✓ Contract sent for signing",
         description: "Contract has been sent to the client. They will receive an email from DocuSign.",
       });
-      navigate(`/portal/client?clientId=${clientData.client.id}`);
+      navigate(routes.client.detail(clientData.client.id));
     } catch (error) {
       toast({
         title: "Failed to send contract",

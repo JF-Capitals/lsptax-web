@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import { routes } from "@/routes/ROUTES";
 import { getSingleProperty } from "@/store/data";
 import { PropertyData, Invoice } from "@/types/types";
 import { editProperty } from "@/api/api";
@@ -164,7 +165,7 @@ export default function EditProperty() {
 
       toast({ title: "Property updated successfully!" });
       setIsDialogOpen(false);
-      navigate(`/portal/property?propertyId=${propertyId}`);
+      navigate(routes.properties.view(propertyId));
     } catch (error) {
       toast({ title: "Failed to update property", variant: "destructive" });
     } finally {

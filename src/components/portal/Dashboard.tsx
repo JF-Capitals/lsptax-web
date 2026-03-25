@@ -6,6 +6,7 @@ import { Properties } from "./properties/columns";
 import { Clients } from "./clients/list/columns";
 import { Prospect } from "@/types/types";
 import { TableSkeleton } from "./TableSkeleton";
+import { FeatureErrorBoundary } from "@/components/FeatureErrorBoundary";
 
 const Dashboard = () => {
   const {
@@ -21,11 +22,11 @@ const Dashboard = () => {
 
   if (isError) {
     return (
-      <div className="flex flex-col justify-center items-center py-20 text-destructive">
-        <span className="text-lg font-semibold">
+      <div className="flex flex-col justify-center items-center py-20 text-destructive gap-2">
+        <span className="text-sm text-muted-foreground text-center max-w-md">
           {error instanceof Error ? error.message : "Failed to load dashboard"}
         </span>
-        <Button variant="blue" className="mt-4" onClick={() => refetch()}>
+        <Button variant="blue" className="mt-2" onClick={() => refetch()}>
           Retry
         </Button>
       </div>
@@ -50,11 +51,13 @@ const Dashboard = () => {
         stats={stats}
         loading={false}
       />
-      <MiniTableContainer
-        prospectData={(prospectData ?? []) as Prospect[]}
-        propData={(propData ?? []) as Properties[]}
-        clientData={(clientData ?? []) as Clients[]}
-      />
+      <FeatureErrorBoundary label="Dashboard tables">
+        <MiniTableContainer
+          prospectData={(prospectData ?? []) as Prospect[]}
+          propData={(propData ?? []) as Properties[]}
+          clientData={(clientData ?? []) as Clients[]}
+        />
+      </FeatureErrorBoundary>
     </div>
   );
 };

@@ -6,6 +6,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { getSingleClient } from "@/store/data";
 import { previewAoa, sendAoaForClient } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
+import { routes } from "@/routes/ROUTES";
 
 interface Client {
   client: ClientData;
@@ -110,7 +111,9 @@ const AppointmentForm: React.FC = () => {
         title: "AOA sent for signing",
         description: "The client will receive an email from DocuSign to sign the Appointment of Agent.",
       });
-      navigate(`/portal/client?clientId=${clientData?.client?.id ?? clientIdParam}`);
+      navigate(
+        routes.client.detail(clientData?.client?.id ?? clientIdParam ?? "")
+      );
     } catch (error) {
       toast({
         title: "Failed to send AOA",

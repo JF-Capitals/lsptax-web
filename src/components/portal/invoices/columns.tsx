@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { InvoiceSummary } from "@/types/types";
 import formatDate from "@/utils/formatDate";
 import { NavLink } from "react-router-dom";
+import { routes } from "@/routes/ROUTES";
 import { formatUSD } from "@/utils/formatCurrency";
 import { InvoiceActionsCell } from "./InvoiceActionsCell";
 
@@ -14,7 +15,7 @@ export const invoicesColumn: ColumnDef<InvoiceSummary>[] = [
     cell: ({ row }) => {
       const id = row.original.id;
       return (
-        <NavLink to={`/portal/invoice?clientId=${id}`}>
+        <NavLink to={routes.invoices.byClient(id)}>
           <div className="text-blue-400 font-bold">#{id}</div>
         </NavLink>
       );

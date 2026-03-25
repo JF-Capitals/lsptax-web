@@ -8,6 +8,7 @@ import { NavLink } from "react-router-dom";
 import TableBuilder from "../../TableBuilder";
 import { useClientsQuery } from "@/hooks/queries";
 import { TableSkeleton } from "../../TableSkeleton";
+import { routes } from "@/routes/ROUTES";
 
 interface ClientTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -81,13 +82,8 @@ const ClientTable = <TData, TValue>({
 
   if (isError) {
     return (
-      <div className="flex flex-col justify-center items-center py-20 text-destructive">
-        <span className="text-lg font-semibold">
-          {archived
-            ? "Failed to load archived clients. Please try again later."
-            : "Failed to load active clients. Please try again later."}
-        </span>
-        <Button variant="blue" className="mt-4" onClick={() => refetch()}>
+      <div className="flex flex-col justify-center items-center py-20 gap-2">
+        <Button variant="blue" onClick={() => refetch()}>
           Retry
         </Button>
       </div>
@@ -133,7 +129,7 @@ const ClientTable = <TData, TValue>({
             <Archive />
             {archived ? "View Active Clients" : "View Archive"}
           </Button>
-          <NavLink to={`/portal/clients/add-client`}>
+          <NavLink to={routes.clients.add()}>
             <Button variant={"blue"}>
               <UserRoundPlus /> Add New Client
             </Button>
@@ -156,7 +152,7 @@ const ClientTable = <TData, TValue>({
         emptyState={{
           title: "No clients yet",
           description: "Get started by adding your first client to manage properties and invoices.",
-          action: { label: "Add your first client", to: "/portal/clients/add-client" },
+          action: { label: "Add your first client", to: routes.clients.add() },
         }}
         serverPagination={{
           total,

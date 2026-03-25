@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { addProspectProperty } from "@/api/api";
+import { routes } from "@/routes/ROUTES";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 
@@ -86,9 +87,9 @@ export default function AddProspectPropertyForm() {
       const r = result as { property?: { id?: unknown }; id?: unknown };
       const newPropId = r?.property?.id ?? r?.id;
       if (newPropId != null && String(newPropId) !== "") {
-        navigate(`/portal/prospect/property?id=${encodeURIComponent(String(newPropId))}`);
+        navigate(routes.prospect.property(String(newPropId)));
       } else {
-        navigate(`/portal/prospect?id=${encodeURIComponent(id!)}`);
+        navigate(routes.prospect.detail(id!));
       }
     } catch (error) {
       console.error("Error adding property:", error);

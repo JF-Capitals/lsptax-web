@@ -40,6 +40,9 @@ export async function authFetch(
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("username");
+    if (window.location.pathname !== "/login") {
+      window.location.assign("/login");
+    }
   }
 
   return response;

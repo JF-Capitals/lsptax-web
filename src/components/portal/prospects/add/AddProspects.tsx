@@ -16,6 +16,7 @@ import { addProspect } from "@/api/api";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { routes } from "@/routes/ROUTES";
 
 const formSchema = z.object({
   ProspectName: z.string().min(1, "Prospect name is required"),
@@ -71,7 +72,7 @@ export default function AddProspectForm() {
       const r = result as { prospect?: { id?: unknown }; id?: unknown };
       const newId = r?.prospect?.id ?? r?.id;
       if (newId != null && String(newId) !== "") {
-        navigate(`/portal/prospect?id=${encodeURIComponent(String(newId))}`);
+        navigate(routes.prospect.detail(String(newId)));
       } else {
         form.reset();
       }

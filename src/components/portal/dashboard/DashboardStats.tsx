@@ -2,6 +2,7 @@ import React from "react";
 import clientsLogo from "@/assets/dashboard/client-logo.svg";
 import prospectLogo from "@/assets/dashboard/prospects-logo.svg";
 import { NavLink } from "react-router-dom";
+import { routes } from "@/routes/ROUTES";
 
 interface Stats {
   numOfClients: number;
@@ -27,13 +28,13 @@ const DashboardStats = ({
       label: "Active Clients",
       icon: clientsLogo,
       number: loading ? null : stats.numOfClients,
-      link: "/portal/clients/list-client",
+      link: routes.clients.list(),
     },
     {
       label: "New Prospects",
       icon: prospectLogo,
       number: loading ? null : stats.numOfProspects,
-      link: "/portal/prospects/list-prospect",
+      link: routes.prospects.list(),
     },
   ];
 

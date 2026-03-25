@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { loginUser } from "@/api/api"; // Assuming you put the function in a utils/api file
 import { NavLink, useNavigate } from "react-router-dom";
+import { routes } from "@/routes/ROUTES";
 
 import {
     Form,
@@ -69,7 +70,7 @@ export default function LoginPage() {
         description: "Login Success",
       });
 
-      navigate("/portal/dashboard"); // Relative route
+      navigate(routes.dashboard());
     } catch (error) {
       console.error("Login failed", error);
       toast({
