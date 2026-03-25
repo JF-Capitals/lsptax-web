@@ -11,6 +11,13 @@ import { Properties } from "./columns";
 import { Input } from "@/components/ui/input";
 import { usePropertiesQuery } from "@/hooks/queries";
 import { TableSkeleton } from "../TableSkeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface PropertiesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -26,6 +33,7 @@ const PropertiesTable = <TData extends Properties, TValue>({
   const [downloadingCsv, setDownloadingCsv] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+  const [accountType, setAccountType] = useState<"all" | "real" | "bpp">("all");
 
   const commitSearch = () => {
     setAppliedSearch(searchTerm.trim());
@@ -37,6 +45,7 @@ const PropertiesTable = <TData extends Properties, TValue>({
     offset,
     search: appliedSearch,
     archived,
+    accountType: accountType === "all" ? undefined : accountType,
   });
 
   const properties = (data?.data ?? []) as TData[];
@@ -46,7 +55,9 @@ const PropertiesTable = <TData extends Properties, TValue>({
   const handleCsvDownload = async () => {
     setDownloadingCsv(true);
     try {
-      await downloadPropertiesCSV();
+      await downloadPropertiesCSV({
+        accountType: accountType === "all" ? undefined : accountType,
+      });
     } catch (err) {
       console.error("Error downloading CSV:", err);
     } finally {
@@ -124,6 +135,25 @@ const PropertiesTable = <TData extends Properties, TValue>({
               <Search className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+        <div className="flex flex-col gap-2 w-full md:max-w-[220px]">
+          <h1 className="text-lg font-semibold">Account Type</h1>
+          <Select
+            value={accountType}
+            onValueChange={(v) => {
+              setAccountType(v as "all" | "real" | "bpp");
+              setOffset(0);
+            }}
+          >
+            <SelectTrigger aria-label="Filter by account type">
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="real">Real</SelectItem>
+              <SelectItem value="bpp">BPP</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex gap-2 w-full">
           <Button onClick={switchArchived}>

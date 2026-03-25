@@ -40,6 +40,7 @@ export interface Property {
   mailingAddress?: string;
   MAILINGADDRESSCITYTXZIP?: string;
   mailingAddressCityTxZip?: string;
+  propertyAddress?: string;
   CADMailingADDRESS?: string;
   cadMailingAddress?: string;
   CADCITY?: string;
@@ -126,7 +127,8 @@ export interface InvoiceData {
 }
 
 export interface PropertyData {
-  clientDetails: ClientData;
+  client: ClientData;
+  /** Backend v2 shape uses `client` instead of `clientDetails` */
   propertyDetails: Property;
   invoices: Invoice[];
 }

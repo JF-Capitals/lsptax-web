@@ -218,7 +218,7 @@ export default function EditProperty() {
       const endingAppraised = parseFloat(cleanNumberInput((yearData?.endingAppraised?.toString()) ?? "")) || 0;
 
       // Contingency fee is client-level in v2 ("25" -> 0.25)
-      const contingencyFeeString = property?.clientDetails?.contingencyFee || "0";
+      const contingencyFeeString = property?.client?.contingencyFee || "0";
       const contingencyFeePercentage = parseFloat(contingencyFeeString);
       const contingencyFee = contingencyFeePercentage / 100; // Convert to decimal (e.g., 25% -> 0.25)
 
@@ -347,7 +347,7 @@ export default function EditProperty() {
         const endingAppraised = parseFloat(cleanNumberInput(row["Ending Appraised"])) || 0;
 
         // Contingency fee is client-level in v2 (not editable per property)
-        const contingencyFeeString = property?.clientDetails?.contingencyFee || "0";
+        const contingencyFeeString = property?.client?.contingencyFee || "0";
         const contingencyFeePercentage = parseFloat(contingencyFeeString);
         const contingencyFee = contingencyFeePercentage / 100;
 

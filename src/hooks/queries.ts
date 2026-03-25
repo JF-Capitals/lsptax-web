@@ -44,18 +44,20 @@ export function usePropertiesQuery({
   offset = 0,
   search = "",
   archived = false,
+  accountType,
 }: {
   limit?: number;
   offset?: number;
   search?: string;
   archived?: boolean;
+  accountType?: string;
 }) {
   return useQuery({
-    queryKey: ["properties", limit, offset, search, archived],
+    queryKey: ["properties", limit, offset, search, archived, accountType || ""],
     queryFn: () =>
       archived
-        ? getArchiveProperties(limit, offset, search || undefined)
-        : getProperties(limit, offset, search || undefined),
+        ? getArchiveProperties(limit, offset, search || undefined, accountType || undefined)
+        : getProperties(limit, offset, search || undefined, accountType || undefined),
     ...queryClientDefaults,
   });
 }

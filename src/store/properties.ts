@@ -10,11 +10,13 @@ const base = getApiBaseUrl;
 export const getProperties = async (
   limit = DEFAULT_PAGE_SIZE,
   offset = 0,
-  search?: string
+  search?: string,
+  accountType?: string
 ): Promise<PaginatedResponse<unknown>> => {
   try {
     const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
     if (search?.trim()) params.set("search", search.trim());
+    if (accountType?.trim()) params.set("accountType", accountType.trim());
     const response = await authFetch(`${base()}/api/properties?${params.toString()}`);
     if (!response.ok) throw new Error("Failed to fetch properties");
     const json = await response.json();
@@ -33,11 +35,13 @@ export const getProperties = async (
 export const getArchiveProperties = async (
   limit = DEFAULT_PAGE_SIZE,
   offset = 0,
-  search?: string
+  search?: string,
+  accountType?: string
 ): Promise<PaginatedResponse<unknown>> => {
   try {
     const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
     if (search?.trim()) params.set("search", search.trim());
+    if (accountType?.trim()) params.set("accountType", accountType.trim());
     const response = await authFetch(`${base()}/api/archive_properties?${params.toString()}`);
     if (!response.ok) throw new Error("Failed to fetch properties");
     const json = await response.json();
@@ -76,9 +80,18 @@ export const getProspectProperty = async ({ propertyId }: { propertyId: string }
   }
 };
 
-export const downloadPropertiesCSV = async () => {
+export const downloadPropertiesCSV = async ({
+  accountType,
+}: {
+  accountType?: string;
+} = {}) => {
   try {
-    const response = await authFetch(`${base()}/api/download-properties-csv`);
+    const params = new URLSearchParams();
+    if (accountType?.trim()) params.set("accountType", accountType.trim());
+    const qs = params.toString();
+    const response = await authFetch(
+      `${base()}/api/download-properties-csv${qs ? `?${qs}` : ""}`
+    );
     if (!response.ok) throw new Error("Failed to download properties CSV");
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);

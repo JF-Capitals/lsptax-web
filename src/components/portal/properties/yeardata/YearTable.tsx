@@ -1,6 +1,6 @@
-import { Invoice } from "@/types/types";
 import React from "react";
 import { formatUSD } from "@/utils/formatCurrency";
+import { Invoice } from "@/types/types";
 
 // Define the type for table row data
 type TableRow = {
@@ -35,7 +35,10 @@ type TableRow = {
   "Ending Appraised": string | number;
 };
 
-const YearTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
+const YearTable: React.FC<{ invoices: Invoice[]; showBpp?: boolean }> = ({
+  invoices,
+  showBpp = true,
+}) => {
   // Extract data for the table: creating rows and columns
   const years = [2021, 2022, 2023, 2024, 2025];
   const rowData: TableRow[] = years.map((year) => {
@@ -97,6 +100,9 @@ const YearTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
           <tbody>
             {Object.keys(rowData[0])
               .filter((key) => {
+                const isBppField = ["BPP Rendered", "BPP Invoice", "BPP Paid"].includes(key);
+                if (isBppField && !showBpp) return false;
+
                 const isConditionalField = [
                   "Beginning Market",
                   "Ending Market",

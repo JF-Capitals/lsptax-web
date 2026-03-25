@@ -231,19 +231,24 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
 
   const activePropertyId = property.propertyDetails.id;
 
-  const client = property.clientDetails;
+  const client = property.client;
   const prop = property.propertyDetails;
   const clientName = client?.clientName ?? "";
   const clientPhone = client?.phoneNumber ?? "";
   const clientEmail = client?.email ?? "";
   const clientNumber = prop?.clientNumber ?? "";
   const accountNumber = prop?.accountNumber ?? "";
+  const nameOnCad = prop?.nameOnCad ?? "";
   const mailingAddress = prop?.mailingAddress ?? "";
   const mailingCityZip = prop?.mailingAddressCityTxZip ?? "";
-  const contactOwner = prop?.contactOwner ?? "";
+  const propertyAddress = prop?.propertyAddress ?? "";
   const cadMailingAddress = prop?.cadMailingAddress ?? "";
   const cadZipCode = prop?.cadZipCode ?? "";
   const cadCounty = prop?.cadCounty ?? "";
+  const acctType = String(client?.typeOfAcct ?? client?.TypeOfAcct ?? "")
+    .trim()
+    .toLowerCase();
+  const showBpp = acctType === "bpp";
 
   return (
     <div className="w-full p-4 bg-white shadow-md rounded-lg">
@@ -372,13 +377,15 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
           <table className="table-auto w-full">
             <tbody>
               <tr>
-                <td className="font-medium">Contract Owner:</td>
-                <td>{contactOwner || "—"}</td>
+                <td className="font-medium">Name on CAD:</td>
+                <td>{nameOnCad || "—"}</td>
               </tr>
               <tr>
-                <td className="font-medium">Address:</td>
+                <td className="font-medium">Property Address:</td>
                 <td>
-                  {[cadMailingAddress, cadZipCode].filter(Boolean).join(" ") || "—"}
+                  {propertyAddress ||
+                    [cadMailingAddress, cadZipCode].filter(Boolean).join(" ") ||
+                    "—"}
                 </td>
               </tr>
               <tr>
@@ -400,7 +407,7 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
         </div>
         {isInvoiceOpen && (
           <div className="mt-4">
-            <YearTable invoices={property.invoices} />
+            <YearTable invoices={property.invoices} showBpp={showBpp} />
           </div>
         )}
       </div> */}
@@ -415,7 +422,7 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
       </div>
       <div>
         <div className="mt-4">
-          <YearTable invoices={property.invoices} />
+          <YearTable invoices={property.invoices} showBpp={showBpp} />
         </div>
       </div>
 

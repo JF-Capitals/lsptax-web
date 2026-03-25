@@ -37,7 +37,7 @@ export default function PropertyAoaPage() {
     if (propertyIdParam) fetchPropertyData();
   }, [propertyIdParam]);
 
-  const clientIdNum = propertyData?.clientDetails?.id;
+  const clientIdNum = propertyData?.client?.id;
   const propertyIdNum = propertyData?.propertyDetails?.id;
 
   useEffect(() => {
