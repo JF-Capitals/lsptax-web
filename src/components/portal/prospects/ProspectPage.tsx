@@ -4,6 +4,7 @@ import { getSingleProspect } from "@/store/data";
 import {
   getContractsByClient,
   getContractDownloadUrl,
+  sendAoaForAllProperties,
   syncClientContractStatus,
   type ContractListItem,
 } from "@/api/api";
@@ -11,6 +12,18 @@ import { House, LoaderCircle, Mail, MapPin, Phone, FileText } from "lucide-react
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Property, Prospect } from "@/types/types";
 import { useToast } from "@/hooks/use-toast";
 import { routes } from "@/routes/ROUTES";
@@ -38,6 +51,9 @@ const ProspectPage = () => {
   const [contractsLoading, setContractsLoading] = useState(false);
   const [downloadingContractId, setDownloadingContractId] = useState<number | null>(null);
   const { toast } = useToast();
+  const [sendAllOpen, setSendAllOpen] = useState(false);
+  const [sendAllAgree, setSendAllAgree] = useState(false);
+  const [sendAllSending, setSendAllSending] = useState(false);
 
   const fetchProspectData = useCallback(async () => {
     if (!id) {
@@ -163,6 +179,35 @@ const ProspectPage = () => {
     const county = p.cadCounty ?? p.CADCOUNTY;
     return selectedCounty === "All" ? true : county === selectedCounty;
   });
+  const nonArchivedProperties = properties.filter(
+    (p) => !(p.isArchived ?? p.IsArchived)
+  );
+
+  const handleSendAllAoas = async () => {
+    const prospectId = prospect.id;
+    setSendAllSending(true);
+    try {
+      const res = await sendAoaForAllProperties(prospectId);
+      toast({
+        title: res.success ? "✓ AOA envelope sent" : "AOA envelope sent (with failures)",
+        description:
+          `Sent ${res.sent}/${res.total}. Failed ${res.failed}.` +
+          (res.envelopeId ? ` Envelope: ${res.envelopeId}` : ""),
+        variant: res.failed > 0 ? "destructive" : undefined,
+      });
+      setSendAllOpen(false);
+      setSendAllAgree(false);
+      fetchContracts();
+    } catch (err) {
+      toast({
+        title: "Failed to send AOAs",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendAllSending(false);
+    }
+  };
 
   return (
     <div className="m-2 rounded-lg bg-white p-4">
@@ -244,18 +289,126 @@ const ProspectPage = () => {
       <div className="mt-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold">Contracts & AOAs</h2>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={contractsLoading}
-            onClick={() => fetchContracts()}
-          >
-            {contractsLoading ? (
-              <LoaderCircle className="h-4 w-4 animate-spin" />
-            ) : (
-              "Refresh status"
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <AlertDialog
+              open={sendAllOpen}
+              onOpenChange={(open) => {
+                setSendAllOpen(open);
+                if (!open) setSendAllAgree(false);
+              }}
+            >
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="blue"
+                  size="sm"
+                  disabled={nonArchivedProperties.length === 0}
+                  onClick={() => setSendAllOpen(true)}
+                >
+                  Send AOA for all properties
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="max-w-2xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Send AOA for all properties (single envelope)</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will send <strong>one DocuSign email/envelope</strong> to the prospect with{" "}
+                    <strong>one AOA PDF per non-archived property</strong>. If any property is not eligible
+                    (e.g. already sent), it may be skipped and reported as failed.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <div className="space-y-3">
+                  <div className="rounded-md border bg-muted/30 p-3 text-sm">
+                    <div className="font-medium mb-2">Summary</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <div>
+                        <span className="text-muted-foreground">Prospect:</span> {prospect.clientName}
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Email:</span> {prospect.email || "—"}
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Properties:</span> {nonArchivedProperties.length}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-md border">
+                    <div className="px-3 py-2 text-sm font-medium bg-gray-50 border-b">
+                      Properties to include
+                    </div>
+                    <div className="max-h-56 overflow-auto">
+                      <table className="w-full text-sm">
+                        <thead className="sticky top-0 bg-white border-b">
+                          <tr>
+                            <th className="text-left p-2 font-medium">Account #</th>
+                            <th className="text-left p-2 font-medium">County</th>
+                            <th className="text-left p-2 font-medium">Name on CAD</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {nonArchivedProperties.map((p) => (
+                            <tr key={p.id} className="border-b last:border-b-0">
+                              <td className="p-2">{p.accountNumber ?? p.AccountNumber ?? "—"}</td>
+                              <td className="p-2">{p.cadCounty ?? p.CADCOUNTY ?? "—"}</td>
+                              <td className="p-2">{p.nameOnCad ?? p.NAMEONCAD ?? "—"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <label className="flex items-start gap-2 text-sm">
+                    <Checkbox
+                      checked={sendAllAgree}
+                      onCheckedChange={(v) => setSendAllAgree(v === true)}
+                      disabled={sendAllSending}
+                      className="mt-0.5"
+                    />
+                    <span>
+                      I understand this sends a single DocuSign envelope and the prospect will receive an email to
+                      sign AOAs for all listed properties.
+                    </span>
+                  </label>
+                </div>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={sendAllSending}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (!sendAllAgree || sendAllSending) return;
+                      void handleSendAllAoas();
+                    }}
+                    className={!sendAllAgree ? "opacity-50 pointer-events-none" : ""}
+                  >
+                    {sendAllSending ? (
+                      <span className="inline-flex items-center gap-2">
+                        <LoaderCircle className="h-4 w-4 animate-spin" />
+                        Sending…
+                      </span>
+                    ) : (
+                      "Agree & send AOAs"
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={contractsLoading}
+              onClick={() => fetchContracts()}
+            >
+              {contractsLoading ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                "Refresh status"
+              )}
+            </Button>
+          </div>
         </div>
         {contractsLoading ? (
           <div className="flex items-center gap-2 text-gray-600 py-4">
