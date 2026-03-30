@@ -93,6 +93,39 @@ export const sendAoaForClient = async (
   return data as { success: boolean; contract: { id: number; envelopeId: string; status: string }; envelopeId: string };
 };
 
+export interface SendAoaAllResultItem {
+  success: boolean;
+  propertyId: number;
+  envelopeId?: string;
+  contract?: { id: number; envelopeId: string; status: string };
+  message?: string;
+}
+
+export interface SendAoaAllResponse {
+  success: boolean;
+  total: number;
+  sent: number;
+  failed: number;
+  envelopeId?: string;
+  results: SendAoaAllResultItem[];
+}
+
+export const sendAoaForAllProperties = async (clientId: number): Promise<SendAoaAllResponse> => {
+  const response = await fetch(`${baseUrl()}/api/contracts/send-aoa-all`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ clientId }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data as { message?: string }).message || "Failed to send AOA for all properties");
+  }
+  return data as SendAoaAllResponse;
+};
+
 export const getContractsByClient = async (
   clientId: string | number
 ): Promise<ContractListItem[]> => {
