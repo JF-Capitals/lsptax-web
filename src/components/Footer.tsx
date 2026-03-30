@@ -1,4 +1,5 @@
 import { Mail, Phone, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -56,11 +57,23 @@ const Footer = () => {
                 Our Services
               </NavLink> */}
               <a
-                 href="#about"
+                href="/#about"
                 className="text-white hover:text-blue-400 transition-all duration-300 hover:translate-x-2"
               >
                 About Us
               </a>
+              <Link
+                to="/privacy"
+                className="text-white hover:text-blue-400 transition-all duration-300 hover:translate-x-2"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                to="/terms"
+                className="text-white hover:text-blue-400 transition-all duration-300 hover:translate-x-2"
+              >
+                Terms of Use
+              </Link>
             </div>
           </div>
         </div>

@@ -7,6 +7,8 @@ import ProtectedRoute from "./utils/ProtectedRoute";
 import LoginPage from "./page/LoginPage";
 import NotFoundPage from "./page/NotFoundPage";
 import { PortalRouteElements } from "./routes/portalRouteElements";
+import PrivacyPolicyPage from "./page/PrivacyPolicyPage";
+import TermsOfUsePage from "./page/TermsOfUsePage";
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
       </a>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsOfUsePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/portal"
