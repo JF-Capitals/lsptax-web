@@ -4,6 +4,7 @@ import { getSingleProspect } from "@/store/data";
 import {
   getContractsByClient,
   getContractDownloadUrl,
+  sendDocs,
   sendAoaForAllProperties,
   syncClientContractStatus,
   type ContractListItem,
@@ -54,6 +55,9 @@ const ProspectPage = () => {
   const [sendAllOpen, setSendAllOpen] = useState(false);
   const [sendAllAgree, setSendAllAgree] = useState(false);
   const [sendAllSending, setSendAllSending] = useState(false);
+  const [sendAllDocsOpen, setSendAllDocsOpen] = useState(false);
+  const [sendAllDocsAgree, setSendAllDocsAgree] = useState(false);
+  const [sendAllDocsSending, setSendAllDocsSending] = useState(false);
 
   const fetchProspectData = useCallback(async () => {
     if (!id) {
@@ -209,6 +213,31 @@ const ProspectPage = () => {
     }
   };
 
+  const handleSendAllDocs = async () => {
+    const prospectId = prospect.id;
+    setSendAllDocsSending(true);
+    try {
+      const res = await sendDocs(prospectId, "all_docs");
+      toast({
+        title: "✓ Docs sent",
+        description:
+          "Contract + all AOAs have been sent in a single envelope." +
+          ("envelopeId" in res && res.envelopeId ? ` Envelope: ${res.envelopeId}` : ""),
+      });
+      setSendAllDocsOpen(false);
+      setSendAllDocsAgree(false);
+      fetchContracts();
+    } catch (err) {
+      toast({
+        title: "Failed to send docs",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendAllDocsSending(false);
+    }
+  };
+
   return (
     <div className="m-2 rounded-lg bg-white p-4">
       <div className="flex justify-between">
@@ -223,6 +252,137 @@ const ProspectPage = () => {
           </span>
         </div>
         <div className="flex gap-4">
+          <AlertDialog
+            open={sendAllDocsOpen}
+            onOpenChange={(open) => {
+              setSendAllDocsOpen(open);
+              if (!open) setSendAllDocsAgree(false);
+            }}
+          >
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="blue"
+                className="w-full"
+                disabled={nonArchivedProperties.length === 0}
+                onClick={() => setSendAllDocsOpen(true)}
+              >
+                Send all docs
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="max-w-2xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Send all docs (single envelope)</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will send <strong>one DocuSign email/envelope</strong> to the prospect with the{" "}
+                  <strong>client contract</strong> and{" "}
+                  <strong>one AOA PDF per non-archived property</strong>.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <div className="space-y-3">
+                <div className="rounded-md border bg-muted/30 p-3 text-sm">
+                  <div className="font-medium mb-2">Summary</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div>
+                      <span className="text-muted-foreground">Prospect:</span> {prospect.clientName}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Email:</span> {prospect.email || "—"}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Properties:</span> {nonArchivedProperties.length}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-md border">
+                  <div className="px-3 py-2 text-sm font-medium bg-gray-50 border-b">
+                    Docs to be sent
+                  </div>
+                  <div className="p-3 space-y-3 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="font-medium">Client contract</div>
+                        <div className="text-muted-foreground">Preview the generated contract PDF.</div>
+                      </div>
+                      <Button asChild size="sm" variant="outline" disabled={sendAllDocsSending}>
+                        <NavLink to={routes.prospect.contract(prospect.id)} target="_blank" rel="noreferrer">
+                          Preview
+                        </NavLink>
+                      </Button>
+                    </div>
+
+                    <div className="border-t pt-3">
+                      <div className="font-medium mb-2">AOAs (one per property)</div>
+                      <div className="max-h-56 overflow-auto rounded-md border">
+                        <table className="w-full text-sm">
+                          <thead className="sticky top-0 bg-white border-b">
+                            <tr>
+                              <th className="text-left p-2 font-medium">Account #</th>
+                              <th className="text-left p-2 font-medium">County</th>
+                              <th className="text-left p-2 font-medium">Name on CAD</th>
+                              <th className="text-right p-2 font-medium">Preview</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {nonArchivedProperties.map((p) => (
+                              <tr key={p.id} className="border-b last:border-b-0">
+                                <td className="p-2">{p.accountNumber ?? p.AccountNumber ?? "—"}</td>
+                                <td className="p-2">{p.cadCounty ?? p.CADCOUNTY ?? "—"}</td>
+                                <td className="p-2">{p.nameOnCad ?? p.NAMEONCAD ?? "—"}</td>
+                                <td className="p-2 text-right">
+                                  <Button asChild size="sm" variant="outline" disabled={sendAllDocsSending}>
+                                    <NavLink to={routes.prospect.aoa(p.id)} target="_blank" rel="noreferrer">
+                                      Preview
+                                    </NavLink>
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <label className="flex items-start gap-2 text-sm">
+                  <Checkbox
+                    checked={sendAllDocsAgree}
+                    onCheckedChange={(v) => setSendAllDocsAgree(v === true)}
+                    disabled={sendAllDocsSending}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    I understand this sends a single DocuSign envelope containing the contract and AOAs for all listed
+                    properties.
+                  </span>
+                </label>
+              </div>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={sendAllDocsSending}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (!sendAllDocsAgree || sendAllDocsSending) return;
+                    void handleSendAllDocs();
+                  }}
+                  className={!sendAllDocsAgree ? "opacity-50 pointer-events-none" : ""}
+                >
+                  {sendAllDocsSending ? (
+                    <span className="inline-flex items-center gap-2">
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                      Sending…
+                    </span>
+                  ) : (
+                    "Agree & send docs"
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           <NavLink to={routes.editProspect(prospect.id)}>
             <Button variant="blue" className="w-full">
               Edit Prospect Details

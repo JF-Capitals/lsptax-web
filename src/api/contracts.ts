@@ -50,47 +50,18 @@ export const previewAoa = async (
   return response.json();
 };
 
-export const sendContractForClient = async (clientId: number): Promise<{
-  success: boolean;
-  contract: { id: number; envelopeId: string; status: string };
-  envelopeId: string;
-}> => {
-  const response = await fetch(`${baseUrl()}/api/contracts/send-contract`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
-    body: JSON.stringify({ clientId }),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error((data as { message?: string }).message || "Failed to send contract");
-  }
-  return data as { success: boolean; contract: { id: number; envelopeId: string; status: string }; envelopeId: string };
-};
+export type SendDocsType = "contract" | "aoa" | "aoa_all" | "all_docs";
 
-export const sendAoaForClient = async (
-  clientId: number,
-  propertyId: number
-): Promise<{
-  success: boolean;
+export type SendDocsRequest =
+  | { clientId: number; type: "contract" }
+  | { clientId: number; type: "aoa"; propertyId: number }
+  | { clientId: number; type: "aoa_all" }
+  | { clientId: number; type: "all_docs" };
+
+export type SendDocsSingleResponse = {
+  success: true;
   contract: { id: number; envelopeId: string; status: string };
   envelopeId: string;
-}> => {
-  const response = await fetch(`${baseUrl()}/api/contracts/send-aoa`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
-    body: JSON.stringify({ clientId, propertyId }),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error((data as { message?: string }).message || "Failed to send AOA");
-  }
-  return data as { success: boolean; contract: { id: number; envelopeId: string; status: string }; envelopeId: string };
 };
 
 export interface SendAoaAllResultItem {
@@ -101,8 +72,8 @@ export interface SendAoaAllResultItem {
   message?: string;
 }
 
-export interface SendAoaAllResponse {
-  success: boolean;
+export interface SendDocsAoaAllResponse {
+  success: true;
   total: number;
   sent: number;
   failed: number;
@@ -110,20 +81,57 @@ export interface SendAoaAllResponse {
   results: SendAoaAllResultItem[];
 }
 
-export const sendAoaForAllProperties = async (clientId: number): Promise<SendAoaAllResponse> => {
-  const response = await fetch(`${baseUrl()}/api/contracts/send-aoa-all`, {
+export type SendDocsAllDocsResponse = {
+  success: true;
+  envelopeId: string;
+  clientContract?: { id: number; envelopeId: string; status: string };
+  aoa?: {
+    total?: number;
+    sent?: number;
+    failed?: number;
+    results?: SendAoaAllResultItem[];
+  };
+};
+
+export type SendDocsResponse =
+  | SendDocsSingleResponse
+  | SendDocsAoaAllResponse
+  | SendDocsAllDocsResponse;
+
+export const sendDocs = async (
+  clientId: number,
+  type: SendDocsType,
+  propertyId?: number
+): Promise<SendDocsResponse> => {
+  const body: Record<string, unknown> = { clientId, type };
+  if (type === "aoa") body.propertyId = propertyId;
+
+  const response = await fetch(`${baseUrl()}/api/contracts/send-docs`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...getAuthHeaders(),
     },
-    body: JSON.stringify({ clientId }),
+    body: JSON.stringify(body),
   });
+
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error((data as { message?: string }).message || "Failed to send AOA for all properties");
+    throw new Error((data as { message?: string }).message || "Failed to send documents");
   }
-  return data as SendAoaAllResponse;
+  return data as SendDocsResponse;
+};
+
+export const sendAoaForAllProperties = async (clientId: number): Promise<SendDocsAoaAllResponse> => {
+  return sendDocs(clientId, "aoa_all") as Promise<SendDocsAoaAllResponse>;
+};
+
+export const sendContractForClient = async (clientId: number): Promise<SendDocsSingleResponse> => {
+  return sendDocs(clientId, "contract") as Promise<SendDocsSingleResponse>;
+};
+
+export const sendAoaForClient = async (clientId: number, propertyId: number): Promise<SendDocsSingleResponse> => {
+  return sendDocs(clientId, "aoa", propertyId) as Promise<SendDocsSingleResponse>;
 };
 
 export const getContractsByClient = async (
