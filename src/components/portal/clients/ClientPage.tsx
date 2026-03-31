@@ -221,7 +221,7 @@ const ClientPage = () => {
                 disabled={nonArchivedProperties.length === 0}
                 onClick={() => setSendAllDocsOpen(true)}
               >
-                Send all docs
+                Send All Docs
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className="max-w-2xl">
