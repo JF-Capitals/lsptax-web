@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
         "/invoice": { target: backendUrl, changeOrigin: true },
         "/action": { target: backendUrl, changeOrigin: true },
         "/csv": { target: backendUrl, changeOrigin: true },
+        "/report": { target: backendUrl, changeOrigin: true },
       },
     },
   };

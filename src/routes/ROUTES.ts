@@ -24,6 +24,8 @@ export function withQuery(
 export const routes = {
   dashboard: () => portalPath("dashboard"),
 
+  reports: () => portalPath("reports"),
+
   properties: {
     list: () => portalPath("properties"),
     add: () => portalPath("add-property"),

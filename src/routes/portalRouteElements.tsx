@@ -36,6 +36,7 @@ const EditProspectProperty = lazy(() => import("@/components/portal/prospects/Ed
 const EditProspectDetails = lazy(() => import("@/components/portal/prospects/edit/EditProspectDetails"));
 const PreviewSignedPdf = lazy(() => import("@/components/portal/prospects/preview/PreviewSignedPDF"));
 const CsvUploadsPage = lazy(() => import("@/components/portal/csv/CsvUploadsPage"));
+const ReportsPage = lazy(() => import("@/components/portal/reports/ReportsPage"));
 
 /**
  * Child `<Route>` elements for `/portal/*`. Parent layout supplies `<Outlet />` + Suspense.
@@ -112,6 +113,7 @@ export function PortalRouteElements() {
       <Route path="agent" element={<AppointmentForm />} />
       <Route path="invoice" element={<InvoicePage />} />
       <Route path="csv-uploads" element={<CsvUploadsPage />} />
+      <Route path="reports" element={<ReportsPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </>
   );

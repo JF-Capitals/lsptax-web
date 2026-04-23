@@ -9,6 +9,7 @@ import {
   UploadCloud,
   ChevronLeft,
   ChevronRight,
+  BarChart3,
 } from "lucide-react";
 import {
   Tooltip,
@@ -34,6 +35,7 @@ const menuOptions: MenuOption[] = [
   { to: routes.invoices.list(), match: "invoices", label: "Invoices", icon: FileText },
   { to: routes.prospects.list(), match: "prospects", label: "Prospects", icon: UserPlus },
   { to: routes.csvUploads(), match: "csv-uploads", label: "CSV Uploads", icon: UploadCloud },
+  { to: routes.reports(), match: "reports", label: "Reports", icon: BarChart3 },
 ];
 
 const SideMenu: React.FC = () => {
