@@ -6,6 +6,21 @@ import {
 
 const base = getApiBaseUrl;
 
+/** List payloads sometimes omit `status` or send it under another key; keep table filters and cells aligned. */
+export function normalizeProspectStatus(raw: Record<string, unknown>): string {
+  for (const key of ["status", "prospectStatus", "prospect_status"] as const) {
+    const v = raw[key];
+    if (typeof v === "string" && v.trim() !== "") return v.trim();
+  }
+  return "NOT_CONTACTED";
+}
+
+function normalizeProspectListItem(item: unknown): unknown {
+  if (item === null || typeof item !== "object") return item;
+  const r = item as Record<string, unknown>;
+  return { ...r, status: normalizeProspectStatus(r) };
+}
+
 export const getProspects = async (
   limit = DEFAULT_PAGE_SIZE,
   offset = 0
@@ -17,7 +32,7 @@ export const getProspects = async (
     if (!response.ok) throw new Error("Failed to fetch prospects");
     const json = await response.json();
     return {
-      data: json.data ?? [],
+      data: (json.data ?? []).map(normalizeProspectListItem),
       total: json.total ?? 0,
       limit: json.limit ?? limit,
       offset: json.offset ?? offset,
@@ -39,7 +54,7 @@ export const getArchiveProspects = async (
     if (!response.ok) throw new Error("Failed to fetch prospects");
     const json = await response.json();
     return {
-      data: json.data ?? [],
+      data: (json.data ?? []).map(normalizeProspectListItem),
       total: json.total ?? 0,
       limit: json.limit ?? limit,
       offset: json.offset ?? offset,
