@@ -25,12 +25,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ClientData, Property } from "@/types/types";
+import type { ClientLifecyclePayload } from "@/types/clientLifecycle";
 import { routes } from "@/routes/ROUTES";
 import { useToast } from "@/hooks/use-toast";
+import { ClientLifecyclePanel } from "@/components/portal/clients/lifecycle/ClientLifecyclePanel";
 
 interface Client {
   client: ClientData;
   properties: Property[];
+  lifecycle?: ClientLifecyclePayload | null;
 }
 
 const ClientPage = () => {
@@ -51,38 +54,45 @@ const ClientPage = () => {
   const [sendAllDocsAgree, setSendAllDocsAgree] = useState(false);
   const [sendAllDocsSending, setSendAllDocsSending] = useState(false);
 
-  useEffect(() => {
-    const fetchClientData = async () => {
+  const fetchClientData = useCallback(async (mode: "full" | "refresh" = "full") => {
+    if (!clientId) {
+      setError("No client ID provided in the URL.");
+      setLoading(false);
+      return;
+    }
+
+    const isRefresh = mode === "refresh";
+
+    if (!isRefresh) {
       setLoading(true);
       setError(null);
       setClientData(null);
+    }
 
-      if (!clientId) {
-        setError("No client ID provided in the URL.");
-        setLoading(false);
-        return;
+    try {
+      const response = await getSingleClient({ clientId });
+
+      if (!response || !response.client) {
+        if (!isRefresh) setError("No data found for the specified client ID.");
+      } else {
+        setClientData(response as Client);
+        if (!isRefresh) setError(null);
       }
-
-      try {
-        const response = await getSingleClient({ clientId });
-
-        if (!response || !response.client) {
-          setError("No data found for the specified client ID.");
-        } else {
-          setClientData(response);
-        }
-      } catch (err) {
-        console.error("Error fetching client data:", err);
+    } catch (err) {
+      console.error("Error fetching client data:", err);
+      if (!isRefresh) {
         setError(
           "An error occurred while fetching client data. Please try again later."
         );
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchClientData();
+    } finally {
+      if (!isRefresh) setLoading(false);
+    }
   }, [clientId]);
+
+  useEffect(() => {
+    void fetchClientData("full");
+  }, [fetchClientData]);
 
   const fetchContracts = useCallback(() => {
     const id = clientData?.client?.id;
@@ -631,6 +641,12 @@ const ClientPage = () => {
           </div>
         )}
       </div>
+
+      <ClientLifecyclePanel
+        clientId={clientData.client.id}
+        lifecycle={clientData.lifecycle}
+        onUpdated={() => fetchClientData("refresh")}
+      />
     </div>
   );
 };
