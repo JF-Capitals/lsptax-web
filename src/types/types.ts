@@ -1,5 +1,7 @@
 // src/types.ts
 
+import type { PropertyLifecyclePayload } from "@/types/clientLifecycle";
+
 export interface ClientData {
   id: number;
   TypeOfAcct?: string;
@@ -131,6 +133,8 @@ export interface PropertyData {
   /** Backend v2 shape uses `client` instead of `clientDetails` */
   propertyDetails: Property;
   invoices: Invoice[];
+  /** Protest pipeline state for this property (`GET /api/property`). */
+  lifecycle?: PropertyLifecyclePayload | null;
 }
 
 export interface Prospect {

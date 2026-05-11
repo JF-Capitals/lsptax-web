@@ -1,5 +1,5 @@
 /**
- * Phase/step IDs align with backend `lifecycleConstants` and GET /api/client `lifecycle`.
+ * Phase/step IDs align with backend `lifecycleConstants` and GET /api/property `lifecycle`.
  * Titles/descriptions mirror docs/Roadmap and docs/api_v2.md.
  */
 
@@ -269,7 +269,7 @@ export function getPhaseTitle(phaseId: string | null | undefined): string {
   return getPhaseDef(phaseId)?.title ?? phaseId ?? "—";
 }
 
-/** --- Lifecycle API labels (`GET /api/client` `lifecycle.phases`) + resolver --- */
+/** --- Lifecycle API labels (`GET /api/property` `lifecycle.phases`) + resolver --- */
 
 export type LifecycleLabelResolver = {
   phaseTitle: (phaseId: string | null | undefined) => string;
@@ -492,7 +492,7 @@ function normalizeHistoryRow(raw: unknown, depth = 0): Record<string, unknown> |
   return raw as Record<string, unknown>;
 }
 
-/** Canonical `{ at, from: {phase,step}, to, notes? }` from GET /api/client `lifecycle.history`. */
+/** Canonical `{ at, from: {phase,step}, to, notes? }` from `lifecycle.history` on property. */
 export function parseCanonicalHistoryEntry(raw: unknown): {
   at: string;
   from: LifecycleTransitionEnds;

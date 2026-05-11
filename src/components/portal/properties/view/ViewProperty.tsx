@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { NavLink, useSearchParams } from "react-router-dom";
 import { getSingleProperty, generateInvoices } from "@/store/data";
 import { LoaderCircle, Mail, MapPin, Phone, FileText } from "lucide-react";
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PropertyData } from "@/types/types";
 import { deleteProperty } from "@/api/api";
 import YearTable from "../yeardata/YearTable";
+import { PropertyLifecyclePanel } from "@/components/portal/properties/lifecycle/PropertyLifecyclePanel";
 import { useToast } from "@/hooks/use-toast";
 import { routes } from "@/routes/ROUTES";
 
@@ -34,6 +35,15 @@ const ViewProperty = () => {
     null
   ); // Track navigation state
 
+  /** Refetch after lifecycle updates without full-page loading spinner. */
+  const refreshPropertySnapshot = useCallback(async () => {
+    if (propertyId == null) return;
+    const propertyData = await getSingleProperty({
+      propertyId: propertyId.toString(),
+    });
+    if (propertyData) setProperty(propertyData as PropertyData);
+  }, [propertyId]);
+
   const fetchProperty = async (id: number) => {
     setLoading(true);
     setError("");
@@ -56,7 +66,7 @@ const ViewProperty = () => {
         return;
       }
 
-      setProperty(propertyData);
+      setProperty(propertyData as PropertyData);
     } catch (err) {
       console.error("Error fetching property:", err);
       setError("Failed to fetch property details");
@@ -392,6 +402,12 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
           </table>
         </div>
       </div>
+
+      <PropertyLifecyclePanel
+        propertyId={activePropertyId}
+        lifecycle={property.lifecycle}
+        onUpdated={() => void refreshPropertySnapshot()}
+      />
 
       {/* <div className="p-6 bg-gray-50 border rounded-lg my-2">
         <div

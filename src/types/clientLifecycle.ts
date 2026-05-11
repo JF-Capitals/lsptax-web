@@ -1,4 +1,4 @@
-/** Lifecycle object from GET /api/client (`lifecycle`). */
+/** Lifecycle object from GET /api/property (`lifecycle` on the property response). */
 
 /** One end of a transition (`from` / `to`); `null` ids mean none / not set. */
 export interface LifecycleTransitionEnds {
@@ -6,7 +6,7 @@ export interface LifecycleTransitionEnds {
   step: string | null;
 }
 
-/** Canonical history row from backend (GET /api/client `lifecycle.history`). */
+/** Canonical history row from backend (`lifecycle.history`). */
 export interface ClientLifecycleHistoryTransition {
   at: string;
   from: LifecycleTransitionEnds;
@@ -41,7 +41,7 @@ export interface ClientLifecycleHistoryEntry extends Record<string, unknown> {
   completedAt?: string;
 }
 
-export interface ClientLifecyclePayload {
+export interface PropertyLifecyclePayload {
   phaseId?: string | null;
   stepId?: string | null;
   completedAt?: string | null;
@@ -50,3 +50,6 @@ export interface ClientLifecyclePayload {
   /** Reference labels — same semantics as frontend constants when omitted. */
   phases?: unknown[] | null;
 }
+
+/** @deprecated Use PropertyLifecyclePayload — lifecycle is per property. */
+export type ClientLifecyclePayload = PropertyLifecyclePayload;
