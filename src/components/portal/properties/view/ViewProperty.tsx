@@ -406,6 +406,7 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
       <PropertyLifecyclePanel
         propertyId={activePropertyId}
         lifecycle={property.lifecycle}
+        hearings={property.hearings ?? []}
         onUpdated={() => void refreshPropertySnapshot()}
       />
 

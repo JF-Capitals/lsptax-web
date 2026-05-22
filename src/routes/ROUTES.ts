@@ -45,6 +45,10 @@ export const routes = {
         : portalPath("aoa"),
   },
 
+  hearings: {
+    list: () => portalPath("hearings"),
+  },
+
   invoices: {
     list: () => portalPath("invoices"),
     byClient: (clientId: string | number) =>

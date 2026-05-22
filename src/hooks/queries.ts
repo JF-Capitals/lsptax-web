@@ -9,6 +9,7 @@ import {
   getAllInvoices,
   getArchiveInvoices,
   dashboardData,
+  getHearings,
 } from "@/store/data";
 import { DEFAULT_PAGE_SIZE } from "@/store/common";
 import { QUERY_META_SUPPRESS_GLOBAL_ERROR_TOAST } from "@/routes/ROUTES";
@@ -100,6 +101,26 @@ export function useInvoicesQuery({
       archived
         ? getArchiveInvoices(limit, offset, search || undefined)
         : getAllInvoices(limit, offset, search || undefined),
+    ...queryClientDefaults,
+  });
+}
+
+export function useHearingsQuery({
+  limit = DEFAULT_PAGE_SIZE,
+  offset = 0,
+  from,
+  to,
+  status,
+}: {
+  limit?: number;
+  offset?: number;
+  from?: string;
+  to?: string;
+  status?: string;
+}) {
+  return useQuery({
+    queryKey: ["hearings", limit, offset, from ?? "", to ?? "", status ?? ""],
+    queryFn: () => getHearings(limit, offset, from, to, status),
     ...queryClientDefaults,
   });
 }

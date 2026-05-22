@@ -37,6 +37,7 @@ const EditProspectDetails = lazy(() => import("@/components/portal/prospects/edi
 const PreviewSignedPdf = lazy(() => import("@/components/portal/prospects/preview/PreviewSignedPDF"));
 const CsvUploadsPage = lazy(() => import("@/components/portal/csv/CsvUploadsPage"));
 const ReportsPage = lazy(() => import("@/components/portal/reports/ReportsPage"));
+const HearingsTable = lazy(() => import("@/components/portal/hearings/HearingsTable"));
 
 /**
  * Child `<Route>` elements for `/portal/*`. Parent layout supplies `<Outlet />` + Suspense.
@@ -62,6 +63,14 @@ export function PortalRouteElements() {
         element={
           <FeatureErrorBoundary label="Invoices list">
             <InvoicesTable columns={invoicesColumn as ColumnDef<unknown, unknown>[]} />
+          </FeatureErrorBoundary>
+        }
+      />
+      <Route
+        path="hearings"
+        element={
+          <FeatureErrorBoundary label="Hearings list">
+            <HearingsTable />
           </FeatureErrorBoundary>
         }
       />

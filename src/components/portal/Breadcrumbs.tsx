@@ -23,6 +23,7 @@ const ROUTE_LABELS: Record<string, string> = {
   "preview-docs": "Preview Documents",
   "edit-prospect": "Edit Prospect",
   "edit-prospect-properties": "Edit Prospect Properties",
+  hearings: "Hearings",
   invoices: "Invoices",
   invoice: "Invoice",
   aoa: "AOA",

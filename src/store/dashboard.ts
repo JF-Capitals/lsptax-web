@@ -1,14 +1,16 @@
 import { authFetch, getApiBaseUrl } from "@/api/client";
+import type { HearingStats } from "@/types/hearings";
 
 const base = getApiBaseUrl;
 
-interface Stats {
+export interface DashboardStats {
   numOfClients: number;
   numOfProspects: number;
   numOfAgents: number;
+  hearings?: HearingStats;
 }
 
-export const dashboardData = async (): Promise<Stats> => {
+export const dashboardData = async (): Promise<DashboardStats> => {
   try {
     const response = await authFetch(`${base()}/api/stats`);
     if (!response.ok) throw new Error("Failed to fetch dashboard stats");

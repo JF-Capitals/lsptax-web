@@ -83,6 +83,12 @@ const headerData = [
     desc: "See all Invoices here.",
   },
   {
+    id: "hearings",
+    icon: "",
+    label: "Hearings",
+    desc: "View and filter scheduled property hearings.",
+  },
+  {
     id: "clients/list-client",
     icon: "",
     label: "Clients",

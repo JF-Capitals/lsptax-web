@@ -159,7 +159,7 @@ export const CLIENT_LIFECYCLE_PHASES: LifecyclePhaseDef[] = [
     steps: [
       {
         id: "hearingScheduleReceipt",
-        title: "Hearing schedule receipt",
+        title: "Hearing schedule received",
         description: "Receive hearing dates from county / CAD.",
       },
       {

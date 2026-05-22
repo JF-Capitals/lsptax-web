@@ -448,6 +448,94 @@ export const downloadSignedPDF = async ({ prospectId }: { prospectId: number }) 
   }
 };
 
+export const addHearing = async (payload: {
+  propertyId: number;
+  date: string;
+  notes?: string;
+  status?: string;
+}) => {
+  const response = await fetch(`${baseUrl()}/action/add-hearing`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+  const text = await response.text();
+  let result: Record<string, unknown> = {};
+  if (text) {
+    try {
+      result = JSON.parse(text);
+    } catch {
+      // non-JSON
+    }
+  }
+  if (!response.ok) {
+    const msg = (result?.message as string) || (result?.error as string) || "Failed to schedule hearing";
+    throw new Error(msg);
+  }
+  return result;
+};
+
+export const editHearing = async (payload: {
+  hearingId: number;
+  date?: string;
+  notes?: string;
+  status?: string;
+}) => {
+  const response = await fetch(`${baseUrl()}/action/edit-hearing`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+  const text = await response.text();
+  let result: Record<string, unknown> = {};
+  if (text) {
+    try {
+      result = JSON.parse(text);
+    } catch {
+      // non-JSON
+    }
+  }
+  if (!response.ok) {
+    const msg = (result?.message as string) || (result?.error as string) || "Failed to update hearing";
+    throw new Error(msg);
+  }
+  return result;
+};
+
+/** Soft-delete: sets `deletedAt`; row excluded from lists and stats. */
+export const deleteHearing = async (
+  hearingId: number,
+): Promise<{ message?: string; hearingId?: number; deletedAt?: string }> => {
+  const response = await fetch(`${baseUrl()}/action/delete-hearing`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ hearingId }),
+  });
+  const text = await response.text();
+  let result: Record<string, unknown> = {};
+  if (text) {
+    try {
+      result = JSON.parse(text);
+    } catch {
+      // non-JSON
+    }
+  }
+  if (!response.ok) {
+    const msg = (result?.message as string) || (result?.error as string) || "Failed to delete hearing";
+    throw new Error(msg);
+  }
+  return result;
+};
+
 export const archiveItem = async (tableName: string, id: number) => {
   try {
     const response = await fetch(`${baseUrl()}/action/archive-entity`, {

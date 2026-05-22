@@ -12,6 +12,8 @@ import {
   type LifecyclePhaseId,
 } from "@/constants/clientLifecycle";
 import type { PropertyLifecyclePayload } from "@/types/clientLifecycle";
+import type { Hearing } from "@/types/hearings";
+import { PropertyHearingsSection } from "@/components/portal/properties/lifecycle/PropertyHearingsSection";
 import { editProperty } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -48,10 +50,11 @@ function stepVisual(
 interface PropertyLifecyclePanelProps {
   propertyId: number | string;
   lifecycle: PropertyLifecyclePayload | null | undefined;
+  hearings?: Hearing[];
   onUpdated: () => void | Promise<void>;
 }
 
-export function PropertyLifecyclePanel({ propertyId, lifecycle, onUpdated }: PropertyLifecyclePanelProps) {
+export function PropertyLifecyclePanel({ propertyId, lifecycle, hearings = [], onUpdated }: PropertyLifecyclePanelProps) {
   const { toast } = useToast();
   /** Collapsible like before; open by default so rail + steps are one click away. */
   const [lifecycleOpen, setLifecycleOpen] = useState(true);
@@ -342,6 +345,14 @@ export function PropertyLifecyclePanel({ propertyId, lifecycle, onUpdated }: Pro
                               )}
                             </div>
                             <p className="mt-1 text-xs leading-snug text-slate-600">{step.description}</p>
+                            {step.id === "calendarIntegration" ? (
+                              <PropertyHearingsSection
+                                propertyId={propertyId}
+                                hearings={hearings}
+                                lifecyclePhaseId={currentPhaseId}
+                                onUpdated={onUpdated}
+                              />
+                            ) : null}
                           </div>
                           <div className="mt-2 shrink-0 sm:mt-0">
                             <Button

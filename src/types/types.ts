@@ -1,6 +1,7 @@
 // src/types.ts
 
 import type { PropertyLifecyclePayload } from "@/types/clientLifecycle";
+import type { Hearing } from "@/types/hearings";
 
 export interface ClientData {
   id: number;
@@ -135,6 +136,8 @@ export interface PropertyData {
   invoices: Invoice[];
   /** Protest pipeline state for this property (`GET /api/property`). */
   lifecycle?: PropertyLifecyclePayload | null;
+  /** Scheduled hearings (`GET /api/property`). */
+  hearings?: Hearing[];
 }
 
 export interface Prospect {

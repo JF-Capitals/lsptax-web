@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   BarChart3,
+  Calendar,
 } from "lucide-react";
 import {
   Tooltip,
@@ -33,6 +34,7 @@ const menuOptions: MenuOption[] = [
   { to: routes.clients.list(), match: "clients", label: "Clients", icon: Users },
   { to: routes.properties.list(), match: "properties", label: "Properties", icon: Building },
   { to: routes.invoices.list(), match: "invoices", label: "Invoices", icon: FileText },
+  { to: routes.hearings.list(), match: "hearings", label: "Hearings", icon: Calendar },
   { to: routes.prospects.list(), match: "prospects", label: "Prospects", icon: UserPlus },
   { to: routes.csvUploads(), match: "csv-uploads", label: "CSV Uploads", icon: UploadCloud },
   { to: routes.reports(), match: "reports", label: "Reports", icon: BarChart3 },

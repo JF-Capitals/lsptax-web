@@ -9,3 +9,4 @@ export * from "./properties";
 export * from "./invoices";
 export * from "./prospects";
 export * from "./dashboard";
+export * from "./hearings";
