@@ -7,10 +7,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PropertyData } from "@/types/types";
 import { deleteProperty } from "@/api/api";
 import YearTable from "../yeardata/YearTable";
+import { PROPERTY_INVOICE_YEARS } from "../propertyInvoiceYears";
 import { PropertyLifecyclePanel } from "@/components/portal/properties/lifecycle/PropertyLifecyclePanel";
 import { useToast } from "@/hooks/use-toast";
 import { routes } from "@/routes/ROUTES";
 
+function clampToPropertyInvoiceYear(year: number): number {
+  const min = Math.min(...PROPERTY_INVOICE_YEARS);
+  const max = Math.max(...PROPERTY_INVOICE_YEARS);
+  return Math.min(max, Math.max(min, year));
+}
 
 const ViewProperty = () => {
   const { toast } = useToast();
@@ -20,7 +26,9 @@ const ViewProperty = () => {
   const [isDeleting, setIsDeleting] = useState(false); // Track deletion state
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false); // Track invoice section state
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false); // Track invoice generation state
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Track selected year
+  const [selectedYear, setSelectedYear] = useState(() =>
+    clampToPropertyInvoiceYear(new Date().getFullYear())
+  ); // Track selected year (restricted to property invoice years)
   const [searchParams, setSearchParams] = useSearchParams();
   const propertyIdParam = searchParams.get("propertyId");
   const parsedPropertyId =
@@ -285,7 +293,7 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
                 <SelectValue placeholder="Select Year" />
               </SelectTrigger>
               <SelectContent>
-                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).reverse().map((year) => (
+                {PROPERTY_INVOICE_YEARS.map((year) => (
                   <SelectItem key={year} value={year.toString()}>
                     {year}
                   </SelectItem>

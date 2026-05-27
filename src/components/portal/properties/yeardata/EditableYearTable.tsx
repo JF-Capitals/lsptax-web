@@ -1,5 +1,6 @@
 import { Invoice } from "@/types/types";
 import React, { useState } from "react";
+import { PROPERTY_INVOICE_YEARS } from "../propertyInvoiceYears";
 
 // Define the type for table row data
 type TableRow = {
@@ -37,7 +38,7 @@ type TableRow = {
 const EditableYearTable: React.FC<{ invoices?: Invoice[] }> = ({
   invoices,
 }) => {
-  const years = [2021, 2022, 2023, 2024, 2025];
+  const years = PROPERTY_INVOICE_YEARS;
   // Prepare initial table data from invoices
   const initialTableData: TableRow[] = years.map((year) => {
     const yearData = invoices?.find((invoice) => invoice.year === year);

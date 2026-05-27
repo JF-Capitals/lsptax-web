@@ -1,6 +1,7 @@
 import React from "react";
 import { formatUSD } from "@/utils/formatCurrency";
 import { Invoice } from "@/types/types";
+import { PROPERTY_INVOICE_YEARS } from "../propertyInvoiceYears";
 
 // Define the type for table row data
 type TableRow = {
@@ -40,7 +41,7 @@ const YearTable: React.FC<{ invoices: Invoice[]; showBpp?: boolean }> = ({
   showBpp = true,
 }) => {
   // Extract data for the table: creating rows and columns
-  const years = [2021, 2022, 2023, 2024, 2025];
+  const years = PROPERTY_INVOICE_YEARS;
   const rowData: TableRow[] = years.map((year) => {
     const yearData = invoices.find((invoice) => invoice.year === year);
 

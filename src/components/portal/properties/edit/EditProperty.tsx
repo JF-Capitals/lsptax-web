@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { routes } from "@/routes/ROUTES";
 import { getSingleProperty } from "@/store/data";
 import { PropertyData, Invoice } from "@/types/types";
+import { PROPERTY_INVOICE_YEARS } from "../propertyInvoiceYears";
 import { editProperty } from "@/api/api";
 import { LoaderCircle } from "lucide-react";
 import { formatUSD, cleanNumberInput } from "@/utils/formatCurrency";
@@ -99,7 +100,7 @@ export default function EditProperty() {
   const [property, setProperty] = useState<PropertyData | null>(null);
   const propertyId = searchParams.get("propertyId");
   const navigate = useNavigate();
-  const years = [2021, 2022, 2023, 2024, 2025];
+  const years = PROPERTY_INVOICE_YEARS;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
