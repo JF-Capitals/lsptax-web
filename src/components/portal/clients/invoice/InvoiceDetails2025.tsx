@@ -143,6 +143,7 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({ invoice, select
             <div className="grid grid-cols-2 text-[13px] leading-[1.25] font-medium">
               <div className="min-h-[62px]">
                 <p className="font-semibold">Property Tax Representation For:</p>
+                <p>{firstMatch.property?.propertyDetails.nameOnCad || "--"}</p>
                 <p>{firstMatch.property?.propertyDetails.propertyAddress || "--"}</p>
                 <p>{firstMatch.property?.propertyDetails.mailingAddressCityTxZip || "--"}</p>
               </div>
