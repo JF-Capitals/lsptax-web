@@ -166,20 +166,20 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
 
     setIsGeneratingInvoice(true);
     try {
-      const clientNumber = property.propertyDetails.clientNumber;
+      const clientId = property.client?.id;
       const accountNumber = property.propertyDetails.accountNumber;
       
-      if (!clientNumber || !accountNumber) {
+      if (!clientId || !accountNumber) {
         toast({
           title: "Error",
-          description: "Missing client number or account number",
+          description: "Missing client ID or account number",
           variant: "destructive",
         });
         return;
       }
 
       const result = await generateInvoices({
-        clientNumbers: [clientNumber],
+        clientIds: [clientId],
         propertyAccountNumbers: [accountNumber],
         years: [selectedYear], // Use selected year
       });
@@ -276,7 +276,7 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
           </NavLink>
 
           <NavLink
-            to={routes.invoices.byClient(clientNumber)}
+            to={routes.invoices.byProperty(activePropertyId)}
           >
             <Button className="w-full">View Invoices</Button>
           </NavLink>

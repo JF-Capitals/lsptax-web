@@ -14,8 +14,12 @@ export const invoicesColumn: ColumnDef<InvoiceSummary>[] = [
     header: "Invoice #",
     cell: ({ row }) => {
       const id = row.original.id;
+      const propertyId = row.original.propertyId;
+      const invoiceLink = propertyId
+        ? routes.invoices.byProperty(propertyId)
+        : routes.invoices.byClient(row.original.clientId);
       return (
-        <NavLink to={routes.invoices.byClient(id)}>
+        <NavLink to={invoiceLink}>
           <div className="text-blue-400 font-bold">#{id}</div>
         </NavLink>
       );
@@ -25,10 +29,16 @@ export const invoicesColumn: ColumnDef<InvoiceSummary>[] = [
     accessorKey: "property",
     header: "Property Account Number",
     cell: ({ row }) => {
+      const propertyNumbers = row.original?.propertyNumbers?.length
+        ? row.original.propertyNumbers
+        : row.original.propertyNumber
+          ? [row.original.propertyNumber]
+          : [];
+
       return (
         <div>
           <div className="flex flex-wrap">
-            {row.original?.propertyNumbers?.map((property, index) => (
+            {propertyNumbers.map((property, index) => (
               <h1
                 key={index}
                 className="bg-green-200 p-1 m-1 text-green-800 font-bold w-max border rounded-xl"

@@ -103,7 +103,7 @@ const InvoicesTable = <TData, TValue>({
           <div className="relative flex flex-1 items-center max-w-md w-80 min-w-0">
             <Input
               type="text"
-              placeholder="Search by client number or property/account number..."
+              placeholder="Search by property/account number..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => {
@@ -113,7 +113,7 @@ const InvoicesTable = <TData, TValue>({
                 }
               }}
               className="pr-9 w-full"
-              aria-label="Search invoices by client or property number"
+              aria-label="Search invoices by property/account number"
             />
             {(searchTerm || appliedSearch) && (
               <Button

@@ -9,7 +9,7 @@ const base = getApiBaseUrl;
 
 export const getInvoice = async ({ clientId }: { clientId: string }) => {
   try {
-    const response = await authFetch(`${base()}/api/invoice/${clientId}`);
+    const response = await authFetch(`${base()}/api/invoice/clientid=${clientId}`);
     if (!response.ok) throw new Error("Failed to fetch Invoices");
     return response.json();
   } catch {
@@ -19,7 +19,7 @@ export const getInvoice = async ({ clientId }: { clientId: string }) => {
 
 export const getInvoiceByPropertyId = async ({ propertyId }: { propertyId: string }) => {
   try {
-    const response = await authFetch(`${base()}/api/invoice_prop?propertyId=${propertyId}`);
+    const response = await authFetch(`${base()}/api/invoice/${propertyId}`);
     if (!response.ok) throw new Error("Failed to fetch Invoices");
     return response.json();
   } catch {
@@ -80,10 +80,10 @@ export const getClientsForInvoiceGeneration = async () => {
   return data.data;
 };
 
-export const getPropertiesForInvoiceGeneration = async (clientNumbers: string[]) => {
-  const clientNumbersParam = clientNumbers.join(",");
+export const getPropertiesForInvoiceGeneration = async (clientIds: number[]) => {
+  const clientIdsParam = clientIds.join(",");
   const response = await authFetch(
-    `${base()}/invoice/properties?clientNumbers=${clientNumbersParam}`
+    `${base()}/invoice/properties?clientIds=${clientIdsParam}`
   );
   if (!response.ok) throw new Error("Failed to fetch properties for invoice generation");
   const data = await response.json();
@@ -91,7 +91,7 @@ export const getPropertiesForInvoiceGeneration = async (clientNumbers: string[])
 };
 
 export const generateInvoices = async (options: {
-  clientNumbers: string[];
+  clientIds: number[];
   propertyAccountNumbers?: string[] | null;
   years?: number[];
   invoiceDefaults?: Record<string, unknown>;
@@ -112,11 +112,11 @@ export const generateInvoices = async (options: {
 };
 
 export const getInvoiceGenerationStats = async (
-  clientNumbers?: string[],
+  clientIds?: number[],
   years?: number[]
 ) => {
   const params = new URLSearchParams();
-  if (clientNumbers?.length) params.append("clientNumbers", clientNumbers.join(","));
+  if (clientIds?.length) params.append("clientIds", clientIds.join(","));
   if (years?.length) params.append("years", years.map((y) => y.toString()).join(","));
   const response = await authFetch(`${base()}/invoice/stats?${params.toString()}`);
   if (!response.ok) throw new Error("Failed to fetch invoice generation statistics");

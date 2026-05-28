@@ -113,8 +113,10 @@ export interface InvoiceSummary {
   id: string | number;
   isArchived: boolean;
   clientId: string;
+  propertyId?: string | number;
   clientNumber?: string;
-  propertyNumbers: string[]; 
+  propertyNumber?: string;
+  propertyNumbers?: string[];
   totalInvoiceAmount: number;
   createdAt: string; 
 }

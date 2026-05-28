@@ -53,6 +53,8 @@ export const routes = {
     list: () => portalPath("invoices"),
     byClient: (clientId: string | number) =>
       withQuery(portalPath("invoice"), { clientId: String(clientId) }),
+    byProperty: (propertyId: string | number) =>
+      withQuery(portalPath("invoice"), { propertyId: String(propertyId) }),
   },
 
   clients: {
