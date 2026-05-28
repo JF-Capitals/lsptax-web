@@ -19,6 +19,21 @@ function formatDate(value?: string): string {
   return date.toLocaleDateString();
 }
 
+function addDays(value: string, days: number): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  date.setDate(date.getDate() + days);
+  return date.toLocaleDateString();
+}
+
+function toSafeFilenamePart(value: string): string {
+  return value
+    .trim()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9_-]/g, "")
+    .replace(/_+/g, "_");
+}
+
 function getYearInvoice(property: InvoiceProperty, year: number): Invoice | undefined {
   return property.invoice.find((inv) => inv.year === year);
 }
@@ -36,9 +51,17 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({ invoice, select
   const taxSavings = firstMatch.yearInvoice?.taxableSavings ?? 0;
   const dueAmount = taxSavings * (contingencyPercent / 100);
   const invoiceDate = formatDate(firstMatch.yearInvoice?.invoiceDate);
+  const dueDate = addDays(invoiceDate, 28);
+  const cadOwnerNameRaw =
+    firstMatch.property?.propertyDetails.nameOnCad ||
+    firstMatch.property?.propertyDetails.contactOwner ||
+    invoice.client.clientName ||
+    "CAD_OWNER_NAME";
+  const printFileName = `LSPTax_${toSafeFilenamePart(cadOwnerNameRaw)}_INVOICE_${selectedYear}`;
 
   const reactToPrintFn = useReactToPrint({
     contentRef,
+    documentTitle: printFileName,
     pageStyle: `
       @page {
         size: letter;
@@ -57,10 +80,14 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({ invoice, select
         #invoice-2025-sheet {
           box-shadow: none !important;
           width: 100% !important;
-          min-height: auto !important;
+          min-height: 255mm !important;
           margin: 0 auto !important;
           border: 1px solid #111 !important;
           border-radius: 0 !important;
+          padding: 18px !important;
+          font-size: 12px !important;
+          line-height: 1.2 !important;
+          font-family: "Nunito", sans-serif !important;
         }
       }
     `,
@@ -79,118 +106,118 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({ invoice, select
         <div
           id="invoice-2025-sheet"
           ref={contentRef}
-          className="mx-auto w-full max-w-[820px] bg-white shadow p-6 text-[13px] leading-[1.3] text-black font-['Times_New_Roman']"
+          className="mx-auto w-full max-w-[950px] min-h-[255mm] bg-white shadow p-5 text-[12px] leading-[1.2] text-black font-sans"
         >
-          <div className="flex items-start justify-between border-b border-black pb-3">
-            <div className="flex items-start gap-3">
-              <img src={brandLogo} alt="LSP Tax logo" className="h-[98px] w-[98px] object-contain" />
-              <div className="pt-1">
-                <p className="text-[22px] font-bold tracking-wide leading-6">LONE STAR PROPERTY TAX</p>
-                <p>16107 KENSINGTON DRIVE, STE. 194</p>
-                <p>SUGARLAND, TX 77479</p>
-                <p>713-505-6806</p>
-                <p>info@lsptax.com</p>
-              </div>
-            </div>
-            <div className="text-right pt-2 min-w-[250px]">
-              <p className="font-semibold tracking-wide text-[14px]">FOR PROFESSIONAL SERVICES</p>
-              <p>
-                Invoice Number: <span className="font-semibold">{firstMatch.yearInvoice?.id ?? "--"}</span>
-              </p>
-              <p>
-                Invoice Date: <span className="font-semibold">{invoiceDate}</span>
-              </p>
-              <p>
-                Due Date: <span className="font-semibold">{invoiceDate}</span>
-              </p>
-              <p>
-                Total Fee Due: <span className="font-semibold">{formatUSD(dueAmount)}</span>
-              </p>
+          <div className="flex items-start gap-2 pb-2">
+            <img src={brandLogo} alt="LSP Tax logo" className="h-[76px] w-[76px] object-contain" />
+            <div className="pt-1 text-[13px] leading-[1.25] font-semibold">
+              <p className="text-[17px] font-black tracking-wide leading-[1.1]">LONE STAR PROPERTY TAX</p>
+              <p>16107 KENSINGTON DRIVE, STE. 194</p>
+              <p>SUGARLAND, TX 77479</p>
+              <p>info@lsptax.com</p>
+              <p>713-505-6806</p>
             </div>
           </div>
 
-          <div className="my-5 grid grid-cols-[1fr_300px] gap-6 items-start">
-            <div>
-              <p className="font-semibold uppercase">{invoice.client.clientName}</p>
+          <div className="my-3 border border-black p-2">
+            <div className="grid grid-cols-[1fr_360px] gap-3 items-start text-[13px] leading-[1.25] font-medium">
+              <div>
+                <p>{invoice.client.clientName}</p>
+                <p>{invoice.client.mailingAddress}</p>
+                <p>{invoice.client.mailingAddressCityTxZip}</p>
+              </div>
+              <div className="grid grid-cols-[150px_1fr] gap-y-1">
+                <p>Invoice Date:</p>
+                <p>{invoiceDate}</p>
+                <p>Invoice Number:</p>
+                <p>{firstMatch.yearInvoice?.id ?? "--"}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="my-3 text-center text-[16px] font-bold underline tracking-wide">
+            FOR PROFESSIONAL SERVICES
+          </div>
+
+          <div className="border border-black p-3">
+            <div className="grid grid-cols-2 text-[13px] leading-[1.25] font-medium">
+              <div className="min-h-[62px]">
+                <p className="font-semibold">Property Tax Representation For:</p>
+                <p>{firstMatch.property?.propertyDetails.propertyAddress || "--"}</p>
+                <p>{firstMatch.property?.propertyDetails.mailingAddressCityTxZip || "--"}</p>
+              </div>
+              <div className="min-h-[62px] grid grid-cols-[150px_1fr]">
+                <p>Account Number:</p>
+                <p>{firstMatch.property?.propertyDetails.accountNumber || "--"}</p>
+                <p>Service:</p>
+                <p>{selectedYear} Protest</p>
+              </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 text-[13px] leading-[1.25] font-medium">
+              <div className="min-h-[88px]">
+                <p>Begining Appraised Value: {formatUSD(firstMatch.yearInvoice?.beginningAppraised)}</p>
+                <p>Ending Appraised Value: {formatUSD(firstMatch.yearInvoice?.endingAppraised)}</p>
+                <p>Rduction: {formatUSD(firstMatch.yearInvoice?.appraisedReduction)}</p>
+                <p>Overall Tax Rate: {firstMatch.yearInvoice?.taxRate ?? 0}%</p>
+              </div>
+              <div className="min-h-[88px]">
+                <p>Begining Market Value: {formatUSD(firstMatch.yearInvoice?.beginningMarket)}</p>
+                <p>Ending Market Value: {formatUSD(firstMatch.yearInvoice?.endingMarket)}</p>
+                <p>Rduction: {formatUSD(firstMatch.yearInvoice?.marketReduction)}</p>
+              </div>
+            </div>
+
+            <div className="mt-4 w-[300px] border border-black p-2 text-[13px] leading-[1.2] font-semibold">
+              <div className="grid grid-cols-[1fr_1fr]">
+                <p>Client Tax Savings:</p>
+                <p>{formatUSD(taxSavings)}</p>
+                <p>Contingency Fee:</p>
+                <p>{contingencyPercent}%</p>
+                <p>Due:</p>
+                <p>{formatUSD(dueAmount)}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="my-4 border-t border-dashed border-black pt-1 text-center text-[15px] font-bold leading-none">
+            Cut Here ✂
+          </div>
+
+          <div className="grid grid-cols-[1fr_340px] gap-4 min-h-[110px] text-[13px] leading-[1.25] font-medium">
+            <div className="pl-1 pt-1">
+              <p>{invoice.client.clientName}</p>
               <p>{invoice.client.mailingAddress}</p>
               <p>{invoice.client.mailingAddressCityTxZip}</p>
             </div>
-            <div className="border border-black p-3">
-              <p className="font-semibold">Payment Options</p>
-              <p className="mt-1">ZELLE: 713-505-6806 (Lone Star Property Tax)</p>
-              <p>Include invoice number in memo.</p>
-            </div>
-          </div>
-
-          <div className="border border-black">
-            <div className="grid grid-cols-2">
-              <div className="p-3 min-h-[82px]">
-                <p className="font-semibold">Property Tax Representation For</p>
-                <p>{firstMatch.property?.propertyDetails.mailingAddress || "--"}</p>
-                <p>{firstMatch.property?.propertyDetails.mailingAddressCityTxZip || "--"}</p>
+            <div className="border border-black p-2">
+              <div className="grid grid-cols-[140px_1fr] font-semibold">
+                <p>Invoice Number:</p>
+                <p>{firstMatch.yearInvoice?.id ?? "--"}</p>
+                <p>Total Fee Due:</p>
+                <p>{formatUSD(dueAmount)}</p>
+                <p>Invoice Date:</p>
+                <p>{invoiceDate}</p>
+                <p>Due Date:</p>
+                <p>{dueDate}</p>
               </div>
-              <div className="p-3 min-h-[82px]">
-                <p>
-                  Account Number:{" "}
-                  <span className="font-semibold">
-                    {firstMatch.property?.propertyDetails.accountNumber || "--"}
-                  </span>
-                </p>
-                <p>
-                  Service: <span className="font-semibold">{selectedYear} Protest</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2">
-              <div className="p-3 min-h-[86px]">
-                <p>Beginning Appraised Value: {formatUSD(firstMatch.yearInvoice?.beginningAppraised)}</p>
-                <p>Ending Appraised Value: {formatUSD(firstMatch.yearInvoice?.endingAppraised)}</p>
-                <p>Reduction: {formatUSD(firstMatch.yearInvoice?.appraisedReduction)}</p>
-              </div>
-              <div className="p-3 min-h-[86px]">
-                <p>Beginning Market Value: {formatUSD(firstMatch.yearInvoice?.beginningMarket)}</p>
-                <p>Ending Market Value: {formatUSD(firstMatch.yearInvoice?.endingMarket)}</p>
-                <p>Reduction: {formatUSD(firstMatch.yearInvoice?.marketReduction)}</p>
+              <div className="mt-5 grid grid-cols-[140px_1fr] font-semibold">
+                <p>Amount Enclosed:</p>
+                <p className="border-b border-black" />
               </div>
             </div>
           </div>
 
-          <div className="mt-5 grid grid-cols-3 gap-4 border border-black p-3">
-            <p>
-              Overall Tax Rate: <span className="font-semibold">{firstMatch.yearInvoice?.taxRate ?? 0}%</span>
-            </p>
-            <p>
-              Client Tax Savings: <span className="font-semibold">{formatUSD(taxSavings)}</span>
-            </p>
-            <p>
-              Contingency Fee: <span className="font-semibold">{contingencyPercent}%</span>
-            </p>
-          </div>
-
-          <div className="mt-4 text-right text-[20px] font-bold">Due: {formatUSD(dueAmount)}</div>
-
-          <div className="my-5 border-t border-dashed border-black pt-2 text-[10px] tracking-[0.16em] uppercase">
-            Cut Here
-          </div>
-
-          <div className="grid grid-cols-[1fr_300px] gap-6 border border-black p-3 min-h-[120px]">
-            <div className="pt-1">
-              <p className="font-semibold">Please remit payment to address below:</p>
-              <p className="mt-2">LONE STAR PROPERTY TAX</p>
+          <div className="mt-5 grid grid-cols-[1fr_1fr] text-[13px] leading-[1.25] font-semibold">
+            <div>
+              <p>Please remit payment to adress below:</p>
+              <p className="mt-1">LONE STAR PROPERTY TAX</p>
               <p>16107 KENSINGTON DRIVE, STE. 194</p>
               <p>SUGARLAND, TX 77479</p>
             </div>
-            <div className="border border-black p-3">
-              <p>
-                Invoice Date: <span className="font-semibold">{invoiceDate}</span>
-              </p>
-              <p>
-                Invoice Number: <span className="font-semibold">{firstMatch.yearInvoice?.id ?? "--"}</span>
-              </p>
-              <p className="mt-2">
-                Amount Enclosed: <span className="font-semibold">{formatUSD(dueAmount)}</span>
-              </p>
+            <div>
+              <p>OR&nbsp;&nbsp; ZELLE: (Include Invoice number)</p>
+              <p>713-505-6806 (Lone Star Property Tax)</p>
             </div>
           </div>
         </div>
