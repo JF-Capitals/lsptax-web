@@ -1,6 +1,6 @@
 import { getInvoice, getInvoiceByPropertyId } from "@/store/data";
 import { InvoiceData } from "@/types/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import InvoiceDetails2025 from "./InvoiceDetails2025";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,46 @@ type NormalizationResult = {
   debug: Record<string, unknown>;
 };
 
+type InvoicePropertyDetails = InvoiceData["properties"][number]["propertyDetails"];
+type InvoiceRecord = InvoiceData["properties"][number]["invoice"][number];
+
+const asPropertyDetails = (details: Record<string, unknown>): InvoicePropertyDetails =>
+  details as unknown as InvoicePropertyDetails;
+
+const asInvoiceRecord = (invoice: { [key: string]: unknown }): InvoiceRecord =>
+  invoice as unknown as InvoiceRecord;
+
+const buildFallbackClient = (
+  propertyDetails: Record<string, unknown>
+): InvoiceData["client"] => ({
+  id: Number(propertyDetails.clientId ?? 0),
+  clientName: String(propertyDetails.clientName ?? propertyDetails.nameOnCad ?? ""),
+  clientNumber: String(propertyDetails.clientNumber ?? ""),
+  mailingAddress: String(propertyDetails.mailingAddress ?? ""),
+  mailingAddressCityTxZip: String(propertyDetails.mailingAddressCityTxZip ?? ""),
+  contingencyFee: String(propertyDetails.contingencyFee ?? "0"),
+  email: String(propertyDetails.email ?? ""),
+  phoneNumber: String(propertyDetails.phoneNumber ?? ""),
+});
+
+const resolvePropertyDetails = (
+  topLevel: unknown,
+  invoices: Array<Record<string, unknown>>
+): Record<string, unknown> | undefined => {
+  const fromTop =
+    topLevel && typeof topLevel === "object"
+      ? (topLevel as Record<string, unknown>)
+      : undefined;
+  const fromInvoice = invoices
+    .map((invoice) => invoice.propertyDetails)
+    .find((details) => details && typeof details === "object") as
+    | Record<string, unknown>
+    | undefined;
+
+  if (fromTop && fromInvoice) return { ...fromTop, ...fromInvoice };
+  return fromInvoice ?? fromTop;
+};
+
 const mapPropertyOnlyPayload = (
   payload: unknown
 ): InvoiceData | undefined => {
@@ -26,35 +66,48 @@ const mapPropertyOnlyPayload = (
   const maybePayload = payload as {
     propertyDetails?: unknown;
     invoices?: unknown;
+    client?: unknown;
+    clientDetails?: unknown;
   };
 
-  if (!maybePayload.propertyDetails || !Array.isArray(maybePayload.invoices)) {
+  if (!Array.isArray(maybePayload.invoices) || maybePayload.invoices.length === 0) {
     return undefined;
   }
 
-  const propertyDetails = maybePayload.propertyDetails as Record<string, unknown>;
+  const invoices = maybePayload.invoices as Array<Record<string, unknown>>;
+  const defaultPropertyDetails = resolvePropertyDetails(
+    maybePayload.propertyDetails,
+    invoices
+  );
+  if (!defaultPropertyDetails) return undefined;
 
-  // New API returns invoice details by property. Build a compatible client object
-  // from available property fields so existing invoice views continue to render.
-  const fallbackClient = {
-    id: Number(propertyDetails.clientId ?? 0),
-    clientName: String(propertyDetails.clientName ?? propertyDetails.nameOnCad ?? ""),
-    clientNumber: String(propertyDetails.clientNumber ?? ""),
-    mailingAddress: String(propertyDetails.mailingAddress ?? ""),
-    mailingAddressCityTxZip: String(propertyDetails.mailingAddressCityTxZip ?? ""),
-    contingencyFee: String(propertyDetails.contingencyFee ?? "0"),
-    email: String(propertyDetails.email ?? ""),
-    phoneNumber: String(propertyDetails.phoneNumber ?? ""),
-  };
+  const client =
+    ((maybePayload.client ?? maybePayload.clientDetails) as InvoiceData["client"] | undefined) ??
+    buildFallbackClient(defaultPropertyDetails);
+
+  const propertyMap = new Map<string, InvoiceData["properties"][number]>();
+
+  for (const invoice of invoices) {
+    const embeddedDetails = invoice.propertyDetails as Record<string, unknown> | undefined;
+    const propertyDetails = asPropertyDetails(
+      embeddedDetails
+        ? { ...defaultPropertyDetails, ...embeddedDetails }
+        : defaultPropertyDetails
+    );
+
+    const propertyKey = String(invoice.propertyId ?? propertyDetails.id ?? "default");
+    const { propertyDetails: _ignored, ...invoiceRecord } = invoice;
+
+    if (!propertyMap.has(propertyKey)) {
+      propertyMap.set(propertyKey, { propertyDetails, invoice: [] });
+    }
+
+    propertyMap.get(propertyKey)!.invoice.push(asInvoiceRecord(invoiceRecord));
+  }
 
   return {
-    client: fallbackClient,
-    properties: [
-      {
-        propertyDetails: maybePayload.propertyDetails as InvoiceData["properties"][number]["propertyDetails"],
-        invoice: maybePayload.invoices as InvoiceData["properties"][number]["invoice"],
-      },
-    ],
+    client,
+    properties: Array.from(propertyMap.values()),
   };
 };
 
@@ -100,7 +153,8 @@ const normalizeInvoiceData = (raw: unknown): NormalizationResult => {
   const source = (raw as { data?: unknown }).data ?? raw;
   const sourceArray = Array.isArray(source) ? source : [source];
 
-  // Case: single property-only payload from GET /api/invoice/:propertyId
+  // Case: property payload from GET /api/invoice/:propertyId
+  // Supports top-level propertyDetails and/or propertyDetails nested on each invoice row.
   const propertyOnly = mapPropertyOnlyPayload(source);
   if (propertyOnly) {
     return {
@@ -181,17 +235,26 @@ const InvoicePage = () => {
   const propertyId = searchParams.get("propertyId");
   const clientId = searchParams.get("clientId");
   const [invoiceData, setInvoiceData] = useState<InvoiceData | undefined>();
-  const [selectedYear, setSelectedYear] = useState<number>(2025);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const availableYears = Array.from(
-    new Set(
-      (invoiceData?.properties ?? [])
-        .flatMap((property) => property.invoice)
-        .map((invoice) => invoice.year)
-    )
-  ).sort((a, b) => b - a);
+  const availableYears = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (invoiceData?.properties ?? [])
+            .flatMap((property) => property.invoice)
+            .map((invoice) => invoice.year)
+        )
+      ).sort((a, b) => b - a),
+    [invoiceData]
+  );
+
+  useEffect(() => {
+    if (availableYears.length === 0) return;
+    setSelectedYear(availableYears[0]);
+  }, [invoiceData, availableYears]);
 
   useEffect(() => {
     if (!propertyId && !clientId) {
