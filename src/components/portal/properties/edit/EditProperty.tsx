@@ -75,13 +75,41 @@ const formSchema = z.object({
   cadZipCode: z.string().optional().default(""),
   cadCounty: z.string().optional().default(""),
   accountNumber: z.string().optional().default(""),
-  clientNumber: z.string().optional().default(""),
+  clientNumber: z.coerce.string().optional().default(""),
   contactOwner: z.string().nullable().default(""),
   subcontractOwner: z.string().nullable().default(""),
-  bppFee: z.string().optional().default(""),
-  flatFee: z.string().optional().default(""),
+  bppFee: z.coerce.string().optional().default(""),
+  flatFee: z.coerce.string().optional().default(""),
   isArchived: z.boolean().optional().default(false),
 });
+
+function mapPropertyDetailsToFormValues(
+  details: Record<string, unknown>
+): z.infer<typeof formSchema> {
+  const str = (value: unknown) => (value == null ? "" : String(value));
+
+  return {
+    statusNotes: str(details.statusNotes ?? details.StatusNotes),
+    otherNotes: str(details.otherNotes ?? details.OtherNotes),
+    nameOnCad: str(details.nameOnCad ?? details.NAMEONCAD),
+    mailingAddress: str(details.mailingAddress ?? details.MAILINGADDRESS),
+    mailingAddressCityTxZip: str(
+      details.mailingAddressCityTxZip ?? details.MAILINGADDRESSCITYTXZIP
+    ),
+    propertyAddress: str(details.propertyAddress),
+    cadMailingAddress: str(details.cadMailingAddress ?? details.CADMailingADDRESS),
+    cadCity: str(details.cadCity ?? details.CADCITY),
+    cadZipCode: str(details.cadZipCode ?? details.CADZIPCODE),
+    cadCounty: str(details.cadCounty ?? details.CADCOUNTY),
+    accountNumber: str(details.accountNumber ?? details.AccountNumber),
+    clientNumber: str(details.clientNumber ?? details.CLIENTNumber),
+    contactOwner: str(details.contactOwner ?? details.CONTACTOWNER),
+    subcontractOwner: str(details.subcontractOwner ?? details.SUBCONTRACTOWNER),
+    bppFee: str(details.bppFee ?? details.BPPFEE),
+    flatFee: str(details.flatFee ?? details.FlatFee),
+    isArchived: Boolean(details.isArchived ?? details.IsArchived ?? false),
+  };
+}
 
 interface CompleteSubmission {
   propertyDetails: z.infer<typeof formSchema>;
@@ -96,6 +124,7 @@ export default function EditProperty() {
     typeof formSchema
   > | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [property, setProperty] = useState<PropertyData | null>(null);
   const propertyId = searchParams.get("propertyId");
@@ -116,7 +145,7 @@ export default function EditProperty() {
 
   const handleConfirm = async () => {
     if (!pendingValues) return;
-    setLoading(true);
+    setIsSubmitting(true);
     try {
       // Filter out years with no meaningful data
       const meaningfulYearlyData = tableData.reduce((acc, row) => {
@@ -171,7 +200,7 @@ export default function EditProperty() {
     } catch (error) {
       toast({ title: "Failed to update property", variant: "destructive" });
     } finally {
-      setLoading(false); // Set loading to false after submission
+      setIsSubmitting(false);
     }
   };
   useEffect(() => {
@@ -186,7 +215,11 @@ export default function EditProperty() {
         const property = await getSingleProperty({ propertyId });
         if (property) {
           setProperty(property);
-          form.reset(property.propertyDetails ?? {});
+          form.reset(
+            mapPropertyDetailsToFormValues(
+              (property.propertyDetails ?? {}) as Record<string, unknown>
+            )
+          );
         } else {
           setError("Property not found");
         }
@@ -395,7 +428,13 @@ export default function EditProperty() {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleSubmit)}
+        onSubmit={form.handleSubmit(handleSubmit, () => {
+          toast({
+            title: "Could not save property",
+            description: "Please check the form for invalid values and try again.",
+            variant: "destructive",
+          });
+        })}
         className="space-y-8 m-2 py-10 px-6 bg-white rounded-lg shadow-lg"
       >
         <div className="border-b pb-4">
@@ -727,9 +766,9 @@ export default function EditProperty() {
           <Button
             type="submit"
             className="w-32 bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center"
-            disabled={loading}
+            disabled={isSubmitting}
           >
-            {loading ? (
+            {isSubmitting ? (
               <>
                 <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
                 Saving...
@@ -739,25 +778,36 @@ export default function EditProperty() {
             )}
           </Button>
         </div>
-
-        <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirm Changes</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to save these changes? This action cannot
-                be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleConfirm}>
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </form>
+
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to save these changes? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              type="button"
+              onClick={handleConfirm}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <LoaderCircle className="animate-spin w-5 h-5 mr-2" />
+                  Saving...
+                </>
+              ) : (
+                "Continue"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Form>
   );
 }
