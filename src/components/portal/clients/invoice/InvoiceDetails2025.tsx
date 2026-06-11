@@ -47,10 +47,8 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({ invoice, select
     return { property, yearInvoice };
   }, [invoice.properties, selectedYear]);
 
-  const contingencyPercent = Number(invoice.client.contingencyFee || "0");
-  const taxSavings = firstMatch.yearInvoice?.taxableSavings ?? 0;
-  const dueAmount = taxSavings * (contingencyPercent / 100);
-  const invoiceDate = formatDate(firstMatch.yearInvoice?.invoiceDate);
+  const yearInvoice = firstMatch.yearInvoice;
+  const invoiceDate = formatDate(yearInvoice?.invoiceDate);
   const dueDate = addDays(invoiceDate, 28);
   const cadOwnerNameRaw =
     firstMatch.property?.propertyDetails.nameOnCad ||
@@ -157,26 +155,26 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({ invoice, select
 
             <div className="mt-6 grid grid-cols-2 text-[13px] leading-[1.25] font-medium">
               <div className="min-h-[88px]">
-                <p>Begining Appraised Value: {formatUSD(firstMatch.yearInvoice?.beginningAppraised)}</p>
-                <p>Ending Appraised Value: {formatUSD(firstMatch.yearInvoice?.endingAppraised)}</p>
-                <p>Rduction: {formatUSD(firstMatch.yearInvoice?.appraisedReduction)}</p>
-                <p>Overall Tax Rate: {firstMatch.yearInvoice?.taxRate ?? 0}%</p>
+                <p>Begining Appraised Value: {formatUSD(yearInvoice?.noticeAppraisedValue)}</p>
+                <p>Ending Appraised Value: {formatUSD(yearInvoice?.finalAppraisedValue)}</p>
+                <p>Reduction: {formatUSD(yearInvoice?.appraisedReduction)}</p>
+                <p>Overall Tax Rate: {yearInvoice?.taxRate ?? 0}%</p>
               </div>
               <div className="min-h-[88px]">
-                <p>Begining Market Value: {formatUSD(firstMatch.yearInvoice?.beginningMarket)}</p>
-                <p>Ending Market Value: {formatUSD(firstMatch.yearInvoice?.endingMarket)}</p>
-                <p>Rduction: {formatUSD(firstMatch.yearInvoice?.marketReduction)}</p>
+                <p>Begining Market Value: {formatUSD(yearInvoice?.noticeMarketValue)}</p>
+                <p>Ending Market Value: {formatUSD(yearInvoice?.finalMarketValue)}</p>
+                <p>Reduction: {formatUSD(yearInvoice?.marketReduction)}</p>
               </div>
             </div>
 
             <div className="mt-4 w-[300px] border border-black p-2 text-[13px] leading-[1.2] font-semibold">
               <div className="grid grid-cols-[1fr_1fr]">
                 <p>Client Tax Savings:</p>
-                <p>{formatUSD(taxSavings)}</p>
+                <p>{formatUSD(yearInvoice?.taxableSavings)}</p>
                 <p>Contingency Fee:</p>
-                <p>{contingencyPercent}%</p>
+                <p>{yearInvoice?.contingencyFee ?? yearInvoice?.contingencyFeePercent ?? invoice.client.contingencyFee ?? 0}%</p>
                 <p>Due:</p>
-                <p>{formatUSD(dueAmount)}</p>
+                <p>{formatUSD(yearInvoice?.invoiceAmount)}</p>
               </div>
             </div>
           </div>
@@ -196,7 +194,7 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({ invoice, select
                 <p>Invoice Number:</p>
                 <p>{firstMatch.yearInvoice?.id ?? "--"}</p>
                 <p>Total Fee Due:</p>
-                <p>{formatUSD(dueAmount)}</p>
+                <p>{formatUSD(yearInvoice?.invoiceAmount)}</p>
                 <p>Invoice Date:</p>
                 <p>{invoiceDate}</p>
                 <p>Due Date:</p>

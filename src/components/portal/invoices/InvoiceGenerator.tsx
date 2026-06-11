@@ -467,9 +467,9 @@ const InvoiceGenerator = () => {
                               {property.cadMailingAddress}, {property.cadCity}, {property.cadCounty}
                             </div>
                             <div className="text-sm">
-                              {property.contingencyFee && (
+                              {property.contingencyFee != null && property.contingencyFee !== "" && (
                                 <Badge variant="secondary" className="mr-1">
-                                  Contingency: ${property.contingencyFee}
+                                  Contingency: {property.contingencyFee}%
                                 </Badge>
                               )}
                               {property.flatFee && (

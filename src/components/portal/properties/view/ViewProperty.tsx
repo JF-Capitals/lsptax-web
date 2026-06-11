@@ -261,6 +261,12 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
   const mailingCityZip = prop?.mailingAddressCityTxZip ?? "";
   const propertyAddress = prop?.propertyAddress ?? "";
   const cadCounty = prop?.cadCounty ?? "";
+  const cadMailingDisplay =
+    prop?.cadMailingAddressDisplay?.full ||
+    [prop?.cadMailingAddressDisplay?.line1, prop?.cadMailingAddressDisplay?.line2]
+      .filter(Boolean)
+      .join(", ") ||
+    [mailingAddress, mailingCityZip].filter(Boolean).join(", ");
   const acctType = String(client?.typeOfAcct ?? client?.TypeOfAcct ?? "")
     .trim()
     .toLowerCase();
@@ -401,6 +407,10 @@ const handleNavigation = async (newId: number, direction: "prev" | "next") => {
                 <td>
                   {propertyAddress || "—"}
                 </td>
+              </tr>
+              <tr>
+                <td className="font-medium">CAD Mailing Address:</td>
+                <td>{cadMailingDisplay || "—"}</td>
               </tr>
               <tr>
                 <td className="font-medium">County:</td>

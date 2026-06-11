@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -23,12 +22,25 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { routes } from "@/routes/ROUTES";
 import { getSingleProperty } from "@/store/data";
 import { PropertyData, Invoice } from "@/types/types";
 import { PROPERTY_INVOICE_YEARS } from "../propertyInvoiceYears";
+import {
+  buildYearlyDataPayload,
+  CONTINGENCY_FEE_OPTIONS,
+  type YearlyTableRow,
+} from "../yearlyDataPayload";
 import { editProperty } from "@/api/api";
 import { LoaderCircle } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { formatUSD, cleanNumberInput } from "@/utils/formatCurrency";
 
 type TableRow = {
@@ -70,9 +82,6 @@ const formSchema = z.object({
   mailingAddress: z.string().optional().default(""),
   mailingAddressCityTxZip: z.string().optional().default(""),
   propertyAddress: z.string().optional().default(""),
-  cadMailingAddress: z.string().optional().default(""),
-  cadCity: z.string().optional().default(""),
-  cadZipCode: z.string().optional().default(""),
   cadCounty: z.string().optional().default(""),
   accountNumber: z.string().optional().default(""),
   clientNumber: z.coerce.string().optional().default(""),
@@ -97,9 +106,6 @@ function mapPropertyDetailsToFormValues(
       details.mailingAddressCityTxZip ?? details.MAILINGADDRESSCITYTXZIP
     ),
     propertyAddress: str(details.propertyAddress),
-    cadMailingAddress: str(details.cadMailingAddress ?? details.CADMailingADDRESS),
-    cadCity: str(details.cadCity ?? details.CADCITY),
-    cadZipCode: str(details.cadZipCode ?? details.CADZIPCODE),
     cadCounty: str(details.cadCounty ?? details.CADCOUNTY),
     accountNumber: str(details.accountNumber ?? details.AccountNumber),
     clientNumber: str(details.clientNumber ?? details.CLIENTNumber),
@@ -113,7 +119,19 @@ function mapPropertyDetailsToFormValues(
 
 interface CompleteSubmission {
   propertyDetails: z.infer<typeof formSchema>;
-  yearlyData: Record<number, Omit<TableRow, "year">>;
+  yearlyData: Record<string, Record<string, unknown>>;
+}
+
+function resolveContingencyFee(
+  yearData: Invoice | undefined,
+  clientDefault: string | undefined,
+): string {
+  const fromInvoice =
+    yearData?.contingencyFee ?? yearData?.contingencyFeePercent;
+  if (fromInvoice != null) {
+    return String(fromInvoice);
+  }
+  return clientDefault || "0";
 }
 
 export default function EditProperty() {
@@ -127,6 +145,7 @@ export default function EditProperty() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [property, setProperty] = useState<PropertyData | null>(null);
+  const [cadMailingDisplay, setCadMailingDisplay] = useState("");
   const propertyId = searchParams.get("propertyId");
   const navigate = useNavigate();
   const years = PROPERTY_INVOICE_YEARS;
@@ -147,51 +166,17 @@ export default function EditProperty() {
     if (!pendingValues) return;
     setIsSubmitting(true);
     try {
-      // Filter out years with no meaningful data
-      const meaningfulYearlyData = tableData.reduce((acc, row) => {
-        const { year, ...rowWithoutYear } = row;
-        
-        // Only check user-editable fields, not calculated fields
-        const editableFields = [
-          "Protest Date", "BPP Rendered", "BPP Invoice", "BPP Paid",
-          "Notice Land Value", "Notice Improvement Value", "Notice Appraised Value",
-          "Final Land Value", "Final Improvement Value", "Final Appraised Value",
-          "Hearing Date", "Invoice Date", "Under Litigation", "Under Arbitration",
-          "Tax Rate", "Paid Date", "Payment Notes", "Ending Market", "Ending Appraised"
-        ];
-        
-        // Check if this year has any meaningful data in editable fields
-        const hasData = editableFields.some(field => {
-          const value = rowWithoutYear[field as keyof typeof rowWithoutYear];
-          if (typeof value === 'boolean') {
-            return value === true; // Only include if litigation/arbitration is true
-          }
-          if (typeof value === 'string') {
-            return value.trim() !== '' && value !== '0'; // Exclude empty strings and "0"
-          }
-          if (typeof value === 'number') {
-            return value > 0; // Only include positive numbers
-          }
-          return false;
-        });
-        
-        if (hasData) {
-          acc[year] = rowWithoutYear;
-        }
-        
-        return acc;
-      }, {} as Record<number, Omit<TableRow, "year">>);
+      const yearlyData = buildYearlyDataPayload(tableData as YearlyTableRow[]);
 
       const completeSubmission: CompleteSubmission = {
         propertyDetails: pendingValues,
-        yearlyData: meaningfulYearlyData,
+        yearlyData,
       };
-      
-      
+
       await editProperty(
         propertyId!,
-        completeSubmission.propertyDetails,
-        completeSubmission.yearlyData
+        completeSubmission.propertyDetails as Record<string, unknown>,
+        completeSubmission.yearlyData,
       );
 
       toast({ title: "Property updated successfully!" });
@@ -215,6 +200,17 @@ export default function EditProperty() {
         const property = await getSingleProperty({ propertyId });
         if (property) {
           setProperty(property);
+          const display = property.propertyDetails?.cadMailingAddressDisplay;
+          setCadMailingDisplay(
+            display?.full ||
+              [display?.line1, display?.line2].filter(Boolean).join(", ") ||
+              [
+                property.propertyDetails?.mailingAddress,
+                property.propertyDetails?.mailingAddressCityTxZip,
+              ]
+                .filter(Boolean)
+                .join(", "),
+          );
           form.reset(
             mapPropertyDetailsToFormValues(
               (property.propertyDetails ?? {}) as Record<string, unknown>
@@ -252,10 +248,13 @@ export default function EditProperty() {
       const endingMarket = parseFloat(cleanNumberInput((yearData?.endingMarket?.toString()) ?? "")) || 0;
       const endingAppraised = parseFloat(cleanNumberInput((yearData?.endingAppraised?.toString()) ?? "")) || 0;
 
-      // Contingency fee is client-level in v2 ("25" -> 0.25)
-      const contingencyFeeString = property?.client?.contingencyFee || "0";
+      // Per-year contingency override, defaulting to client settings
+      const contingencyFeeString = resolveContingencyFee(
+        yearData,
+        property?.client?.contingencyFee,
+      );
       const contingencyFeePercentage = parseFloat(contingencyFeeString);
-      const contingencyFee = contingencyFeePercentage / 100; // Convert to decimal (e.g., 25% -> 0.25)
+      const contingencyFee = contingencyFeePercentage / 100;
 
       const noticeMarketValue = noticeLandValue + noticeImprovementValue;
       const finalMarketValue = finalLandValue + finalImprovementValue;
@@ -307,9 +306,8 @@ export default function EditProperty() {
     });
   };
   useEffect(() => {
-    if (property?.invoices) {
-      setTableData(getInitialTableData(property.invoices));
-    }
+    if (!property) return;
+    setTableData(getInitialTableData(property.invoices ?? []));
   }, [property]);
 
   const [tableData, setTableData] = useState<TableRow[]>(() => getInitialTableData());
@@ -362,6 +360,15 @@ export default function EditProperty() {
     recalculateFields(rowIndex);
   };
 
+  const handleContingencyChange = (rowIndex: number, value: string) => {
+    setTableData((prev) =>
+      prev.map((row, idx) =>
+        idx === rowIndex ? { ...row, "Contingency Fee": value } : row,
+      ),
+    );
+    recalculateFields(rowIndex);
+  };
+
   const recalculateFields = (rowIndex: number) => {
     setTableData((prev) =>
       prev.map((row, idx) => {
@@ -381,8 +388,8 @@ export default function EditProperty() {
         const endingMarket = parseFloat(cleanNumberInput(row["Ending Market"])) || 0;
         const endingAppraised = parseFloat(cleanNumberInput(row["Ending Appraised"])) || 0;
 
-        // Contingency fee is client-level in v2 (not editable per property)
-        const contingencyFeeString = property?.client?.contingencyFee || "0";
+        // Per-year contingency override (dropdown), defaulting to client settings
+        const contingencyFeeString = row["Contingency Fee"] || property?.client?.contingencyFee || "0";
         const contingencyFeePercentage = parseFloat(contingencyFeeString);
         const contingencyFee = contingencyFeePercentage / 100;
 
@@ -495,41 +502,12 @@ export default function EditProperty() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="cadMailingAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CAD Mailing Address</FormLabel>
-                  <Input placeholder="Enter CAD Mailing Address" {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="cadCity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CAD City</FormLabel>
-                  <Input placeholder="Enter CAD City" {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="cadZipCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CAD ZIP Code</FormLabel>
-                  <Input placeholder="Enter CAD ZIP Code" {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-1">
+              <p className="text-sm font-medium leading-none">CAD Mailing Address</p>
+              <p className="text-sm text-muted-foreground rounded-md border border-input bg-muted/40 px-3 py-2 min-h-10">
+                {cadMailingDisplay || "—"}
+              </p>
+            </div>
 
             <FormField
               control={form.control}
@@ -681,7 +659,6 @@ export default function EditProperty() {
                   "Invoice Amount",
                   "Beginning Market",
                   "Beginning Appraised",
-                  "Contingency Fee",
                 ].includes(key);
 
                 return (
@@ -708,6 +685,35 @@ export default function EditProperty() {
                             }
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />
+                        ) : key === "Contingency Fee" ? (
+                          (() => {
+                            const currentPct = row["Contingency Fee"] || "0";
+                            const pctNum = Number(currentPct);
+                            const options: number[] = CONTINGENCY_FEE_OPTIONS.some(
+                              (opt) => opt === pctNum,
+                            )
+                              ? [...CONTINGENCY_FEE_OPTIONS]
+                              : [pctNum, ...CONTINGENCY_FEE_OPTIONS];
+                            return (
+                          <Select
+                            value={currentPct}
+                            onValueChange={(value) =>
+                              handleContingencyChange(rowIndex, value)
+                            }
+                          >
+                            <SelectTrigger className="h-8 w-full">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {options.map((pct) => (
+                                <SelectItem key={pct} value={String(pct)}>
+                                  {pct}%
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                            );
+                          })()
                         ) : isCalculatedField ? (
                           <input
                             type="text"
@@ -718,7 +724,7 @@ export default function EditProperty() {
                         ) : key === "Tax Rate" ? (
                           <input
                             type="number"
-                            step="0.01"
+                            step="0.0001"
                             min="0"
                             value={row[key as keyof TableRow] as string}
                             onChange={(e) =>

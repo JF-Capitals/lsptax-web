@@ -3,6 +3,12 @@
 import type { PropertyLifecyclePayload } from "@/types/clientLifecycle";
 import type { Hearing } from "@/types/hearings";
 
+export interface CadMailingAddressDisplay {
+  line1?: string;
+  line2?: string;
+  full?: string;
+}
+
 export interface ClientData {
   id: number;
   TypeOfAcct?: string;
@@ -26,6 +32,7 @@ export interface ClientData {
   MAILINGADDRESSCITYTXZIP?: string;
   mailingAddressCityTxZip?: string;
   contingencyFee?: string;
+  flatFee?: string | number | null;
   IsArchived?: boolean;
   isArchived?: boolean;
   createdAt?: Date;
@@ -52,6 +59,7 @@ export interface Property {
   cadZipCode?: string;
   CADCOUNTY?: string;
   cadCounty?: string;
+  cadMailingAddressDisplay?: CadMailingAddressDisplay;
   AccountNumber?: string;
   accountNumber?: string;
   CLIENTNumber?: string;
@@ -94,6 +102,7 @@ export interface Invoice {
   taxRate?: number;
   taxableSavings?: number;
   contingencyFee?: number;
+  contingencyFeePercent?: number;
   invoiceAmount?: number;
   paidDate?: string;
   paymentNotes?: string;
@@ -151,6 +160,7 @@ export interface Prospect {
   mailingAddress?: string;
   mailingAddressCityTxZip?: string;
   contingencyFee?: string;
+  flatFee?: string | number | null;
   billingAddress?: string;
   billingEmail?: string;
   envelopeId?: string;
