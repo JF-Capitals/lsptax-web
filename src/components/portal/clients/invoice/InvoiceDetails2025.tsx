@@ -1,58 +1,107 @@
-import React, { useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
-import { Printer } from "lucide-react";
+import { LoaderCircle, Mail, Printer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { formatUSD } from "@/utils/formatCurrency";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 import { Invoice, InvoiceData, InvoiceProperty } from "@/types/types";
-import brandLogo from "@/assets/invoice-logo.png";
+import {
+  getInvoiceDeliveries,
+  sendInvoice,
+  type InvoiceDelivery,
+} from "@/store/invoices";
+import { elementsToPdfAttachments } from "@/utils/elementToPdfBase64";
+import InvoiceSheet2025, {
+  addInvoiceDays,
+  formatInvoiceDate,
+  getYearInvoice,
+  toSafeFilenamePart,
+} from "./InvoiceSheet2025";
+import { getClientPhoneNumber, getClientRecipientEmail } from "@/utils/clientContact";
+import InvoiceSendHistory from "./InvoiceSendHistory";
 
 type InvoiceDetails2025Props = {
   invoice: InvoiceData;
   selectedYear: number;
+  propertyIdFilter?: string | null;
 };
 
-function formatDate(value?: string): string {
-  if (!value) return new Date().toLocaleDateString();
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return new Date().toLocaleDateString();
-  return date.toLocaleDateString();
-}
+type PropertyWithInvoice = {
+  property: InvoiceProperty;
+  yearInvoice: Invoice;
+};
 
-function addDays(value: string, days: number): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  date.setDate(date.getDate() + days);
-  return date.toLocaleDateString();
-}
-
-function toSafeFilenamePart(value: string): string {
-  return value
-    .trim()
-    .replace(/\s+/g, "_")
-    .replace(/[^a-zA-Z0-9_-]/g, "")
-    .replace(/_+/g, "_");
-}
-
-function getYearInvoice(property: InvoiceProperty, year: number): Invoice | undefined {
-  return property.invoice.find((inv) => inv.year === year);
-}
-
-const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({ invoice, selectedYear }) => {
+const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({
+  invoice,
+  selectedYear,
+  propertyIdFilter,
+}) => {
   const contentRef = useRef<HTMLDivElement>(null);
+  const captureContainerRef = useRef<HTMLDivElement>(null);
+  const sheetRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const { toast } = useToast();
 
-  const firstMatch = useMemo(() => {
-    const property = invoice.properties.find((p) => getYearInvoice(p, selectedYear));
-    const yearInvoice = property ? getYearInvoice(property, selectedYear) : undefined;
-    return { property, yearInvoice };
-  }, [invoice.properties, selectedYear]);
+  const [sendDialogOpen, setSendDialogOpen] = useState(false);
+  const [sendSms, setSendSms] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [deliveries, setDeliveries] = useState<InvoiceDelivery[]>([]);
+  const [loadingDeliveries, setLoadingDeliveries] = useState(false);
 
-  const yearInvoice = firstMatch.yearInvoice;
-  const invoiceDate = formatDate(yearInvoice?.invoiceDate);
-  const dueDate = addDays(invoiceDate, 28);
+  const propertiesWithInvoice = useMemo((): PropertyWithInvoice[] => {
+    return invoice.properties
+      .filter((property) => {
+        if (propertyIdFilter && String(property.propertyDetails.id) !== propertyIdFilter) {
+          return false;
+        }
+        const yearInvoice = getYearInvoice(property, selectedYear);
+        return !!yearInvoice;
+      })
+      .map((property) => ({
+        property,
+        yearInvoice: getYearInvoice(property, selectedYear)!,
+      }));
+  }, [invoice.properties, propertyIdFilter, selectedYear]);
+
+  const displayMatch = propertiesWithInvoice[0];
+
+  const recipientEmail = getClientRecipientEmail(invoice.client);
+  const recipientPhone = getClientPhoneNumber(invoice.client);
+
+  const refreshDeliveries = useCallback(async () => {
+    const clientId = invoice.client.id;
+    if (!clientId) return;
+    setLoadingDeliveries(true);
+    try {
+      const rows = await getInvoiceDeliveries(clientId, 10);
+      setDeliveries(rows);
+    } catch {
+      // Non-blocking; history is optional
+    } finally {
+      setLoadingDeliveries(false);
+    }
+  }, [invoice.client.id]);
+
+  useEffect(() => {
+    void refreshDeliveries();
+  }, [refreshDeliveries]);
+
+  const yearInvoice = displayMatch?.yearInvoice;
+  const invoiceDate = formatInvoiceDate(yearInvoice?.invoiceDate);
+  const dueDate = addInvoiceDays(invoiceDate, 28);
   const cadOwnerNameRaw =
-    firstMatch.property?.propertyDetails.nameOnCad ||
-    firstMatch.property?.propertyDetails.contactOwner ||
+    displayMatch?.property.propertyDetails.nameOnCad ||
+    displayMatch?.property.propertyDetails.contactOwner ||
     invoice.client.clientName ||
     "CAD_OWNER_NAME";
   const printFileName = `LSPTax_${toSafeFilenamePart(cadOwnerNameRaw)}_INVOICE_${selectedYear}`;
@@ -91,136 +140,218 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({ invoice, select
     `,
   });
 
+  const handleSendInvoice = async () => {
+    const clientId = invoice.client.id;
+    if (!clientId) {
+      toast({
+        title: "Cannot send invoice",
+        description: "Client ID is missing.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!recipientEmail) {
+      toast({
+        title: "Cannot send invoice",
+        description: "This client has no billing email or email address on file.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (propertiesWithInvoice.length === 0) {
+      toast({
+        title: "Cannot send invoice",
+        description: `No invoice data found for ${selectedYear}.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      const captureElements = propertiesWithInvoice
+        .map(({ property }) => {
+          const el = sheetRefs.current.get(property.propertyDetails.id);
+          if (!el) return null;
+          const account = property.propertyDetails.accountNumber || String(property.propertyDetails.id);
+          return {
+            element: el,
+            filename: `invoice-${account}-${selectedYear}.pdf`,
+          };
+        })
+        .filter(Boolean) as Array<{ element: HTMLElement; filename: string }>;
+
+      if (captureElements.length === 0) {
+        throw new Error("Could not prepare invoice PDFs for sending.");
+      }
+
+      const attachments = await elementsToPdfAttachments(captureElements);
+      const result = await sendInvoice({
+        clientId,
+        year: selectedYear,
+        sendSms,
+        attachments,
+      });
+
+      toast({
+        title: "Invoice sent",
+        description: result.message || `Emailed to ${result.data.recipientEmail}`,
+      });
+
+      if (result.data.warning) {
+        toast({
+          title: "SMS not delivered",
+          description: result.data.warning,
+        });
+      }
+
+      setSendDialogOpen(false);
+      await refreshDeliveries();
+    } catch (error) {
+      toast({
+        title: "Failed to send invoice",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  if (!displayMatch) {
+    return (
+      <div className="flex items-center justify-center min-h-[40vh] px-4 text-center text-gray-700">
+        No invoice data for {selectedYear}.
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-100 py-4">
-      <div className="mx-auto max-w-[980px] px-3">
-        <div className="mb-3 flex items-center justify-end">
+      <div className="mx-auto max-w-[1100px] px-3">
+        <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
           <Button variant="blue" className="bg-brand-blue text-white" onClick={() => reactToPrintFn()}>
             <Printer className="mr-2 h-4 w-4" />
             Print
           </Button>
+          <Button
+            variant="blue"
+            className="bg-brand-blue text-white"
+            disabled={!recipientEmail || isSending}
+            onClick={() => setSendDialogOpen(true)}
+          >
+            {isSending ? (
+              <>
+                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              <>
+                <Mail className="mr-2 h-4 w-4" />
+                Send by email
+              </>
+            )}
+          </Button>
         </div>
 
-        <div
-          id="invoice-2025-sheet"
-          ref={contentRef}
-          className="mx-auto w-full max-w-[950px] min-h-[255mm] bg-white shadow p-5 text-[12px] leading-[1.2] text-black font-sans"
-        >
-          <div className="flex items-start gap-2 pb-2">
-            <img src={brandLogo} alt="LSP Tax logo" className="h-[76px] w-[76px] object-contain" />
-            <div className="pt-1 text-[13px] leading-[1.25] font-semibold">
-              <p className="text-[17px] font-black tracking-wide leading-[1.1]">LONE STAR PROPERTY TAX</p>
-              <p>16107 KENSINGTON DRIVE, STE. 194</p>
-              <p>SUGARLAND, TX 77479</p>
-              <p>info@lsptax.com</p>
-              <p>713-505-6806</p>
-            </div>
+        {!recipientEmail && (
+          <p className="mb-3 text-sm text-amber-700">
+            Add a billing email or email address on the client record to send this invoice.
+          </p>
+        )}
+
+        <div className="flex flex-col items-start gap-3 lg:flex-row lg:gap-4">
+          <div ref={contentRef} className="min-w-0 flex-1">
+            <InvoiceSheet2025
+              client={invoice.client}
+              property={displayMatch.property}
+              yearInvoice={yearInvoice}
+              selectedYear={selectedYear}
+              invoiceDate={invoiceDate}
+              dueDate={dueDate}
+            />
           </div>
 
-          <div className="my-3 border border-black p-2">
-            <div className="grid grid-cols-[1fr_360px] gap-3 items-start text-[13px] leading-[1.25] font-medium">
-              <div>
-                <p>{invoice.client.clientName}</p>
-                <p>{invoice.client.mailingAddress}</p>
-                <p>{invoice.client.mailingAddressCityTxZip}</p>
-              </div>
-              <div className="grid grid-cols-[150px_1fr] gap-y-1">
-                <p>Invoice Date:</p>
-                <p>{invoiceDate}</p>
-                <p>Invoice Number:</p>
-                <p>{firstMatch.yearInvoice?.id ?? "--"}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="my-3 text-center text-[16px] font-bold underline tracking-wide">
-            FOR PROFESSIONAL SERVICES
-          </div>
-
-          <div className="border border-black p-3">
-            <div className="grid grid-cols-2 text-[13px] leading-[1.25] font-medium">
-              <div className="min-h-[62px]">
-                <p className="font-semibold">Property Tax Representation For:</p>
-                <p>{firstMatch.property?.propertyDetails.nameOnCad || "--"}</p>
-                <p>{firstMatch.property?.propertyDetails.propertyAddress || "--"}</p>
-                <p>{firstMatch.property?.propertyDetails.mailingAddressCityTxZip || "--"}</p>
-              </div>
-              <div className="min-h-[62px] grid grid-cols-[150px_1fr]">
-                <p>Account Number:</p>
-                <p>{firstMatch.property?.propertyDetails.accountNumber || "--"}</p>
-                <p>Service:</p>
-                <p>{selectedYear} Protest</p>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 text-[13px] leading-[1.25] font-medium">
-              <div className="min-h-[88px]">
-                <p>Begining Appraised Value: {formatUSD(yearInvoice?.noticeAppraisedValue)}</p>
-                <p>Ending Appraised Value: {formatUSD(yearInvoice?.finalAppraisedValue)}</p>
-                <p>Reduction: {formatUSD(yearInvoice?.appraisedReduction)}</p>
-                <p>Overall Tax Rate: {yearInvoice?.taxRate ?? 0}%</p>
-              </div>
-              <div className="min-h-[88px]">
-                <p>Begining Market Value: {formatUSD(yearInvoice?.noticeMarketValue)}</p>
-                <p>Ending Market Value: {formatUSD(yearInvoice?.finalMarketValue)}</p>
-                <p>Reduction: {formatUSD(yearInvoice?.marketReduction)}</p>
-              </div>
-            </div>
-
-            <div className="mt-4 w-[300px] border border-black p-2 text-[13px] leading-[1.2] font-semibold">
-              <div className="grid grid-cols-[1fr_1fr]">
-                <p>Client Tax Savings:</p>
-                <p>{formatUSD(yearInvoice?.taxableSavings)}</p>
-                <p>Contingency Fee:</p>
-                <p>{yearInvoice?.contingencyFee ?? yearInvoice?.contingencyFeePercent ?? invoice.client.contingencyFee ?? 0}%</p>
-                <p>Due:</p>
-                <p>{formatUSD(yearInvoice?.invoiceAmount)}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="my-4 border-t border-dashed border-black pt-1 text-center text-[15px] font-bold leading-none">
-            Cut Here ✂
-          </div>
-
-          <div className="grid grid-cols-[1fr_340px] gap-4 min-h-[110px] text-[13px] leading-[1.25] font-medium">
-            <div className="pl-1 pt-1">
-              <p>{invoice.client.clientName}</p>
-              <p>{invoice.client.mailingAddress}</p>
-              <p>{invoice.client.mailingAddressCityTxZip}</p>
-            </div>
-            <div className="border border-black p-2">
-              <div className="grid grid-cols-[140px_1fr] font-semibold">
-                <p>Invoice Number:</p>
-                <p>{firstMatch.yearInvoice?.id ?? "--"}</p>
-                <p>Total Fee Due:</p>
-                <p>{formatUSD(yearInvoice?.invoiceAmount)}</p>
-                <p>Invoice Date:</p>
-                <p>{invoiceDate}</p>
-                <p>Due Date:</p>
-                <p>{dueDate}</p>
-              </div>
-              <div className="mt-5 grid grid-cols-[140px_1fr] font-semibold">
-                <p>Amount Enclosed:</p>
-                <p className="border-b border-black" />
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-5 grid grid-cols-[1fr_1fr] text-[13px] leading-[1.25] font-semibold">
-            <div>
-              <p>Please remit payment to adress below:</p>
-              <p className="mt-1">LONE STAR PROPERTY TAX</p>
-              <p>16107 KENSINGTON DRIVE, STE. 194</p>
-              <p>SUGARLAND, TX 77479</p>
-            </div>
-            <div>
-              <p>OR&nbsp;&nbsp; ZELLE: (Include Invoice number)</p>
-              <p>713-505-6806 (Lone Star Property Tax)</p>
-            </div>
-          </div>
+          <InvoiceSendHistory
+            deliveries={deliveries}
+            loading={loadingDeliveries}
+            selectedYear={selectedYear}
+          />
         </div>
       </div>
+
+      {/* Off-screen sheets for multi-property PDF capture */}
+      <div
+        ref={captureContainerRef}
+        className="fixed left-[-10000px] top-0 w-[950px] pointer-events-none"
+        aria-hidden
+      >
+        {propertiesWithInvoice.map(({ property, yearInvoice: inv }) => {
+          const sheetDate = formatInvoiceDate(inv.invoiceDate);
+          return (
+            <InvoiceSheet2025
+              key={property.propertyDetails.id}
+              ref={(node) => {
+                if (node) {
+                  sheetRefs.current.set(property.propertyDetails.id, node);
+                } else {
+                  sheetRefs.current.delete(property.propertyDetails.id);
+                }
+              }}
+              client={invoice.client}
+              property={property}
+              yearInvoice={inv}
+              selectedYear={selectedYear}
+              invoiceDate={sheetDate}
+              dueDate={addInvoiceDays(sheetDate, 28)}
+            />
+          );
+        })}
+      </div>
+
+      <AlertDialog open={sendDialogOpen} onOpenChange={setSendDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Send invoice by email</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-left text-sm text-muted-foreground">
+                <p>
+                  Email <span className="font-medium text-foreground">{recipientEmail}</span> with{" "}
+                  {propertiesWithInvoice.length} PDF
+                  {propertiesWithInvoice.length === 1 ? "" : "s"} for tax year {selectedYear}.
+                </p>
+                {recipientPhone && (
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="send-invoice-sms"
+                      checked={sendSms}
+                      onCheckedChange={(checked) => setSendSms(checked === true)}
+                    />
+                    <label htmlFor="send-invoice-sms" className="cursor-pointer">
+                      Also send SMS to {recipientPhone}
+                    </label>
+                  </div>
+                )}
+                {!recipientPhone && sendSms && (
+                  <p className="text-xs">No phone number on file — SMS will be skipped.</p>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isSending}
+              onClick={(event) => {
+                event.preventDefault();
+                void handleSendInvoice();
+              }}
+            >
+              {isSending ? "Sending..." : "Send invoice"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

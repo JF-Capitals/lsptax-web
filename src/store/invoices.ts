@@ -124,6 +124,106 @@ export const getInvoiceGenerationStats = async (
   return data.data;
 };
 
+export type InvoiceSendAttachment = {
+  filename: string;
+  contentBase64: string;
+};
+
+export type InvoiceSendResult = {
+  success: boolean;
+  clientId: number;
+  recipientEmail: string;
+  recipientPhone?: string | null;
+  emailStatus: string;
+  smsStatus: string;
+  brevoEmailMessageId?: string;
+  deliveryId?: number;
+  warning?: string;
+};
+
+export type InvoiceStoredFile = {
+  filename: string;
+  storagePath: string;
+};
+
+export type InvoiceDelivery = {
+  id: number;
+  clientId: number;
+  year: number;
+  recipientEmail: string;
+  recipientPhone?: string | null;
+  emailStatus: string;
+  smsStatus: string;
+  emailSentAt?: string | null;
+  smsSentAt?: string | null;
+  brevoEmailMessageId?: string | null;
+  attachmentNames?: string[];
+  storedFiles?: InvoiceStoredFile[];
+  errorMessage?: string | null;
+  createdAt: string;
+};
+
+export const sendInvoice = async (options: {
+  clientId: number;
+  attachments: InvoiceSendAttachment[];
+  year?: number;
+  sendSms?: boolean;
+  customMessage?: string;
+}): Promise<{ message: string; data: InvoiceSendResult }> => {
+  const response = await authFetch(`${base()}/invoice/send`, {
+    method: "POST",
+    headers: {
+      ...(getAuthHeaders() as Record<string, string>),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(options),
+  });
+  const json = await response.json();
+  if (!response.ok) {
+    throw new Error(json.message || "Failed to send invoice");
+  }
+  return json;
+};
+
+export const getInvoiceDeliveries = async (
+  clientId: number,
+  limit = 20
+): Promise<InvoiceDelivery[]> => {
+  const params = new URLSearchParams({
+    clientId: String(clientId),
+    limit: String(limit),
+  });
+  const response = await authFetch(`${base()}/invoice/deliveries?${params.toString()}`);
+  if (!response.ok) {
+    const json = await response.json().catch(() => ({}));
+    throw new Error(json.message || "Failed to fetch invoice delivery history");
+  }
+  const json = await response.json();
+  return json.data?.deliveries ?? [];
+};
+
+export const getInvoiceDeliveryDownloadUrl = async (
+  deliveryId: number,
+  fileIndex = 0,
+  expiresIn = 3600
+): Promise<{ url: string; filename: string }> => {
+  const params = new URLSearchParams({
+    fileIndex: String(fileIndex),
+    expiresIn: String(expiresIn),
+  });
+  const response = await authFetch(
+    `${base()}/invoice/deliveries/${deliveryId}/download-url?${params.toString()}`
+  );
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(json.message || "Could not get download link for this attachment");
+  }
+  return {
+    url: json.url,
+    filename: json.filename ?? "invoice.pdf",
+  };
+};
+
 export const downloadInvoicesCSV = async () => {
   try {
     const response = await authFetch(`${base()}/api/download-invoices-csv`);

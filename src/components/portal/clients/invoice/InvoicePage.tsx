@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { routes } from "@/routes/ROUTES";
+import { normalizeInvoiceClient } from "@/utils/clientContact";
 
 type NormalizationResult = {
   invoiceData?: InvoiceData;
@@ -26,19 +27,6 @@ const asPropertyDetails = (details: Record<string, unknown>): InvoicePropertyDet
 
 const asInvoiceRecord = (invoice: { [key: string]: unknown }): InvoiceRecord =>
   invoice as unknown as InvoiceRecord;
-
-const buildFallbackClient = (
-  propertyDetails: Record<string, unknown>
-): InvoiceData["client"] => ({
-  id: Number(propertyDetails.clientId ?? 0),
-  clientName: String(propertyDetails.clientName ?? propertyDetails.nameOnCad ?? ""),
-  clientNumber: String(propertyDetails.clientNumber ?? ""),
-  mailingAddress: String(propertyDetails.mailingAddress ?? ""),
-  mailingAddressCityTxZip: String(propertyDetails.mailingAddressCityTxZip ?? ""),
-  contingencyFee: String(propertyDetails.contingencyFee ?? "0"),
-  email: String(propertyDetails.email ?? ""),
-  phoneNumber: String(propertyDetails.phoneNumber ?? ""),
-});
 
 const resolvePropertyDetails = (
   topLevel: unknown,
@@ -81,9 +69,10 @@ const mapPropertyOnlyPayload = (
   );
   if (!defaultPropertyDetails) return undefined;
 
-  const client =
-    ((maybePayload.client ?? maybePayload.clientDetails) as InvoiceData["client"] | undefined) ??
-    buildFallbackClient(defaultPropertyDetails);
+  const client = normalizeInvoiceClient(
+    maybePayload.client ?? maybePayload.clientDetails,
+    defaultPropertyDetails
+  );
 
   const propertyMap = new Map<string, InvoiceData["properties"][number]>();
 
@@ -125,7 +114,10 @@ const mapCandidateToInvoice = (candidate: unknown): InvoiceData | undefined => {
     invoices?: unknown;
   };
 
-  const client = (maybeInvoice.client ?? maybeInvoice.clientDetails) as InvoiceData["client"];
+  const client = normalizeInvoiceClient(
+    maybeInvoice.client ?? maybeInvoice.clientDetails,
+    maybeInvoice.propertyDetails as Record<string, unknown> | undefined
+  );
   let properties = (maybeInvoice.properties ?? []) as unknown;
 
   // Some endpoints return one property payload shape:
@@ -182,7 +174,10 @@ const normalizeInvoiceData = (raw: unknown): NormalizationResult => {
       first.propertyDetails &&
       Array.isArray(first.invoices)
     ) {
-      const client = (first.client ?? first.clientDetails) as InvoiceData["client"];
+      const client = normalizeInvoiceClient(
+        first.client ?? first.clientDetails,
+        first.propertyDetails as Record<string, unknown> | undefined
+      );
       const properties = sourceArray
         .map((item) => item as { propertyDetails?: unknown; invoices?: unknown })
         .filter((item) => item.propertyDetails && Array.isArray(item.invoices))
@@ -368,7 +363,7 @@ const InvoicePage = () => {
 
   return (
     <div>
-      <div className="mx-auto max-w-[980px] px-3 pt-4">
+      <div className="mx-auto max-w-[1100px] px-3 pt-4">
         {availableYears.length > 0 && (
           <div className="mb-3 w-[180px]">
             <Select
@@ -389,7 +384,11 @@ const InvoicePage = () => {
           </div>
         )}
       </div>
-      <InvoiceDetails2025 invoice={invoiceData} selectedYear={selectedYear} />
+      <InvoiceDetails2025
+        invoice={invoiceData}
+        selectedYear={selectedYear}
+        propertyIdFilter={propertyId}
+      />
     </div>
   );
 };
