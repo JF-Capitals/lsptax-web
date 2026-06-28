@@ -1,27 +1,32 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { downloadInvoicesCSV } from "@/store/data";
 import TableBuilder from "../TableBuilder";
-import { Archive, Download, LoaderCircle, Search, X } from "lucide-react";
+import { Archive, Download, LoaderCircle, Mail, Search, X } from "lucide-react";
 import { useInvoicesQuery } from "@/hooks/queries";
 import { TableSkeleton } from "../TableSkeleton";
 import { routes } from "@/routes/ROUTES";
+import { BulkInvoiceSendDialog } from "./BulkInvoiceSendDialog";
+import type { InvoiceSummary } from "@/types/types";
 
-interface InvoicesTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+interface InvoicesTableProps {
+  columns: ColumnDef<InvoiceSummary>[];
 }
 
-const InvoicesTable = <TData, TValue>({
+const InvoicesTable = ({
   columns,
-}: InvoicesTableProps<TData, TValue>) => {
+}: InvoicesTableProps) => {
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [archived, setArchived] = useState(false);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+  const [bulkSendOpen, setBulkSendOpen] = useState(false);
+  const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<Set<number>>(new Set());
 
   const commitSearch = () => {
     setAppliedSearch(searchTerm.trim());
@@ -35,9 +40,89 @@ const InvoicesTable = <TData, TValue>({
     archived,
   });
 
-  const invoices = (data?.data ?? []) as TData[];
+  const invoices = (data?.data ?? []) as InvoiceSummary[];
   const total = data?.total ?? 0;
   const hasMore = data?.hasMore ?? false;
+  const currentPageInvoiceIds = useMemo(
+    () =>
+      invoices
+        .map((invoice) => Number(invoice.id))
+        .filter((id) => Number.isFinite(id)),
+    [invoices]
+  );
+  const selectedInvoiceIdList = useMemo(
+    () => Array.from(selectedInvoiceIds),
+    [selectedInvoiceIds]
+  );
+  const currentPageSelectedCount = currentPageInvoiceIds.filter((id) =>
+    selectedInvoiceIds.has(id)
+  ).length;
+  const allCurrentPageSelected =
+    currentPageInvoiceIds.length > 0 &&
+    currentPageSelectedCount === currentPageInvoiceIds.length;
+
+  const toggleInvoiceSelection = (invoiceId: string | number, checked: boolean) => {
+    const numericId = Number(invoiceId);
+    if (!Number.isFinite(numericId)) return;
+
+    setSelectedInvoiceIds((current) => {
+      const next = new Set(current);
+      if (checked) next.add(numericId);
+      else next.delete(numericId);
+      return next;
+    });
+  };
+
+  const toggleCurrentPageSelection = (checked: boolean) => {
+    setSelectedInvoiceIds((current) => {
+      const next = new Set(current);
+      currentPageInvoiceIds.forEach((id) => {
+        if (checked) next.add(id);
+        else next.delete(id);
+      });
+      return next;
+    });
+  };
+
+  const columnsWithSelection = useMemo<ColumnDef<InvoiceSummary>[]>(
+    () => [
+      {
+        id: "select",
+        header: () => (
+          <div onClick={(event) => event.stopPropagation()}>
+            <Checkbox
+              checked={
+                allCurrentPageSelected
+                  ? true
+                  : currentPageSelectedCount > 0
+                    ? "indeterminate"
+                    : false
+              }
+              onCheckedChange={(checked) => toggleCurrentPageSelection(checked === true)}
+              aria-label="Select all invoices on this page"
+            />
+          </div>
+        ),
+        cell: ({ row }) => {
+          const invoiceId = Number(row.original.id);
+          const isSelected = Number.isFinite(invoiceId) && selectedInvoiceIds.has(invoiceId);
+
+          return (
+            <div onClick={(event) => event.stopPropagation()}>
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={(checked) => toggleInvoiceSelection(row.original.id, checked === true)}
+                aria-label={`Select invoice ${row.original.id}`}
+              />
+            </div>
+          );
+        },
+        enableSorting: false,
+      },
+      ...columns,
+    ],
+    [allCurrentPageSelected, columns, currentPageSelectedCount, selectedInvoiceIds]
+  );
 
   const handleCsvDownload = async () => {
     setDownloadingCsv(true);
@@ -53,6 +138,7 @@ const InvoicesTable = <TData, TValue>({
   const switchArchived = () => {
     setArchived((a) => !a);
     setOffset(0);
+    setSelectedInvoiceIds(new Set());
   };
 
   const clearSearch = () => {
@@ -143,6 +229,23 @@ const InvoicesTable = <TData, TValue>({
           <Archive />
           {archived ? "View Active Invoices" : "View Archive"}
         </Button>
+        {!archived && (
+          <Button variant="blue" onClick={() => setBulkSendOpen(true)}>
+            <Mail />
+            {selectedInvoiceIdList.length > 0
+              ? `Bulk Send Selected (${selectedInvoiceIdList.length})`
+              : "Bulk Send"}
+          </Button>
+        )}
+        {selectedInvoiceIdList.length > 0 && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setSelectedInvoiceIds(new Set())}
+          >
+            Clear Selection
+          </Button>
+        )}
         <Button onClick={handleCsvDownload} disabled={downloadingCsv}>
           {downloadingCsv ? (
             <LoaderCircle className="animate-spin" />
@@ -151,9 +254,25 @@ const InvoicesTable = <TData, TValue>({
           )}
         </Button>
       </div>
+      <BulkInvoiceSendDialog
+        open={bulkSendOpen}
+        onOpenChange={setBulkSendOpen}
+        filters={
+          selectedInvoiceIdList.length > 0
+            ? { invoiceIds: selectedInvoiceIdList }
+            : {
+                search: searchTerm.trim() || appliedSearch || undefined,
+                paymentStatus: "unpaid",
+              }
+        }
+        onSent={() => {
+          setSelectedInvoiceIds(new Set());
+          void refetch();
+        }}
+      />
       <TableBuilder
         data={invoices}
-        columns={columns}
+        columns={columnsWithSelection}
         label="Invoices"
         emptyState={{
           title: "No invoices yet",

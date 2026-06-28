@@ -141,6 +141,83 @@ export type InvoiceSendResult = {
   warning?: string;
 };
 
+export type BulkInvoiceSendFilters = {
+  invoiceIds?: number[];
+  clientIds?: number[];
+  propertyIds?: number[];
+  years?: number[];
+  accountNumbers?: string[];
+  cadCounties?: string[];
+  counties?: string[];
+  search?: string;
+  paymentStatus?: "any" | "paid" | "unpaid";
+  minInvoiceAmount?: number;
+  maxInvoiceAmount?: number;
+  hasEmail?: boolean;
+  limit?: number;
+};
+
+export type BulkInvoiceRecipient = {
+  clientId: number;
+  clientNumber?: string | null;
+  clientName: string;
+  recipientEmail?: string | null;
+  recipientPhone?: string | null;
+  invoiceCount: number;
+  totalInvoiceAmount: number;
+  invoiceIds: number[];
+  years: number[];
+  propertyIds: number[];
+  propertyNumbers?: string[];
+  cadCounties?: string[];
+  canSend: boolean;
+  skipReason?: string | null;
+  lastDelivery?: unknown;
+};
+
+export type BulkInvoiceRecipientsResponse = {
+  totalMatchedClients: number;
+  totalReturned: number;
+  truncated: boolean;
+  recipients: BulkInvoiceRecipient[];
+};
+
+export type BulkInvoiceAttachmentGroup = {
+  clientId: number;
+  year?: number;
+  attachments: InvoiceSendAttachment[];
+  customMessage?: string;
+};
+
+export type BulkInvoiceSendResult = {
+  clientId: number;
+  clientName?: string;
+  success: boolean;
+  status: "SENT" | "FAILED" | "SKIPPED" | string;
+  data?: Pick<
+    InvoiceSendResult,
+    "deliveryId" | "recipientEmail" | "emailStatus" | "smsStatus"
+  >;
+  error?: string;
+};
+
+export type BulkInvoiceSendResponse = {
+  success: boolean;
+  message: string;
+  data: {
+    success: boolean;
+    summary: {
+      matchedClients: number;
+      attempted: number;
+      sent: number;
+      failed: number;
+      skipped: number;
+    };
+    truncated: boolean;
+    results: BulkInvoiceSendResult[];
+  };
+};
+
 export type InvoiceStoredFile = {
   filename: string;
   storagePath: string;
@@ -181,6 +258,71 @@ export const sendInvoice = async (options: {
   const json = await response.json();
   if (!response.ok) {
     throw new Error(json.message || "Failed to send invoice");
+  }
+  return json;
+};
+
+const appendBulkInvoiceFilter = (
+  params: URLSearchParams,
+  key: string,
+  value: string | number | boolean | Array<string | number> | undefined
+) => {
+  if (value === undefined) return;
+  if (Array.isArray(value)) {
+    if (value.length > 0) params.set(key, value.join(","));
+    return;
+  }
+  if (typeof value === "string" && value.trim() === "") return;
+  params.set(key, String(value));
+};
+
+export const getBulkInvoiceRecipients = async (
+  filters: BulkInvoiceSendFilters = {}
+): Promise<BulkInvoiceRecipientsResponse> => {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    appendBulkInvoiceFilter(
+      params,
+      key,
+      value as string | number | boolean | Array<string | number> | undefined
+    );
+  });
+
+  const queryString = params.toString();
+  const response = await authFetch(
+    `${base()}/invoice/bulk-send/recipients${queryString ? `?${queryString}` : ""}`
+  );
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(json.message || "Failed to preview bulk invoice recipients");
+  }
+  return {
+    totalMatchedClients: json.data?.totalMatchedClients ?? 0,
+    totalReturned: json.data?.totalReturned ?? 0,
+    truncated: json.data?.truncated ?? false,
+    recipients: json.data?.recipients ?? [],
+  };
+};
+
+export const bulkSendInvoices = async (options: {
+  filters?: BulkInvoiceSendFilters;
+  attachmentsByClient: BulkInvoiceAttachmentGroup[];
+  year?: number;
+  sendSms?: boolean;
+  customMessage?: string;
+  limit?: number;
+}): Promise<BulkInvoiceSendResponse> => {
+  const response = await authFetch(`${base()}/invoice/bulk-send`, {
+    method: "POST",
+    headers: {
+      ...(getAuthHeaders() as Record<string, string>),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(options),
+  });
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(json.message || "Failed to send invoices in bulk");
   }
   return json;
 };
