@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
+import { Link } from "react-router-dom";
 import { LoaderCircle, Mail, Printer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ import InvoiceSheet2025, {
 } from "./InvoiceSheet2025";
 import { getClientPhoneNumber, getClientRecipientEmail } from "@/utils/clientContact";
 import InvoiceSendHistory from "./InvoiceSendHistory";
+import { routes } from "@/routes/ROUTES";
 
 type InvoiceDetails2025Props = {
   invoice: InvoiceData;
@@ -230,6 +232,11 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({
     <div className="bg-gray-100 py-4">
       <div className="mx-auto max-w-[1100px] px-3">
         <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
+          <Button asChild variant="outline">
+            <Link to={routes.properties.view(displayMatch.property.propertyDetails.id)}>
+              View Property
+            </Link>
+          </Button>
           <Button variant="blue" className="bg-brand-blue text-white" onClick={() => reactToPrintFn()}>
             <Printer className="mr-2 h-4 w-4" />
             Print
