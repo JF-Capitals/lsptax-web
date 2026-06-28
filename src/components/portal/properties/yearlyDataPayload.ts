@@ -10,44 +10,48 @@ const LABEL_TO_CAMEL: Record<string, string> = {
   "BPP Paid": "bppPaid",
   "Notice Land Value": "noticeLandValue",
   "Notice Improvement Value": "noticeImprovementValue",
+  "Notice Market Value": "noticeMarketValue",
   "Notice Appraised Value": "noticeAppraisedValue",
   "Final Land Value": "finalLandValue",
   "Final Improvement Value": "finalImprovementValue",
+  "Final Market Value": "finalMarketValue",
   "Final Appraised Value": "finalAppraisedValue",
+  "Market Reduction": "marketReduction",
+  "Appraised Reduction": "appraisedReduction",
   "Hearing Date": "hearingDate",
   "Invoice Date": "invoiceDate",
   "Under Litigation": "underLitigation",
   "Under Arbitration": "underArbitration",
   "Tax Rate": "taxRate",
+  "Taxable Savings": "taxableSavings",
   "Contingency Fee": "contingencyFee",
+  "Invoice Amount": "invoiceAmount",
   "Paid Date": "paidDate",
   "Payment Notes": "paymentNotes",
+  "Beginning Market": "beginningMarket",
   "Ending Market": "endingMarket",
+  "Beginning Appraised": "beginningAppraised",
   "Ending Appraised": "endingAppraised",
 };
-
-/** Server-calculated — never send on save. */
-const CALCULATED_LABELS = new Set([
-  "Notice Market Value",
-  "Final Market Value",
-  "Market Reduction",
-  "Appraised Reduction",
-  "Taxable Savings",
-  "Invoice Amount",
-  "Beginning Market",
-  "Beginning Appraised",
-]);
 
 const NUMERIC_CAMEL_KEYS = new Set([
   "noticeLandValue",
   "noticeImprovementValue",
+  "noticeMarketValue",
   "noticeAppraisedValue",
   "finalLandValue",
   "finalImprovementValue",
+  "finalMarketValue",
   "finalAppraisedValue",
+  "marketReduction",
+  "appraisedReduction",
   "taxRate",
+  "taxableSavings",
   "contingencyFee",
+  "invoiceAmount",
+  "beginningMarket",
   "endingMarket",
+  "beginningAppraised",
   "endingAppraised",
 ]);
 
@@ -85,7 +89,6 @@ export function buildYearlyDataPayload(
     const yearPayload: Record<string, unknown> = {};
 
     for (const [label, camelKey] of Object.entries(LABEL_TO_CAMEL)) {
-      if (CALCULATED_LABELS.has(label)) continue;
       yearPayload[camelKey] = normalizeValue(label, row[label] as string | boolean);
     }
 

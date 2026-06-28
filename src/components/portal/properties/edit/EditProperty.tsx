@@ -41,7 +41,7 @@ import {
 import { editProperty } from "@/api/api";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { formatUSD, cleanNumberInput } from "@/utils/formatCurrency";
+import { cleanNumberInput } from "@/utils/formatCurrency";
 
 type TableRow = {
   year: number;
@@ -132,6 +132,30 @@ function resolveContingencyFee(
     return String(fromInvoice);
   }
   return clientDefault || "0";
+}
+
+const editableNumericFields = [
+  "Notice Land Value",
+  "Notice Improvement Value",
+  "Notice Market Value",
+  "Notice Appraised Value",
+  "Final Land Value",
+  "Final Improvement Value",
+  "Final Market Value",
+  "Final Appraised Value",
+  "Market Reduction",
+  "Appraised Reduction",
+  "Tax Rate",
+  "Taxable Savings",
+  "Invoice Amount",
+  "Beginning Market",
+  "Ending Market",
+  "Beginning Appraised",
+  "Ending Appraised",
+];
+
+function parseCurrencyInput(value: unknown): number {
+  return parseFloat(cleanNumberInput(value?.toString() ?? "")) || 0;
 }
 
 export default function EditProperty() {
@@ -234,19 +258,21 @@ export default function EditProperty() {
     return years.map((year) => {
       const yearData = list?.find((inv) => inv?.year === year);
 
-      const noticeLandValue = parseFloat(cleanNumberInput((yearData?.noticeLandValue?.toString()) ?? "")) || 0;
-      const noticeImprovementValue =
-        parseFloat(cleanNumberInput((yearData?.noticeImprovementValue?.toString()) ?? "")) || 0;
-      const noticeAppraisedValue =
-        parseFloat(cleanNumberInput((yearData?.noticeAppraisedValue?.toString()) ?? "")) || 0;
-      const finalLandValue = parseFloat(cleanNumberInput((yearData?.finalLandValue?.toString()) ?? "")) || 0;
-      const finalImprovementValue =
-        parseFloat(cleanNumberInput((yearData?.finalImprovementValue?.toString()) ?? "")) || 0;
-      const finalAppraisedValue =
-        parseFloat(cleanNumberInput((yearData?.finalAppraisedValue?.toString()) ?? "")) || 0;
-      const taxRate = parseFloat(cleanNumberInput((yearData?.taxRate?.toString()) ?? "")) || 0;
-      const endingMarket = parseFloat(cleanNumberInput((yearData?.endingMarket?.toString()) ?? "")) || 0;
-      const endingAppraised = parseFloat(cleanNumberInput((yearData?.endingAppraised?.toString()) ?? "")) || 0;
+      const noticeLandValue = parseCurrencyInput(yearData?.noticeLandValue);
+      const noticeImprovementValue = parseCurrencyInput(
+        yearData?.noticeImprovementValue,
+      );
+      const noticeAppraisedValue = parseCurrencyInput(
+        yearData?.noticeAppraisedValue,
+      );
+      const finalLandValue = parseCurrencyInput(yearData?.finalLandValue);
+      const finalImprovementValue = parseCurrencyInput(
+        yearData?.finalImprovementValue,
+      );
+      const finalAppraisedValue = parseCurrencyInput(yearData?.finalAppraisedValue);
+      const taxRate = parseCurrencyInput(yearData?.taxRate);
+      const endingMarket = parseCurrencyInput(yearData?.endingMarket);
+      const endingAppraised = parseCurrencyInput(yearData?.endingAppraised);
 
       // Per-year contingency override, defaulting to client settings
       const contingencyFeeString = resolveContingencyFee(
@@ -256,21 +282,43 @@ export default function EditProperty() {
       const contingencyFeePercentage = parseFloat(contingencyFeeString);
       const contingencyFee = contingencyFeePercentage / 100;
 
-      const noticeMarketValue = noticeLandValue + noticeImprovementValue;
-      const finalMarketValue = finalLandValue + finalImprovementValue;
-      const marketReduction = noticeMarketValue - finalMarketValue;
-      const appraisedReduction = noticeAppraisedValue - finalAppraisedValue;
-      const taxableSavings = marketReduction * (taxRate / 100);
-      const invoiceAmount = taxableSavings * contingencyFee;
+      const noticeMarketValue =
+        yearData?.noticeMarketValue != null
+          ? parseCurrencyInput(yearData.noticeMarketValue)
+          : noticeLandValue + noticeImprovementValue;
+      const finalMarketValue =
+        yearData?.finalMarketValue != null
+          ? parseCurrencyInput(yearData.finalMarketValue)
+          : finalLandValue + finalImprovementValue;
+      const marketReduction =
+        yearData?.marketReduction != null
+          ? parseCurrencyInput(yearData.marketReduction)
+          : noticeMarketValue - finalMarketValue;
+      const appraisedReduction =
+        yearData?.appraisedReduction != null
+          ? parseCurrencyInput(yearData.appraisedReduction)
+          : noticeAppraisedValue - finalAppraisedValue;
+      const taxableSavings =
+        yearData?.taxableSavings != null
+          ? parseCurrencyInput(yearData.taxableSavings)
+          : marketReduction * (taxRate / 100);
+      const invoiceAmount =
+        yearData?.invoiceAmount != null
+          ? parseCurrencyInput(yearData.invoiceAmount)
+          : taxableSavings * contingencyFee;
 
       const beginningMarket =
-        yearData?.underLitigation || yearData?.underArbitration
-          ? finalMarketValue
-          : 0;
+        yearData?.beginningMarket != null
+          ? parseCurrencyInput(yearData.beginningMarket)
+          : yearData?.underLitigation || yearData?.underArbitration
+            ? finalMarketValue
+            : 0;
       const beginningAppraised =
-        yearData?.underLitigation || yearData?.underArbitration
-          ? finalAppraisedValue
-          : 0;
+        yearData?.beginningAppraised != null
+          ? parseCurrencyInput(yearData.beginningAppraised)
+          : yearData?.underLitigation || yearData?.underArbitration
+            ? finalAppraisedValue
+            : 0;
 
       return {
         year,
@@ -319,15 +367,8 @@ export default function EditProperty() {
   ) => {
     const { value } = e.target;
 
-    // Clean comma-separated values for numeric fields
-    const numericFields = [
-      "Notice Land Value", "Notice Improvement Value", "Notice Appraised Value",
-      "Final Land Value", "Final Improvement Value", "Final Appraised Value",
-      "Tax Rate", "Ending Market", "Ending Appraised"
-    ];
-
     let processedValue = value;
-    if (numericFields.includes(columnKey)) {
+    if (editableNumericFields.includes(columnKey)) {
       processedValue = cleanNumberInput(value);
     }
 
@@ -339,7 +380,7 @@ export default function EditProperty() {
     );
 
     // Recalculate dependent fields
-    recalculateFields(rowIndex);
+    recalculateFields(rowIndex, columnKey);
   };
 
   const handleCheckboxChange = (
@@ -357,7 +398,7 @@ export default function EditProperty() {
     );
 
     // Recalculate dependent fields
-    recalculateFields(rowIndex);
+    recalculateFields(rowIndex, columnKey);
   };
 
   const handleContingencyChange = (rowIndex: number, value: string) => {
@@ -366,49 +407,76 @@ export default function EditProperty() {
         idx === rowIndex ? { ...row, "Contingency Fee": value } : row,
       ),
     );
-    recalculateFields(rowIndex);
+    recalculateFields(rowIndex, "Contingency Fee");
   };
 
-  const recalculateFields = (rowIndex: number) => {
+  const recalculateFields = (rowIndex: number, changedColumnKey: keyof TableRow) => {
     setTableData((prev) =>
       prev.map((row, idx) => {
         if (idx !== rowIndex) return row; // Only update the current row
 
-        const noticeLandValue = parseFloat(cleanNumberInput(row["Notice Land Value"])) || 0;
-        const noticeImprovementValue =
-          parseFloat(cleanNumberInput(row["Notice Improvement Value"])) || 0;
-        const noticeAppraisedValue =
-          parseFloat(cleanNumberInput(row["Notice Appraised Value"])) || 0;
-        const finalLandValue = parseFloat(cleanNumberInput(row["Final Land Value"])) || 0;
-        const finalImprovementValue =
-          parseFloat(cleanNumberInput(row["Final Improvement Value"])) || 0;
-        const finalAppraisedValue =
-          parseFloat(cleanNumberInput(row["Final Appraised Value"])) || 0;
-        const taxRate = parseFloat(cleanNumberInput(row["Tax Rate"])) || 0;
-        const endingMarket = parseFloat(cleanNumberInput(row["Ending Market"])) || 0;
-        const endingAppraised = parseFloat(cleanNumberInput(row["Ending Appraised"])) || 0;
+        const noticeLandValue = parseCurrencyInput(row["Notice Land Value"]);
+        const noticeImprovementValue = parseCurrencyInput(
+          row["Notice Improvement Value"],
+        );
+        const noticeMarketValue =
+          changedColumnKey === "Notice Land Value" ||
+          changedColumnKey === "Notice Improvement Value"
+            ? noticeLandValue + noticeImprovementValue
+            : parseCurrencyInput(row["Notice Market Value"]);
+        const noticeAppraisedValue = parseCurrencyInput(
+          row["Notice Appraised Value"],
+        );
+        const finalLandValue = parseCurrencyInput(row["Final Land Value"]);
+        const finalImprovementValue = parseCurrencyInput(
+          row["Final Improvement Value"],
+        );
+        const finalMarketValue =
+          changedColumnKey === "Final Land Value" ||
+          changedColumnKey === "Final Improvement Value"
+            ? finalLandValue + finalImprovementValue
+            : parseCurrencyInput(row["Final Market Value"]);
+        const finalAppraisedValue = parseCurrencyInput(
+          row["Final Appraised Value"],
+        );
+        const taxRate = parseCurrencyInput(row["Tax Rate"]);
+        const endingMarket = parseCurrencyInput(row["Ending Market"]);
+        const endingAppraised = parseCurrencyInput(row["Ending Appraised"]);
 
         // Per-year contingency override (dropdown), defaulting to client settings
         const contingencyFeeString = row["Contingency Fee"] || property?.client?.contingencyFee || "0";
         const contingencyFeePercentage = parseFloat(contingencyFeeString);
         const contingencyFee = contingencyFeePercentage / 100;
 
-        // Calculate dependent fields
-        const noticeMarketValue = noticeLandValue + noticeImprovementValue;
-        const finalMarketValue = finalLandValue + finalImprovementValue;
-        const marketReduction = noticeMarketValue - finalMarketValue;
-        const appraisedReduction = noticeAppraisedValue - finalAppraisedValue;
-        const taxableSavings = marketReduction * (taxRate / 100);
-        const invoiceAmount = taxableSavings * contingencyFee; // Use contingencyFee as a number
+        const marketReduction =
+          changedColumnKey === "Market Reduction"
+            ? parseCurrencyInput(row["Market Reduction"])
+            : noticeMarketValue - finalMarketValue;
+        const appraisedReduction =
+          changedColumnKey === "Appraised Reduction"
+            ? parseCurrencyInput(row["Appraised Reduction"])
+            : noticeAppraisedValue - finalAppraisedValue;
+        const taxableSavings =
+          changedColumnKey === "Taxable Savings"
+            ? parseCurrencyInput(row["Taxable Savings"])
+            : marketReduction * (taxRate / 100);
+        const invoiceAmount =
+          changedColumnKey === "Invoice Amount"
+            ? parseCurrencyInput(row["Invoice Amount"])
+            : taxableSavings * contingencyFee; // Use contingencyFee as a number
 
         const beginningMarket =
-          row["Under Litigation"] || row["Under Arbitration"]
-            ? finalMarketValue
-            : 0;
+          changedColumnKey === "Beginning Market"
+            ? parseCurrencyInput(row["Beginning Market"])
+            : row["Under Litigation"] || row["Under Arbitration"]
+              ? finalMarketValue
+              : 0;
         const beginningAppraised =
-          row["Under Litigation"] || row["Under Arbitration"]
-            ? finalAppraisedValue
-            : 0;
+          changedColumnKey === "Beginning Appraised"
+            ? parseCurrencyInput(row["Beginning Appraised"])
+            : row["Under Litigation"] || row["Under Arbitration"]
+              ? finalAppraisedValue
+              : 0;
 
         return {
           ...row,
@@ -650,17 +718,6 @@ export default function EditProperty() {
               {Object.keys(tableData[0]).map((key) => {
                 if (key === "year") return null;
 
-                const isCalculatedField = [
-                  "Notice Market Value",
-                  "Final Market Value",
-                  "Market Reduction",
-                  "Appraised Reduction",
-                  "Taxable Savings",
-                  "Invoice Amount",
-                  "Beginning Market",
-                  "Beginning Appraised",
-                ].includes(key);
-
                 return (
                   <tr key={key}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -714,13 +771,6 @@ export default function EditProperty() {
                           </Select>
                             );
                           })()
-                        ) : isCalculatedField ? (
-                          <input
-                            type="text"
-                            value={formatUSD(row[key as keyof TableRow] as string)}
-                            readOnly
-                            className="block w-full px-2 py-1 text-sm border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
-                          />
                         ) : key === "Tax Rate" ? (
                           <input
                             type="number"
