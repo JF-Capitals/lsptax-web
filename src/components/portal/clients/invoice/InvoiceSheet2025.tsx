@@ -4,6 +4,10 @@ import { formatUSD } from "@/utils/formatCurrency";
 import { ClientData, Invoice, InvoiceProperty } from "@/types/types";
 import brandLogo from "@/assets/invoice-logo.png";
 
+function formatInvoiceUSD(value: number | string | null | undefined) {
+  return formatUSD(value, false);
+}
+
 type InvoiceSheet2025Props = {
   client: ClientData;
   property: InvoiceProperty;
@@ -58,7 +62,6 @@ const InvoiceSheet2025 = React.forwardRef<HTMLDivElement, InvoiceSheet2025Props>
             <p className="font-semibold">Property Tax Representation For:</p>
             <p>{property.propertyDetails.nameOnCad || "--"}</p>
             <p>{property.propertyDetails.propertyAddress || "--"}</p>
-            <p>{property.propertyDetails.mailingAddressCityTxZip || "--"}</p>
           </div>
           <div className="min-h-[62px] grid grid-cols-[150px_1fr]">
             <p>Account Number:</p>
@@ -70,22 +73,22 @@ const InvoiceSheet2025 = React.forwardRef<HTMLDivElement, InvoiceSheet2025Props>
 
         <div className="mt-6 grid grid-cols-2 text-[13px] leading-[1.25] font-medium">
           <div className="min-h-[88px]">
-            <p>Begining Appraised Value: {formatUSD(yearInvoice?.noticeAppraisedValue)}</p>
-            <p>Ending Appraised Value: {formatUSD(yearInvoice?.finalAppraisedValue)}</p>
-            <p>Reduction: {formatUSD(yearInvoice?.appraisedReduction)}</p>
+            <p>Begining Appraised Value: {formatInvoiceUSD(yearInvoice?.noticeAppraisedValue)}</p>
+            <p>Ending Appraised Value: {formatInvoiceUSD(yearInvoice?.finalAppraisedValue)}</p>
+            <p>Reduction: {formatInvoiceUSD(yearInvoice?.appraisedReduction)}</p>
             <p>Overall Tax Rate: {yearInvoice?.taxRate ?? 0}%</p>
           </div>
           <div className="min-h-[88px]">
-            <p>Begining Market Value: {formatUSD(yearInvoice?.noticeMarketValue)}</p>
-            <p>Ending Market Value: {formatUSD(yearInvoice?.finalMarketValue)}</p>
-            <p>Reduction: {formatUSD(yearInvoice?.marketReduction)}</p>
+            <p>Begining Market Value: {formatInvoiceUSD(yearInvoice?.noticeMarketValue)}</p>
+            <p>Ending Market Value: {formatInvoiceUSD(yearInvoice?.finalMarketValue)}</p>
+            <p>Reduction: {formatInvoiceUSD(yearInvoice?.marketReduction)}</p>
           </div>
         </div>
 
         <div className="mt-4 w-[300px] border border-black p-2 text-[13px] leading-[1.2] font-semibold">
           <div className="grid grid-cols-[1fr_1fr]">
             <p>Client Tax Savings:</p>
-            <p>{formatUSD(yearInvoice?.taxableSavings)}</p>
+            <p>{formatInvoiceUSD(yearInvoice?.taxableSavings)}</p>
             <p>Contingency Fee:</p>
             <p>
               {yearInvoice?.contingencyFee ??
@@ -95,7 +98,7 @@ const InvoiceSheet2025 = React.forwardRef<HTMLDivElement, InvoiceSheet2025Props>
               %
             </p>
             <p>Due:</p>
-            <p>{formatUSD(yearInvoice?.invoiceAmount)}</p>
+            <p>{formatInvoiceUSD(yearInvoice?.invoiceAmount)}</p>
           </div>
         </div>
       </div>
@@ -115,7 +118,7 @@ const InvoiceSheet2025 = React.forwardRef<HTMLDivElement, InvoiceSheet2025Props>
             <p>Invoice Number:</p>
             <p>{yearInvoice?.id ?? "--"}</p>
             <p>Total Fee Due:</p>
-            <p>{formatUSD(yearInvoice?.invoiceAmount)}</p>
+            <p>{formatInvoiceUSD(yearInvoice?.invoiceAmount)}</p>
             <p>Invoice Date:</p>
             <p>{invoiceDate}</p>
             <p>Due Date:</p>
@@ -140,6 +143,13 @@ const InvoiceSheet2025 = React.forwardRef<HTMLDivElement, InvoiceSheet2025Props>
           <p>713-505-6806 (Lone Star Property Tax)</p>
         </div>
       </div>
+
+      {yearInvoice?.paymentNotes?.trim() && (
+        <div className="mt-4 text-[13px] leading-[1.25] font-medium">
+          <p className="font-semibold">Payment Notes:</p>
+          <p className="whitespace-pre-wrap">{yearInvoice.paymentNotes.trim()}</p>
+        </div>
+      )}
     </div>
   )
 );
