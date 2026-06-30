@@ -1,5 +1,6 @@
 import { Invoice } from "@/types/types";
 import React, { useState } from "react";
+import { getBppInvoiceEditValue } from "@/utils/bppInvoice";
 import { PROPERTY_INVOICE_YEARS } from "../propertyInvoiceYears";
 
 // Define the type for table row data
@@ -47,7 +48,7 @@ const EditableYearTable: React.FC<{ invoices?: Invoice[] }> = ({
       year: year,
       "Protested Date": "-",
       "BPP Rendered": "",
-      "BPP Invoice": yearData?.bppInvoice || "-",
+      "BPP Invoice": getBppInvoiceEditValue(yearData) || "-",
       "BPP Paid": yearData?.bppPaid || "-",
       "Notice Land Value": yearData?.noticeLandValue || "-",
       "Notice Improvement Value": yearData?.noticeImprovementValue || "-",

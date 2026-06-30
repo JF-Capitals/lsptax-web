@@ -1,5 +1,6 @@
 import React from "react";
 
+import { getBppInvoiceAmount } from "@/utils/bppInvoice";
 import { formatUSD } from "@/utils/formatCurrency";
 import { ClientData, Invoice, InvoiceProperty } from "@/types/types";
 import brandLogo from "@/assets/invoice-logo.png";
@@ -97,8 +98,18 @@ const InvoiceSheet2025 = React.forwardRef<HTMLDivElement, InvoiceSheet2025Props>
                 0}
               %
             </p>
+            {(() => {
+              const bppAmount = getBppInvoiceAmount(yearInvoice);
+              if (bppAmount <= 0) return null;
+              return (
+                <>
+                  <p>BPP:</p>
+                  <p>{formatUSD(bppAmount)}</p>
+                </>
+              );
+            })()}
             <p>Due:</p>
-            <p>{formatInvoiceUSD(yearInvoice?.invoiceAmount)}</p>
+            <p>{formatUSD(yearInvoice?.invoiceAmount)}</p>
           </div>
         </div>
       </div>
@@ -118,7 +129,7 @@ const InvoiceSheet2025 = React.forwardRef<HTMLDivElement, InvoiceSheet2025Props>
             <p>Invoice Number:</p>
             <p>{yearInvoice?.id ?? "--"}</p>
             <p>Total Fee Due:</p>
-            <p>{formatInvoiceUSD(yearInvoice?.invoiceAmount)}</p>
+            <p>{formatUSD(yearInvoice?.invoiceAmount)}</p>
             <p>Invoice Date:</p>
             <p>{invoiceDate}</p>
             <p>Due Date:</p>

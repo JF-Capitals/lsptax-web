@@ -42,6 +42,10 @@ import { editProperty } from "@/api/api";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { cleanNumberInput } from "@/utils/formatCurrency";
+import {
+  getBppInvoiceEditValue,
+  parseBppInvoiceString,
+} from "@/utils/bppInvoice";
 
 type TableRow = {
   year: number;
@@ -147,6 +151,7 @@ const editableNumericFields = [
   "Appraised Reduction",
   "Tax Rate",
   "Taxable Savings",
+  "BPP Invoice",
   "Invoice Amount",
   "Beginning Market",
   "Ending Market",
@@ -302,10 +307,11 @@ export default function EditProperty() {
         yearData?.taxableSavings != null
           ? parseCurrencyInput(yearData.taxableSavings)
           : marketReduction * (taxRate / 100);
+      const bppAmount = parseBppInvoiceString(getBppInvoiceEditValue(yearData));
       const invoiceAmount =
         yearData?.invoiceAmount != null
           ? parseCurrencyInput(yearData.invoiceAmount)
-          : taxableSavings * contingencyFee;
+          : taxableSavings * contingencyFee + bppAmount;
 
       const beginningMarket =
         yearData?.beginningMarket != null
@@ -324,7 +330,7 @@ export default function EditProperty() {
         year,
         "Protest Date": yearData?.protestDate || "",
         "BPP Rendered": yearData?.bppRendered || "",
-        "BPP Invoice": yearData?.bppInvoice || "",
+        "BPP Invoice": getBppInvoiceEditValue(yearData),
         "BPP Paid": yearData?.bppPaid || "",
         "Notice Land Value": noticeLandValue.toString(),
         "Notice Improvement Value": noticeImprovementValue.toString(),
@@ -460,10 +466,11 @@ export default function EditProperty() {
           changedColumnKey === "Taxable Savings"
             ? parseCurrencyInput(row["Taxable Savings"])
             : marketReduction * (taxRate / 100);
+        const bppAmount = parseBppInvoiceString(row["BPP Invoice"]);
         const invoiceAmount =
           changedColumnKey === "Invoice Amount"
             ? parseCurrencyInput(row["Invoice Amount"])
-            : taxableSavings * contingencyFee; // Use contingencyFee as a number
+            : taxableSavings * contingencyFee + bppAmount;
 
         const beginningMarket =
           changedColumnKey === "Beginning Market"

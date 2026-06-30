@@ -88,6 +88,8 @@ export interface Invoice {
   invoiceDate?: string;
   bppRendered?: string;
   bppInvoice?: string;
+  /** Server-parsed BPP dollars from `bppInvoice`. */
+  bppInvoiceAmount?: number;
   bppPaid?: string;
   noticeLandValue?: number;
   noticeImprovementValue?: number;

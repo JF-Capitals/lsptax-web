@@ -1,5 +1,6 @@
 import React from "react";
 import { formatUSD } from "@/utils/formatCurrency";
+import { getBppInvoiceAmount } from "@/utils/bppInvoice";
 import { Invoice } from "@/types/types";
 import { PROPERTY_INVOICE_YEARS } from "../propertyInvoiceYears";
 
@@ -8,7 +9,7 @@ type TableRow = {
   year: number;
   "Protest Date"?: string;
   "BPP Rendered"?: string;
-  "BPP Invoice": string;
+  "BPP Invoice": string | number;
   "BPP Paid": string;
   "Notice Land Value": string | number;
   "Notice Improvement Value": string | number;
@@ -49,7 +50,7 @@ const YearTable: React.FC<{ invoices: Invoice[]; showBpp?: boolean }> = ({
       year,
       "Protest Date": yearData?.protestDate,
       "BPP Rendered": yearData?.bppRendered,
-      "BPP Invoice": yearData?.bppInvoice || "-",
+      "BPP Invoice": yearData ? getBppInvoiceAmount(yearData) : "-",
       "BPP Paid": yearData?.bppPaid || "-",
       "Notice Land Value": yearData?.noticeLandValue || "-",
       "Notice Improvement Value": yearData?.noticeImprovementValue || "-",
@@ -145,9 +146,14 @@ const YearTable: React.FC<{ invoices: Invoice[]; showBpp?: boolean }> = ({
                               const currencyFields = [
                                 "Notice Land Value", "Notice Improvement Value", "Notice Market Value", "Notice Appraised Value",
                                 "Final Land Value", "Final Improvement Value", "Final Market Value", "Final Appraised Value",
-                                "Market Reduction", "Appraised Reduction", "Taxable Savings", "Invoice Amount",
+                                "Market Reduction", "Appraised Reduction", "Taxable Savings", "BPP Invoice", "Invoice Amount",
                                 "Beginning Market", "Ending Market", "Beginning Appraised", "Ending Appraised"
                               ];
+                              
+                              if (key === "BPP Invoice") {
+                                const amount = typeof value === "number" ? value : 0;
+                                return amount > 0 ? formatUSD(amount) : "-";
+                              }
                               
                               if (currencyFields.includes(key) && value !== "-" && value !== "N/A") {
                                 return formatUSD(String(value));

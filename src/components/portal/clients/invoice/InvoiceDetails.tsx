@@ -18,11 +18,7 @@ const InvoiceDetails: React.FC<{
     if (!invoice) return 0;
     return invoice.properties.reduce((total, property) => {
       const yearlyInvoice = getYearlyInvoiceData(property);
-      const contingencyFee = invoice.client.contingencyFee || "0"; // v2: client-level "25"
-      const contingencyPercentage = Number(contingencyFee);
-      const taxableSavings = yearlyInvoice?.taxableSavings || 0;
-      const calculatedFee = taxableSavings * (contingencyPercentage / 100);
-      return total + calculatedFee;
+      return total + (yearlyInvoice?.invoiceAmount ?? 0);
     }, 0);
   };
   const totalFees = calculateFees();
@@ -221,7 +217,11 @@ const InvoiceDetails: React.FC<{
                       </td>
                       <td className="border border-gray-300 px-4 py-2">
                         {(() => {
-                          const contingencyFee = invoice.client.contingencyFee || "0";
+                          const contingencyFee =
+                            yearlyInvoice?.contingencyFee ??
+                            yearlyInvoice?.contingencyFeePercent ??
+                            invoice.client.contingencyFee ??
+                            "0";
                           const contingencyPercentage = Number(contingencyFee);
                           const taxableSavings = yearlyInvoice?.taxableSavings || 0;
                           const calculatedFee = taxableSavings * (contingencyPercentage / 100);
