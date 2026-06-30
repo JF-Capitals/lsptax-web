@@ -127,7 +127,8 @@ export interface InvoiceSummary {
   propertyNumber?: string;
   propertyNumbers?: string[];
   totalInvoiceAmount: number;
-  createdAt: string; 
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InvoiceProperty {

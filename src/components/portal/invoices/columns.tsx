@@ -59,11 +59,11 @@ export const invoicesColumn: ColumnDef<InvoiceSummary>[] = [
     ),
   },
   {
-    accessorKey: "addedOn",
-    header: "Added/Sent On",
+    accessorKey: "updatedAt",
+    header: "Edited On",
     cell: ({ row }) => {
-      const addedOn = row.original.createdAt;
-      return <div>{formatDate(addedOn)}</div>;
+      const editedOn = row.original.updatedAt;
+      return <div>{formatDate(editedOn)}</div>;
     },
   },
   {
