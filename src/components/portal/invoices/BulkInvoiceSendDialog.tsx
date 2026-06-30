@@ -16,152 +16,23 @@ import { useToast } from "@/hooks/use-toast";
 import {
   bulkSendInvoices,
   getBulkInvoiceRecipients,
-  getInvoice,
   type BulkInvoiceRecipient,
   type BulkInvoiceSendFilters,
 } from "@/store/invoices";
-import { Invoice, InvoiceData, InvoiceProperty } from "@/types/types";
-import { normalizeInvoiceClient } from "@/utils/clientContact";
 import { elementsToPdfAttachments } from "@/utils/elementToPdfBase64";
+import {
+  buildRenderJobsForRecipients,
+  nextFrame,
+  type InvoicePdfRenderJob,
+} from "@/utils/bulkInvoicePdf";
 import { formatUSD } from "@/utils/formatCurrency";
-import InvoiceSheet2025, {
-  addInvoiceDays,
-  formatInvoiceDate,
-  toSafeFilenamePart,
-} from "../clients/invoice/InvoiceSheet2025";
+import { InvoicePdfRenderSheets } from "./InvoicePdfRenderSheets";
 
 type BulkInvoiceSendDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   filters: BulkInvoiceSendFilters;
   onSent?: () => void;
-};
-
-type RenderJob = {
-  key: string;
-  clientId: number;
-  filename: string;
-  client: InvoiceData["client"];
-  property: InvoiceProperty;
-  yearInvoice: Invoice;
-  selectedYear: number;
-  invoiceDate: string;
-  dueDate: string;
-};
-
-const nextFrame = () =>
-  new Promise<void>((resolve) => {
-    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-  });
-
-const getSource = (raw: unknown) => ((raw as { data?: unknown })?.data ?? raw);
-
-const normalizeBulkInvoiceData = (raw: unknown): InvoiceData | undefined => {
-  const source = getSource(raw);
-
-  if (!source || typeof source !== "object") return undefined;
-
-  const sourceArray = Array.isArray(source) ? source : [source];
-  const first = sourceArray[0] as
-    | {
-        client?: unknown;
-        clientDetails?: unknown;
-        propertyDetails?: unknown;
-        invoices?: unknown;
-        properties?: unknown;
-      }
-    | undefined;
-
-  if ((first?.client || first?.clientDetails) && Array.isArray(first.properties)) {
-    return {
-      client: normalizeInvoiceClient(first.client ?? first.clientDetails),
-      properties: first.properties as InvoiceData["properties"],
-    };
-  }
-
-  if ((first?.client || first?.clientDetails) && first.propertyDetails && Array.isArray(first.invoices)) {
-    const client = normalizeInvoiceClient(
-      first.client ?? first.clientDetails,
-      first.propertyDetails as Record<string, unknown>
-    );
-    const properties = sourceArray
-      .map((item) => item as { propertyDetails?: unknown; invoices?: unknown })
-      .filter((item) => item.propertyDetails && Array.isArray(item.invoices))
-      .map((item) => ({
-        propertyDetails: item.propertyDetails as InvoiceProperty["propertyDetails"],
-        invoice: item.invoices as Invoice[],
-      }));
-
-    return { client, properties };
-  }
-
-  const maybeSingle = source as {
-    client?: unknown;
-    clientDetails?: unknown;
-    propertyDetails?: unknown;
-    invoices?: unknown;
-  };
-  if ((maybeSingle.client || maybeSingle.clientDetails) && maybeSingle.propertyDetails && Array.isArray(maybeSingle.invoices)) {
-    return {
-      client: normalizeInvoiceClient(
-        maybeSingle.client ?? maybeSingle.clientDetails,
-        maybeSingle.propertyDetails as Record<string, unknown>
-      ),
-      properties: [
-        {
-          propertyDetails: maybeSingle.propertyDetails as InvoiceProperty["propertyDetails"],
-          invoice: maybeSingle.invoices as Invoice[],
-        },
-      ],
-    };
-  }
-
-  return undefined;
-};
-
-const buildRenderJobsForRecipient = async (
-  recipient: BulkInvoiceRecipient
-): Promise<RenderJob[]> => {
-  const raw = await getInvoice({ clientId: String(recipient.clientId) });
-  const invoiceData = normalizeBulkInvoiceData(raw);
-  if (!invoiceData) {
-    throw new Error(`Could not load invoice details for ${recipient.clientName}.`);
-  }
-
-  const propertyIds = new Set(recipient.propertyIds.map(Number));
-  const invoiceIds = new Set(recipient.invoiceIds.map(Number));
-  const years = new Set(recipient.years.map(Number));
-  const clientName = toSafeFilenamePart(
-    recipient.clientNumber || invoiceData.client.clientNumber || recipient.clientName
-  );
-
-  return invoiceData.properties.flatMap((property) => {
-    const propertyId = Number(property.propertyDetails.id);
-    if (propertyIds.size > 0 && !propertyIds.has(propertyId)) return [];
-
-    return property.invoice
-      .filter((invoice) => invoiceIds.size === 0 || invoiceIds.has(Number(invoice.id)))
-      .filter((invoice) => years.size === 0 || years.has(Number(invoice.year)))
-      .map((yearInvoice) => {
-        const selectedYear = Number(yearInvoice.year);
-        const invoiceDate = formatInvoiceDate(yearInvoice.invoiceDate);
-        const account = toSafeFilenamePart(
-          property.propertyDetails.accountNumber || String(propertyId)
-        );
-
-        return {
-          key: `${recipient.clientId}-${propertyId}-${selectedYear}`,
-          clientId: recipient.clientId,
-          filename: `invoice-${clientName}-${account}-${selectedYear}.pdf`,
-          client: invoiceData.client,
-          property,
-          yearInvoice,
-          selectedYear,
-          invoiceDate,
-          dueDate: addInvoiceDays(invoiceDate, 28),
-        };
-      });
-  });
 };
 
 export function BulkInvoiceSendDialog({
@@ -174,7 +45,7 @@ export function BulkInvoiceSendDialog({
   const sheetRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [recipients, setRecipients] = useState<BulkInvoiceRecipient[]>([]);
   const [selectedClientIds, setSelectedClientIds] = useState<Set<number>>(new Set());
-  const [renderJobs, setRenderJobs] = useState<RenderJob[]>([]);
+  const [renderJobs, setRenderJobs] = useState<InvoicePdfRenderJob[]>([]);
   const [loadingRecipients, setLoadingRecipients] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [sendSms, setSendSms] = useState(true);
@@ -236,7 +107,7 @@ export function BulkInvoiceSendDialog({
 
     setIsSending(true);
     try {
-      const jobs = (await Promise.all(selectedRecipients.map(buildRenderJobsForRecipient))).flat();
+      const { jobs } = await buildRenderJobsForRecipients(selectedRecipients);
       if (jobs.length === 0) {
         throw new Error("No matching invoice PDFs could be prepared for the selected recipients.");
       }
@@ -404,23 +275,7 @@ export function BulkInvoiceSendDialog({
         </DialogContent>
       </Dialog>
 
-      <div className="fixed left-[-10000px] top-0 w-[950px] pointer-events-none" aria-hidden>
-        {renderJobs.map((job) => (
-          <InvoiceSheet2025
-            key={job.key}
-            ref={(node) => {
-              if (node) sheetRefs.current.set(job.key, node);
-              else sheetRefs.current.delete(job.key);
-            }}
-            client={job.client}
-            property={job.property}
-            yearInvoice={job.yearInvoice}
-            selectedYear={job.selectedYear}
-            invoiceDate={job.invoiceDate}
-            dueDate={job.dueDate}
-          />
-        ))}
-      </div>
+      <InvoicePdfRenderSheets jobs={renderJobs} sheetRefs={sheetRefs} />
     </>
   );
 }

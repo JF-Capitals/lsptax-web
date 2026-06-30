@@ -1,16 +1,26 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { downloadInvoicesCSV } from "@/store/data";
 import TableBuilder from "../TableBuilder";
-import { Archive, Download, LoaderCircle, Mail, Search, X } from "lucide-react";
+import { Archive, Download, FileArchive, LoaderCircle, Mail, Search, X } from "lucide-react";
 import { useInvoicesQuery } from "@/hooks/queries";
 import { TableSkeleton } from "../TableSkeleton";
 import { routes } from "@/routes/ROUTES";
 import { BulkInvoiceSendDialog } from "./BulkInvoiceSendDialog";
+import { InvoicePdfRenderSheets } from "./InvoicePdfRenderSheets";
 import type { InvoiceSummary } from "@/types/types";
+import { useToast } from "@/hooks/use-toast";
+import { getBulkInvoiceRecipients } from "@/store/invoices";
+import {
+  buildRenderJobsForRecipients,
+  downloadInvoicePdfsAsZip,
+  MAX_BULK_INVOICE_DOWNLOAD,
+  nextFrame,
+  type InvoicePdfRenderJob,
+} from "@/utils/bulkInvoicePdf";
 
 interface InvoicesTableProps {
   columns: ColumnDef<InvoiceSummary>[];
@@ -19,10 +29,15 @@ interface InvoicesTableProps {
 const InvoicesTable = ({
   columns,
 }: InvoicesTableProps) => {
+  const { toast } = useToast();
+  const sheetRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [archived, setArchived] = useState(false);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
+  const [downloadingPdfs, setDownloadingPdfs] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState<{ completed: number; total: number } | null>(null);
+  const [renderJobs, setRenderJobs] = useState<InvoicePdfRenderJob[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [bulkSendOpen, setBulkSendOpen] = useState(false);
@@ -135,6 +150,78 @@ const InvoicesTable = ({
     }
   };
 
+  const handleBulkPdfDownload = async () => {
+    if (selectedInvoiceIdList.length === 0) {
+      toast({
+        title: "No invoices selected",
+        description: "Select at least one invoice to download.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedInvoiceIdList.length > MAX_BULK_INVOICE_DOWNLOAD) {
+      toast({
+        title: "Too many invoices selected",
+        description: `Download up to ${MAX_BULK_INVOICE_DOWNLOAD} invoices at a time.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDownloadingPdfs(true);
+    setDownloadProgress(null);
+    setRenderJobs([]);
+
+    try {
+      const { recipients, truncated } = await getBulkInvoiceRecipients({
+        invoiceIds: selectedInvoiceIdList,
+        limit: MAX_BULK_INVOICE_DOWNLOAD,
+      });
+
+      if (recipients.length === 0) {
+        throw new Error("No invoice details were found for the selected rows.");
+      }
+
+      if (truncated) {
+        throw new Error(
+          `Selection exceeds the ${MAX_BULK_INVOICE_DOWNLOAD}-invoice download limit. Select fewer invoices.`
+        );
+      }
+
+      const { jobs, warnings } = await buildRenderJobsForRecipients(recipients);
+      if (jobs.length === 0) {
+        throw new Error("No invoice PDFs could be prepared for the selected invoices.");
+      }
+
+      setRenderJobs(jobs);
+      await nextFrame();
+
+      await downloadInvoicePdfsAsZip(jobs, sheetRefs.current, (completed, total) => {
+        setDownloadProgress({ completed, total });
+      });
+
+      toast({
+        title: "Download ready",
+        description:
+          warnings.length > 0
+            ? `${jobs.length} invoice PDF${jobs.length === 1 ? "" : "s"} saved. ${warnings.length} could not be loaded.`
+            : `${jobs.length} invoice PDF${jobs.length === 1 ? "" : "s"} saved to zip.`,
+        variant: warnings.length > 0 ? "destructive" : undefined,
+      });
+    } catch (error) {
+      toast({
+        title: "Bulk download failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDownloadingPdfs(false);
+      setDownloadProgress(null);
+      setRenderJobs([]);
+    }
+  };
+
   const switchArchived = () => {
     setArchived((a) => !a);
     setOffset(0);
@@ -237,6 +324,22 @@ const InvoicesTable = ({
               : "Bulk Send"}
           </Button>
         )}
+        <Button
+          variant="blue"
+          disabled={downloadingPdfs || selectedInvoiceIdList.length === 0}
+          onClick={() => void handleBulkPdfDownload()}
+        >
+          {downloadingPdfs ? (
+            <LoaderCircle className="animate-spin" />
+          ) : (
+            <FileArchive />
+          )}
+          {downloadingPdfs && downloadProgress
+            ? `Preparing ${downloadProgress.completed}/${downloadProgress.total}...`
+            : selectedInvoiceIdList.length > 0
+              ? `Bulk Download Selected (${selectedInvoiceIdList.length})`
+              : "Bulk Download Selected"}
+        </Button>
         {selectedInvoiceIdList.length > 0 && (
           <Button
             type="button"
@@ -292,6 +395,7 @@ const InvoicesTable = ({
           },
         }}
       />
+      <InvoicePdfRenderSheets jobs={renderJobs} sheetRefs={sheetRefs} />
     </div>
   );
 };
