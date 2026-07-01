@@ -181,7 +181,7 @@ const InvoiceSummary: React.FC<{
                 Amount Enclosed: <span className="underline">${totalFees.toFixed(2)}</span>
               </p>
               <p>OR</p>
-              <p>ZELLE: 832-847-3911</p>
+              <p>ZELLE: 713-505-6806</p>
               <p>(Lone Star Property Tax)</p>
             </div>
           </div>

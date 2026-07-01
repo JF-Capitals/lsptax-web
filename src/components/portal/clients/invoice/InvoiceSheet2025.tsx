@@ -151,7 +151,7 @@ const InvoiceSheet2025 = React.forwardRef<HTMLDivElement, InvoiceSheet2025Props>
         </div>
         <div>
           <p>OR&nbsp;&nbsp; ZELLE: (Include Invoice number)</p>
-          <p>832-847-3911 (Lone Star Property Tax)</p>
+          <p>713-505-6806 (Lone Star Property Tax)</p>
         </div>
       </div>
 
