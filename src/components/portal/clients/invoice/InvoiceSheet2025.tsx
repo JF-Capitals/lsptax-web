@@ -1,12 +1,22 @@
 import React from "react";
 
 import { getBppInvoiceAmount } from "@/utils/bppInvoice";
+import { getFlatFeeAmount } from "@/utils/flatFee";
 import { formatUSD } from "@/utils/formatCurrency";
 import { ClientData, Invoice, InvoiceProperty } from "@/types/types";
 import brandLogo from "@/assets/invoice-logo.png";
 
 function formatInvoiceUSD(value: number | string | null | undefined) {
   return formatUSD(value, false);
+}
+
+function getClientNumber(client: ClientData, property: InvoiceProperty): string {
+  return (
+    client.clientNumber?.trim() ||
+    client.CLIENTNumber?.trim() ||
+    property.propertyDetails.clientNumber?.trim() ||
+    "--"
+  );
 }
 
 type InvoiceSheet2025Props = {
@@ -65,6 +75,8 @@ const InvoiceSheet2025 = React.forwardRef<HTMLDivElement, InvoiceSheet2025Props>
             <p>{property.propertyDetails.propertyAddress || "--"}</p>
           </div>
           <div className="min-h-[62px] grid grid-cols-[150px_1fr]">
+            <p>Client Number:</p>
+            <p>{getClientNumber(client, property)}</p>
             <p>Account Number:</p>
             <p>{property.propertyDetails.accountNumber || "--"}</p>
             <p>Service:</p>
@@ -105,6 +117,16 @@ const InvoiceSheet2025 = React.forwardRef<HTMLDivElement, InvoiceSheet2025Props>
                 <>
                   <p>BPP:</p>
                   <p>{formatUSD(bppAmount)}</p>
+                </>
+              );
+            })()}
+            {(() => {
+              const flatFeeAmount = getFlatFeeAmount(yearInvoice);
+              if (flatFeeAmount <= 0) return null;
+              return (
+                <>
+                  <p>Flat Fee:</p>
+                  <p>{formatUSD(flatFeeAmount)}</p>
                 </>
               );
             })()}
@@ -169,19 +191,7 @@ InvoiceSheet2025.displayName = "InvoiceSheet2025";
 
 export default InvoiceSheet2025;
 
-export function formatInvoiceDate(value?: string): string {
-  if (!value) return new Date().toLocaleDateString();
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return new Date().toLocaleDateString();
-  return date.toLocaleDateString();
-}
-
-export function addInvoiceDays(value: string, days: number): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  date.setDate(date.getDate() + days);
-  return date.toLocaleDateString();
-}
+export { addInvoiceDays, formatInvoiceDate } from "@/utils/invoiceDates";
 
 export function toSafeFilenamePart(value: string): string {
   return value

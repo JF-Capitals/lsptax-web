@@ -23,9 +23,9 @@ import {
   type InvoiceDelivery,
 } from "@/store/invoices";
 import { elementsToPdfAttachments } from "@/utils/elementToPdfBase64";
+import { buildInvoicePdfFilename } from "@/utils/bulkInvoicePdf";
+import { getInvoiceSheetDates } from "@/utils/invoiceDates";
 import InvoiceSheet2025, {
-  addInvoiceDays,
-  formatInvoiceDate,
   getYearInvoice,
   toSafeFilenamePart,
 } from "./InvoiceSheet2025";
@@ -99,8 +99,7 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({
   }, [refreshDeliveries]);
 
   const yearInvoice = displayMatch?.yearInvoice;
-  const invoiceDate = formatInvoiceDate(yearInvoice?.invoiceDate);
-  const dueDate = addInvoiceDays(invoiceDate, 28);
+  const { invoiceDate, dueDate } = getInvoiceSheetDates(yearInvoice);
   const cadOwnerNameRaw =
     displayMatch?.property.propertyDetails.nameOnCad ||
     displayMatch?.property.propertyDetails.contactOwner ||
@@ -178,7 +177,14 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({
           const account = property.propertyDetails.accountNumber || String(property.propertyDetails.id);
           return {
             element: el,
-            filename: `invoice-${account}-${selectedYear}.pdf`,
+            filename: buildInvoicePdfFilename({
+              clientNumber: invoice.client.clientNumber,
+              clientName: invoice.client.clientName,
+              accountNumber: account,
+              year: selectedYear,
+              propertyId: property.propertyDetails.id,
+              clientId: invoice.client.id,
+            }),
           };
         })
         .filter(Boolean) as Array<{ element: HTMLElement; filename: string }>;
@@ -294,7 +300,7 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({
         aria-hidden
       >
         {propertiesWithInvoice.map(({ property, yearInvoice: inv }) => {
-          const sheetDate = formatInvoiceDate(inv.invoiceDate);
+          const { invoiceDate: sheetDate, dueDate: sheetDueDate } = getInvoiceSheetDates(inv);
           return (
             <InvoiceSheet2025
               key={property.propertyDetails.id}
@@ -310,7 +316,7 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({
               yearInvoice={inv}
               selectedYear={selectedYear}
               invoiceDate={sheetDate}
-              dueDate={addInvoiceDays(sheetDate, 28)}
+              dueDate={sheetDueDate}
             />
           );
         })}

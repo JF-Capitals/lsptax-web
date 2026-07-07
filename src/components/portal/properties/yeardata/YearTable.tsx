@@ -22,6 +22,8 @@ type TableRow = {
   "Market Reduction": string | number;
   "Appraised Reduction": string | number;
   "Hearing Date"?: string;
+  "Generated Date"?: string;
+  "Due Date"?: string;
   "Invoice Date"?: string;
   "Under Litigation": boolean;
   "Under Arbitration": boolean;
@@ -63,6 +65,8 @@ const YearTable: React.FC<{ invoices: Invoice[]; showBpp?: boolean }> = ({
       "Market Reduction": yearData?.marketReduction || "-",
       "Appraised Reduction": yearData?.appraisedReduction || "-",
       "Hearing Date": yearData?.hearingDate || "-",
+      "Generated Date": yearData?.generatedDate || "-",
+      "Due Date": yearData?.dueDate || "-",
       "Invoice Date": yearData?.invoiceDate || "-",
       "Under Litigation": yearData?.underLitigation || false,
       "Under Arbitration": yearData?.underArbitration || false,

@@ -19,6 +19,8 @@ const LABEL_TO_CAMEL: Record<string, string> = {
   "Market Reduction": "marketReduction",
   "Appraised Reduction": "appraisedReduction",
   "Hearing Date": "hearingDate",
+  "Generated Date": "generatedDate",
+  "Due Date": "dueDate",
   "Invoice Date": "invoiceDate",
   "Under Litigation": "underLitigation",
   "Under Arbitration": "underArbitration",

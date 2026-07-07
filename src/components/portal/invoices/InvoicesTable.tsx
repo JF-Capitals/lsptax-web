@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { downloadInvoicesCSV } from "@/store/data";
+import { MAX_API_PAGE_SIZE } from "@/store/common";
 import TableBuilder from "../TableBuilder";
 import { Archive, Download, FileArchive, LoaderCircle, Mail, Search, X } from "lucide-react";
 import { useInvoicesQuery } from "@/hooks/queries";
@@ -19,6 +20,7 @@ import {
   downloadInvoicePdfsAsZip,
   MAX_BULK_INVOICE_DOWNLOAD,
   nextFrame,
+  resolveInvoiceListRange,
   type InvoicePdfRenderJob,
 } from "@/utils/bulkInvoicePdf";
 
@@ -58,6 +60,8 @@ const InvoicesTable = ({
   const invoices = (data?.data ?? []) as InvoiceSummary[];
   const total = data?.total ?? 0;
   const hasMore = data?.hasMore ?? false;
+  /** API caps page size at 100 even if the UI requests more (e.g. 300). */
+  const effectiveLimit = data?.limit ?? Math.min(limit, MAX_API_PAGE_SIZE);
   const currentPageInvoiceIds = useMemo(
     () =>
       invoices
@@ -197,9 +201,14 @@ const InvoicesTable = ({
       setRenderJobs(jobs);
       await nextFrame();
 
+      const { start, end } = await resolveInvoiceListRange(selectedInvoiceIdList, {
+        archived,
+        search: appliedSearch,
+      });
+
       await downloadInvoicePdfsAsZip(jobs, sheetRefs.current, (completed, total) => {
         setDownloadProgress({ completed, total });
-      });
+      }, { rangeStart: start, rangeEnd: end });
 
       toast({
         title: "Download ready",
@@ -384,13 +393,19 @@ const InvoicesTable = ({
         }}
         serverPagination={{
           total,
-          limit,
+          limit: effectiveLimit,
           offset,
           hasMore,
-          onPrev: () => setOffset((o) => Math.max(0, o - limit)),
-          onNext: () => setOffset((o) => o + limit),
+          onPrev: () => setOffset((o) => Math.max(0, o - effectiveLimit)),
+          onNext: () => setOffset((o) => o + effectiveLimit),
           onPageSizeChange: (size) => {
-            setLimit(size);
+            if (size > MAX_API_PAGE_SIZE) {
+              toast({
+                title: "Page size capped at 100",
+                description: `The API returns at most ${MAX_API_PAGE_SIZE} invoices per page. Use pagination or select across pages for bulk download.`,
+              });
+            }
+            setLimit(Math.min(size, MAX_API_PAGE_SIZE));
             setOffset(0);
           },
         }}

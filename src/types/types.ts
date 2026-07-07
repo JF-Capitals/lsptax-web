@@ -86,6 +86,10 @@ export interface Invoice {
   protestDate?: string;
   hearingDate?: string;
   invoiceDate?: string;
+  /** Invoice generated date shown on PDF (prefer over invoiceDate). */
+  generatedDate?: string;
+  /** Payment due date shown on PDF. */
+  dueDate?: string;
   bppRendered?: string;
   bppInvoice?: string;
   /** Server-parsed BPP dollars from `bppInvoice`. */
@@ -105,6 +109,8 @@ export interface Invoice {
   taxableSavings?: number;
   contingencyFee?: number;
   contingencyFeePercent?: number;
+  /** Per-year flat fee in dollars (added to total due). */
+  flatFee?: number;
   invoiceAmount?: number;
   paidDate?: string;
   paymentNotes?: string;

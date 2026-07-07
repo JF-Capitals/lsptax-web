@@ -64,6 +64,8 @@ type TableRow = {
   "Market Reduction": string;
   "Appraised Reduction": string;
   "Hearing Date"?: string;
+  "Generated Date"?: string;
+  "Due Date"?: string;
   "Invoice Date"?: string;
   "Under Litigation": boolean;
   "Under Arbitration": boolean;
@@ -343,6 +345,8 @@ export default function EditProperty() {
         "Market Reduction": marketReduction.toString(),
         "Appraised Reduction": appraisedReduction.toString(),
         "Hearing Date": yearData?.hearingDate || "",
+        "Generated Date": yearData?.generatedDate || "",
+        "Due Date": yearData?.dueDate || "",
         "Invoice Date": yearData?.invoiceDate || "",
         "Under Litigation": yearData?.underLitigation || false,
         "Under Arbitration": yearData?.underArbitration || false,
