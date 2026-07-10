@@ -285,7 +285,7 @@ const InvoicesTable = ({
           <div className="relative flex flex-1 items-center max-w-md w-80 min-w-0">
             <Input
               type="text"
-              placeholder="Search by property/account number..."
+              placeholder="Search by property/account number or #client number..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => {
@@ -295,7 +295,7 @@ const InvoicesTable = ({
                 }
               }}
               className="pr-9 w-full"
-              aria-label="Search invoices by property/account number"
+              aria-label="Search invoices by property/account number or client number (e.g. #4324)"
             />
             {(searchTerm || appliedSearch) && (
               <Button
