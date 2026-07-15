@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/select";
 import {
   INVOICE_EMAIL_FILTER_OPTIONS,
-  type InvoiceEmailStatusFilter,
 } from "@/utils/invoiceEmailStatus";
 import {
   buildRenderJobsForRecipients,
