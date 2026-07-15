@@ -135,6 +135,8 @@ export interface InvoiceSummary {
   propertyNumber?: string;
   propertyNumbers?: string[];
   totalInvoiceAmount: number;
+  isSent?: boolean;
+  lastDelivery?: import("@/utils/invoiceEmailStatus").InvoiceEmailTracking | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -147,6 +149,7 @@ export interface InvoiceProperty {
 export interface InvoiceData {
   client: ClientData;
   properties: InvoiceProperty[];
+  lastDelivery?: import("@/utils/invoiceEmailStatus").InvoiceEmailTracking | null;
 }
 
 export interface PropertyData {

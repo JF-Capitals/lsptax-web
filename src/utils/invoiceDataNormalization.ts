@@ -1,10 +1,32 @@
 import { InvoiceData } from "@/types/types";
 import { normalizeInvoiceClient } from "@/utils/clientContact";
+import type { InvoiceEmailTracking } from "@/utils/invoiceEmailStatus";
 
 export type InvoiceNormalizationResult = {
   invoiceData?: InvoiceData;
   debug: Record<string, unknown>;
 };
+
+function extractLastDelivery(raw: unknown): InvoiceEmailTracking | null | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const envelope = raw as Record<string, unknown>;
+  if ("lastDelivery" in envelope) {
+    return (envelope.lastDelivery as InvoiceEmailTracking | null) ?? null;
+  }
+  return undefined;
+}
+
+function attachLastDelivery(
+  invoiceData: InvoiceData,
+  raw: unknown,
+  source?: unknown
+): InvoiceData {
+  const fromSource = source !== undefined ? extractLastDelivery(source) : undefined;
+  const fromRaw = extractLastDelivery(raw);
+  const lastDelivery = fromSource !== undefined ? fromSource : fromRaw;
+  if (lastDelivery === undefined) return invoiceData;
+  return { ...invoiceData, lastDelivery };
+}
 
 type InvoicePropertyDetails = InvoiceData["properties"][number]["propertyDetails"];
 type InvoiceRecord = InvoiceData["properties"][number]["invoice"][number];
@@ -131,7 +153,7 @@ export const normalizeInvoiceData = (raw: unknown): InvoiceNormalizationResult =
   const propertyOnly = mapPropertyOnlyPayload(source);
   if (propertyOnly) {
     return {
-      invoiceData: propertyOnly,
+      invoiceData: attachLastDelivery(propertyOnly, raw, source),
       debug: {
         sourceType: Array.isArray(source) ? "array" : "single",
         sourceLength: sourceArray.length,
@@ -166,7 +188,11 @@ export const normalizeInvoiceData = (raw: unknown): InvoiceNormalizationResult =
         }));
 
       return {
-        invoiceData: { client, properties: properties as InvoiceData["properties"] },
+        invoiceData: attachLastDelivery(
+          { client, properties: properties as InvoiceData["properties"] },
+          raw,
+          source
+        ),
         debug: {
           sourceType: Array.isArray(source) ? "array" : "single",
           sourceLength: sourceArray.length,
@@ -180,7 +206,7 @@ export const normalizeInvoiceData = (raw: unknown): InvoiceNormalizationResult =
   const mapped = sourceArray.map(mapCandidateToInvoice).find(Boolean);
   if (mapped) {
     return {
-      invoiceData: mapped,
+      invoiceData: attachLastDelivery(mapped, raw, source),
       debug: {
         sourceType: Array.isArray(source) ? "array" : "single",
         sourceLength: sourceArray.length,

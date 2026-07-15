@@ -66,7 +66,7 @@ export function buildInvoiceZipFilename(rangeStart: number, rangeEnd: number): s
 /** 1-based positions of selected rows in the filtered invoice list (for zip naming). */
 export async function resolveInvoiceListRange(
   selectedInvoiceIds: number[],
-  options?: { archived?: boolean; search?: string }
+  options?: { archived?: boolean; search?: string; sendStatus?: import("@/utils/invoiceEmailStatus").InvoiceEmailStatusFilter }
 ): Promise<{ start: number; end: number }> {
   if (selectedInvoiceIds.length === 0) {
     return { start: 1, end: 1 };
@@ -77,11 +77,12 @@ export async function resolveInvoiceListRange(
   let offset = 0;
   const pageSize = 100;
   const search = options?.search?.trim() || undefined;
+  const sendStatus = options?.sendStatus ?? "all";
   const fetchPage = options?.archived ? getArchiveInvoices : getAllInvoices;
   const targetCount = selectedSet.size;
 
   while (true) {
-    const page = await fetchPage(pageSize, offset, search);
+    const page = await fetchPage(pageSize, offset, search, sendStatus);
     (page.data as InvoiceSummary[]).forEach((row, index) => {
       const id = Number(row.id);
       if (selectedSet.has(id)) {

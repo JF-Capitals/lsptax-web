@@ -7,6 +7,7 @@ import { NavLink } from "react-router-dom";
 import { routes } from "@/routes/ROUTES";
 import { formatUSD } from "@/utils/formatCurrency";
 import { InvoiceActionsCell } from "./InvoiceActionsCell";
+import { InvoiceEmailStatusBadge } from "./InvoiceEmailStatusBadge";
 
 export const invoicesColumn: ColumnDef<InvoiceSummary>[] = [
   {
@@ -56,6 +57,13 @@ export const invoicesColumn: ColumnDef<InvoiceSummary>[] = [
     header: "Amount",
     cell: ({ row }) => (
       <div className="font-bold">{formatUSD(row.original.totalInvoiceAmount)}</div>
+    ),
+  },
+  {
+    accessorKey: "lastDelivery",
+    header: "Status",
+    cell: ({ row }) => (
+      <InvoiceEmailStatusBadge lastDelivery={row.original.lastDelivery} />
     ),
   },
   {

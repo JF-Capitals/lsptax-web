@@ -27,6 +27,7 @@ import {
 } from "@/utils/bulkInvoicePdf";
 import { formatUSD } from "@/utils/formatCurrency";
 import { InvoicePdfRenderSheets } from "./InvoicePdfRenderSheets";
+import { InvoiceEmailStatusBadge } from "./InvoiceEmailStatusBadge";
 
 type BulkInvoiceSendDialogProps = {
   open: boolean;
@@ -235,6 +236,9 @@ export function BulkInvoiceSendDialog({
                         <p className="font-medium">{recipient.clientName}</p>
                         {recipient.clientNumber && (
                           <Badge variant="outline">{recipient.clientNumber}</Badge>
+                        )}
+                        {recipient.lastDelivery && (
+                          <InvoiceEmailStatusBadge lastDelivery={recipient.lastDelivery} />
                         )}
                         {!recipient.canSend && (
                           <Badge variant="destructive">{recipient.skipReason || "Cannot send"}</Badge>

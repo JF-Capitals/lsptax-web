@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { downloadInvoicesCSV } from "@/store/data";
 import { MAX_API_PAGE_SIZE } from "@/store/common";
 import TableBuilder from "../TableBuilder";
-import { Archive, Download, FileArchive, LoaderCircle, Mail, Search, X } from "lucide-react";
+import { Archive, Download, FileArchive, LoaderCircle, Mail, RefreshCw, Search, X } from "lucide-react";
 import { useInvoicesQuery } from "@/hooks/queries";
 import { TableSkeleton } from "../TableSkeleton";
 import { routes } from "@/routes/ROUTES";
@@ -14,7 +14,19 @@ import { BulkInvoiceSendDialog } from "./BulkInvoiceSendDialog";
 import { InvoicePdfRenderSheets } from "./InvoicePdfRenderSheets";
 import type { InvoiceSummary } from "@/types/types";
 import { useToast } from "@/hooks/use-toast";
-import { getBulkInvoiceRecipients } from "@/store/invoices";
+import { getBulkInvoiceRecipients, syncAllInvoiceDeliveriesFromBrevo } from "@/store/invoices";
+import type { InvoiceSendStatusFilter } from "@/store/invoices";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  INVOICE_EMAIL_FILTER_OPTIONS,
+  type InvoiceEmailStatusFilter,
+} from "@/utils/invoiceEmailStatus";
 import {
   buildRenderJobsForRecipients,
   downloadInvoicePdfsAsZip,
@@ -42,6 +54,9 @@ const InvoicesTable = ({
   const [renderJobs, setRenderJobs] = useState<InvoicePdfRenderJob[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+  const [sendStatus, setSendStatus] = useState<InvoiceSendStatusFilter>("all");
+  const [syncingBrevo, setSyncingBrevo] = useState(false);
+  const [brevoSyncProgress, setBrevoSyncProgress] = useState<string | null>(null);
   const [bulkSendOpen, setBulkSendOpen] = useState(false);
   const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<Set<number>>(new Set());
 
@@ -55,6 +70,7 @@ const InvoicesTable = ({
     offset,
     search: appliedSearch,
     archived,
+    sendStatus,
   });
 
   const invoices = (data?.data ?? []) as InvoiceSummary[];
@@ -204,6 +220,7 @@ const InvoicesTable = ({
       const { start, end } = await resolveInvoiceListRange(selectedInvoiceIdList, {
         archived,
         search: appliedSearch,
+        sendStatus,
       });
 
       await downloadInvoicePdfsAsZip(jobs, sheetRefs.current, (completed, total) => {
@@ -235,6 +252,42 @@ const InvoicesTable = ({
     setArchived((a) => !a);
     setOffset(0);
     setSelectedInvoiceIds(new Set());
+  };
+
+  const handleSendStatusChange = (value: InvoiceSendStatusFilter) => {
+    setSendStatus(value);
+    setOffset(0);
+    setSelectedInvoiceIds(new Set());
+  };
+
+  const handleSyncWithBrevo = async () => {
+    setSyncingBrevo(true);
+    setBrevoSyncProgress(null);
+    try {
+      const result = await syncAllInvoiceDeliveriesFromBrevo({
+        limit: 100,
+        onlyStale: false,
+        onProgress: (data) => {
+          const processed = data.offset + data.attempted;
+          setBrevoSyncProgress(`${processed}/${data.totalEligible}`);
+        },
+      });
+      await refetch();
+      toast({
+        title: "Brevo sync complete",
+        description: `${result.totals.synced} synced${result.totals.failed > 0 ? `, ${result.totals.failed} failed` : ""} across ${result.totals.batches} batch${result.totals.batches === 1 ? "" : "es"}.`,
+        variant: result.totals.failed > 0 ? "destructive" : undefined,
+      });
+    } catch (error) {
+      toast({
+        title: "Brevo sync failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncingBrevo(false);
+      setBrevoSyncProgress(null);
+    }
   };
 
   const clearSearch = () => {
@@ -319,8 +372,37 @@ const InvoicesTable = ({
           >
             <Search className="h-4 w-4" />
           </Button>
+          <Select
+            value={sendStatus}
+            onValueChange={(value) => handleSendStatusChange(value as InvoiceSendStatusFilter)}
+          >
+            <SelectTrigger className="w-[11rem] shrink-0" aria-label="Filter by email status">
+              <SelectValue placeholder="Email status" />
+            </SelectTrigger>
+            <SelectContent>
+              {INVOICE_EMAIL_FILTER_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
+        <Button
+          variant="outline"
+          disabled={syncingBrevo}
+          onClick={() => void handleSyncWithBrevo()}
+        >
+          {syncingBrevo ? (
+            <LoaderCircle className="animate-spin" />
+          ) : (
+            <RefreshCw />
+          )}
+          {syncingBrevo && brevoSyncProgress
+            ? `Syncing ${brevoSyncProgress}…`
+            : "Sync with Brevo"}
+        </Button>
         <Button variant={"blue"} onClick={switchArchived}>
           <Archive />
           {archived ? "View Active Invoices" : "View Archive"}
@@ -380,6 +462,9 @@ const InvoicesTable = ({
         onSent={() => {
           setSelectedInvoiceIds(new Set());
           void refetch();
+          window.setTimeout(() => {
+            void refetch();
+          }, 45000);
         }}
       />
       <TableBuilder

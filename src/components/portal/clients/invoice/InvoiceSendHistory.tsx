@@ -1,21 +1,26 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
-import { ChevronLeft, ChevronRight, History, LoaderCircle, Paperclip } from "lucide-react";
+import { ChevronLeft, ChevronRight, History, LoaderCircle, Paperclip, RefreshCw } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { InvoiceEmailStatusBadge } from "@/components/portal/invoices/InvoiceEmailStatusBadge";
 import {
   getInvoiceDeliveryDownloadUrl,
+  syncInvoiceDeliveryTracking,
   type InvoiceDelivery,
   type InvoiceStoredFile,
 } from "@/store/invoices";
+import type { InvoiceEmailTracking } from "@/utils/invoiceEmailStatus";
+import { deliveryToEmailTracking } from "@/utils/invoiceEmailStatus";
 
 type InvoiceSendHistoryProps = {
   deliveries: InvoiceDelivery[];
   loading?: boolean;
   selectedYear?: number;
+  onRefresh?: () => void | Promise<void>;
 };
 
 function formatSentAt(value?: string | null): string {
@@ -51,6 +56,10 @@ function StatusPill({ label, status }: { label: string; status: string }) {
   );
 }
 
+function getDeliveryTracking(delivery: InvoiceDelivery): InvoiceEmailTracking | null {
+  return deliveryToEmailTracking(delivery);
+}
+
 function getDownloadableFiles(delivery: InvoiceDelivery): InvoiceStoredFile[] {
   return (delivery.storedFiles ?? []).filter(
     (file) => file.storagePath?.trim() && file.filename?.trim()
@@ -61,15 +70,23 @@ function DeliveryItem({
   delivery,
   selectedYear,
   downloadingKey,
+  syncingId,
   onDownload,
+  onSyncTracking,
 }: {
   delivery: InvoiceDelivery;
   selectedYear?: number;
   downloadingKey: string | null;
+  syncingId: number | null;
   onDownload: (deliveryId: number, fileIndex: number, filename: string) => void;
+  onSyncTracking: (deliveryId: number) => void;
 }) {
   const isSelectedYear = selectedYear != null && delivery.year === selectedYear;
   const downloadableFiles = getDownloadableFiles(delivery);
+  const emailTracking = getDeliveryTracking(delivery);
+  const canSync =
+    delivery.emailStatus?.toUpperCase() === "SENT" &&
+    Boolean(delivery.brevoEmailMessageId?.trim());
 
   return (
     <li
@@ -89,9 +106,30 @@ function DeliveryItem({
       <p className="mt-1 truncate text-[11px] text-slate-600" title={delivery.recipientEmail}>
         {delivery.recipientEmail}
       </p>
-      <div className="mt-1.5 flex flex-wrap gap-1">
-        <StatusPill label="Email" status={delivery.emailStatus} />
+      <div className="mt-1.5 flex flex-wrap items-center gap-1">
+        {emailTracking ? (
+          <InvoiceEmailStatusBadge lastDelivery={emailTracking} className="rounded px-1.5 py-0.5 text-[10px]" />
+        ) : (
+          <StatusPill label="Email" status={delivery.emailStatus} />
+        )}
         <StatusPill label="SMS" status={delivery.smsStatus} />
+        {canSync && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-5 px-1.5 text-[10px]"
+            disabled={syncingId === delivery.id}
+            onClick={() => onSyncTracking(delivery.id)}
+            title="Refresh Brevo tracking for this send"
+          >
+            {syncingId === delivery.id ? (
+              <LoaderCircle className="h-3 w-3 animate-spin" />
+            ) : (
+              <RefreshCw className="h-3 w-3" />
+            )}
+          </Button>
+        )}
       </div>
       {downloadableFiles.length > 0 && (
         <ul className="mt-1.5 space-y-1 border-t border-slate-100 pt-1.5">
@@ -131,9 +169,11 @@ export default function InvoiceSendHistory({
   deliveries,
   loading = false,
   selectedYear,
+  onRefresh,
 }: InvoiceSendHistoryProps) {
   const [open, setOpen] = useState(false);
   const [downloadingKey, setDownloadingKey] = useState<string | null>(null);
+  const [syncingId, setSyncingId] = useState<number | null>(null);
   const { toast } = useToast();
 
   const handleDownload = async (deliveryId: number, fileIndex: number, filename: string) => {
@@ -150,6 +190,26 @@ export default function InvoiceSendHistory({
       });
     } finally {
       setDownloadingKey(null);
+    }
+  };
+
+  const handleSyncTracking = async (deliveryId: number) => {
+    setSyncingId(deliveryId);
+    try {
+      await syncInvoiceDeliveryTracking(deliveryId);
+      await onRefresh?.();
+      toast({
+        title: "Tracking updated",
+        description: "Latest Brevo email status loaded.",
+      });
+    } catch (error) {
+      toast({
+        title: "Sync failed",
+        description: error instanceof Error ? error.message : "Could not refresh tracking.",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncingId(null);
     }
   };
 
@@ -196,16 +256,35 @@ export default function InvoiceSendHistory({
                 </Badge>
               )}
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 shrink-0 p-0"
-              onClick={() => setOpen(false)}
-              title="Collapse"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            <div className="flex shrink-0 items-center gap-0.5">
+              {onRefresh && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  disabled={loading}
+                  onClick={() => void onRefresh()}
+                  title="Refresh delivery history"
+                >
+                  {loading ? (
+                    <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 shrink-0 p-0"
+                onClick={() => setOpen(false)}
+                title="Collapse"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           <div className="max-h-[min(70vh,520px)] overflow-y-auto p-2">
@@ -222,7 +301,9 @@ export default function InvoiceSendHistory({
                     delivery={delivery}
                     selectedYear={selectedYear}
                     downloadingKey={downloadingKey}
+                    syncingId={syncingId}
                     onDownload={handleDownload}
+                    onSyncTracking={handleSyncTracking}
                   />
                 ))}
               </ul>

@@ -27,14 +27,18 @@ export const getInvoiceByPropertyId = async ({ propertyId }: { propertyId: strin
   }
 };
 
+export type InvoiceSendStatusFilter = import("@/utils/invoiceEmailStatus").InvoiceEmailStatusFilter;
+
 export const getAllInvoices = async (
   limit = DEFAULT_PAGE_SIZE,
   offset = 0,
-  search?: string
+  search?: string,
+  sendStatus: InvoiceSendStatusFilter = "all"
 ): Promise<PaginatedResponse<unknown>> => {
   try {
     const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
     if (search?.trim()) params.set("search", search.trim());
+    if (sendStatus && sendStatus !== "all") params.set("sendStatus", sendStatus);
     const response = await authFetch(`${base()}/api/invoices?${params.toString()}`);
     if (!response.ok) throw new Error("Failed to fetch Invoices");
     const json = await response.json();
@@ -53,11 +57,13 @@ export const getAllInvoices = async (
 export const getArchiveInvoices = async (
   limit = DEFAULT_PAGE_SIZE,
   offset = 0,
-  search?: string
+  search?: string,
+  sendStatus: InvoiceSendStatusFilter = "all"
 ): Promise<PaginatedResponse<unknown>> => {
   try {
     const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
     if (search?.trim()) params.set("search", search.trim());
+    if (sendStatus && sendStatus !== "all") params.set("sendStatus", sendStatus);
     const response = await authFetch(`${base()}/api/archive-invoices?${params.toString()}`);
     if (!response.ok) throw new Error("Failed to fetch Invoices");
     const json = await response.json();
@@ -136,6 +142,7 @@ export type InvoiceSendResult = {
   recipientPhone?: string | null;
   emailStatus: string;
   smsStatus: string;
+  emailLastEvent?: string;
   brevoEmailMessageId?: string;
   deliveryId?: number;
   warning?: string;
@@ -157,6 +164,8 @@ export type BulkInvoiceSendFilters = {
   limit?: number;
 };
 
+import type { InvoiceEmailTracking } from "@/utils/invoiceEmailStatus";
+
 export type BulkInvoiceRecipient = {
   clientId: number;
   clientNumber?: string | null;
@@ -172,7 +181,7 @@ export type BulkInvoiceRecipient = {
   cadCounties?: string[];
   canSend: boolean;
   skipReason?: string | null;
-  lastDelivery?: unknown;
+  lastDelivery?: InvoiceEmailTracking | null;
 };
 
 export type BulkInvoiceRecipientsResponse = {
@@ -231,6 +240,10 @@ export type InvoiceDelivery = {
   recipientPhone?: string | null;
   emailStatus: string;
   smsStatus: string;
+  emailLastEvent?: string | null;
+  emailDeliveredAt?: string | null;
+  emailOpenedAt?: string | null;
+  emailBounceReason?: string | null;
   emailSentAt?: string | null;
   smsSentAt?: string | null;
   brevoEmailMessageId?: string | null;
@@ -238,6 +251,7 @@ export type InvoiceDelivery = {
   storedFiles?: InvoiceStoredFile[];
   errorMessage?: string | null;
   createdAt: string;
+  emailTracking?: InvoiceEmailTracking | null;
 };
 
 export const sendInvoice = async (options: {
@@ -342,6 +356,131 @@ export const getInvoiceDeliveries = async (
   }
   const json = await response.json();
   return json.data?.deliveries ?? [];
+};
+
+export const syncInvoiceDeliveryTracking = async (
+  deliveryId: number
+): Promise<InvoiceEmailTracking> => {
+  const response = await authFetch(`${base()}/invoice/deliveries/${deliveryId}/sync-tracking`, {
+    method: "POST",
+    headers: getAuthHeaders() as Record<string, string>,
+  });
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(json.message || "Failed to sync delivery tracking");
+  }
+  return json.data?.emailTracking ?? json.data ?? json;
+};
+
+export type SyncDeliveriesFromBrevoResult = {
+  totalEligible: number;
+  offset: number;
+  limit: number;
+  attempted: number;
+  synced: number;
+  failed: number;
+  remaining: number;
+  hasMore: boolean;
+  nextOffset: number | null;
+  durationMs: number;
+  onlyStale: boolean;
+  errors: Array<{ deliveryId: number; clientId?: number; message: string }>;
+  results?: Array<{
+    deliveryId: number;
+    clientId: number;
+    success: boolean;
+    emailLastEvent?: string;
+    error?: string;
+  }>;
+};
+
+export type SyncDeliveriesFromBrevoOptions = {
+  limit?: number;
+  offset?: number;
+  onlyStale?: boolean;
+  includeResults?: boolean;
+};
+
+export const syncInvoiceDeliveriesFromBrevo = async (
+  options: SyncDeliveriesFromBrevoOptions = {}
+): Promise<{ message: string; data: SyncDeliveriesFromBrevoResult }> => {
+  const params = new URLSearchParams();
+  if (options.limit != null) params.set("limit", String(options.limit));
+  if (options.offset != null) params.set("offset", String(options.offset));
+  if (options.onlyStale) params.set("onlyStale", "true");
+  if (options.includeResults) params.set("includeResults", "true");
+
+  const query = params.toString();
+  const response = await authFetch(
+    `${base()}/invoice/deliveries/sync-tracking${query ? `?${query}` : ""}`,
+    {
+      method: "POST",
+      headers: getAuthHeaders() as Record<string, string>,
+    }
+  );
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(json.message || "Failed to sync deliveries from Brevo");
+  }
+  return {
+    message: json.message || "Deliveries synced from Brevo",
+    data: json.data ?? {
+      totalEligible: 0,
+      offset: 0,
+      limit: options.limit ?? 50,
+      attempted: 0,
+      synced: 0,
+      failed: 0,
+      remaining: 0,
+      hasMore: false,
+      nextOffset: null,
+      durationMs: 0,
+      onlyStale: Boolean(options.onlyStale),
+      errors: [],
+    },
+  };
+};
+
+export const syncAllInvoiceDeliveriesFromBrevo = async (options?: {
+  onlyStale?: boolean;
+  limit?: number;
+  onProgress?: (data: SyncDeliveriesFromBrevoResult) => void;
+}): Promise<{
+  message: string;
+  totals: { synced: number; failed: number; attempted: number; batches: number };
+}> => {
+  const limit = options?.limit ?? 100;
+  const onlyStale = options?.onlyStale ?? false;
+  let offset = 0;
+  let synced = 0;
+  let failed = 0;
+  let attempted = 0;
+  let batches = 0;
+  let lastMessage = "All eligible deliveries synced.";
+
+  while (true) {
+    const result = await syncInvoiceDeliveriesFromBrevo({
+      limit,
+      offset: onlyStale ? 0 : offset,
+      onlyStale,
+    });
+    const data = result.data;
+    synced += data.synced;
+    failed += data.failed;
+    attempted += data.attempted;
+    batches += 1;
+    lastMessage = result.message;
+    options?.onProgress?.(data);
+
+    if (!data.hasMore || data.attempted === 0) break;
+    if (onlyStale) continue;
+    offset = data.nextOffset ?? offset + limit;
+  }
+
+  return {
+    message: lastMessage,
+    totals: { synced, failed, attempted, batches },
+  };
 };
 
 export const getInvoiceDeliveryDownloadUrl = async (

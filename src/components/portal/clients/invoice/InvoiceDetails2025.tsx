@@ -31,6 +31,8 @@ import InvoiceSheet2025, {
 } from "./InvoiceSheet2025";
 import { getClientPhoneNumber, getClientRecipientEmail } from "@/utils/clientContact";
 import InvoiceSendHistory from "./InvoiceSendHistory";
+import { InvoiceEmailStatusBadge } from "@/components/portal/invoices/InvoiceEmailStatusBadge";
+import { getInvoiceEmailStatusDisplay, latestDeliveryTrackingForYear } from "@/utils/invoiceEmailStatus";
 import { routes } from "@/routes/ROUTES";
 
 type InvoiceDetails2025Props = {
@@ -97,6 +99,20 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({
   useEffect(() => {
     void refreshDeliveries();
   }, [refreshDeliveries]);
+
+  const headerLastDelivery = useMemo(() => {
+    const fromHistory = latestDeliveryTrackingForYear(deliveries, selectedYear);
+    if (fromHistory) return fromHistory;
+
+    if (
+      loadingDeliveries &&
+      invoice.lastDelivery?.year === selectedYear
+    ) {
+      return invoice.lastDelivery;
+    }
+
+    return null;
+  }, [deliveries, selectedYear, invoice.lastDelivery, loadingDeliveries]);
 
   const yearInvoice = displayMatch?.yearInvoice;
   const { invoiceDate, dueDate } = getInvoiceSheetDates(yearInvoice);
@@ -203,7 +219,10 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({
 
       toast({
         title: "Invoice sent",
-        description: result.message || `Emailed to ${result.data.recipientEmail}`,
+        description:
+          result.data.emailLastEvent != null
+            ? `${result.message || `Emailed to ${result.data.recipientEmail}`} (status: ${getInvoiceEmailStatusDisplay({ emailLastEvent: result.data.emailLastEvent }).displayLabel})`
+            : result.message || `Emailed to ${result.data.recipientEmail}`,
       });
 
       if (result.data.warning) {
@@ -215,6 +234,9 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({
 
       setSendDialogOpen(false);
       await refreshDeliveries();
+      window.setTimeout(() => {
+        void refreshDeliveries();
+      }, 45000);
     } catch (error) {
       toast({
         title: "Failed to send invoice",
@@ -238,6 +260,10 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({
     <div className="bg-gray-100 py-4">
       <div className="mx-auto max-w-[1100px] px-3">
         <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
+          <div className="mr-auto flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Email status:</span>
+            <InvoiceEmailStatusBadge lastDelivery={headerLastDelivery} />
+          </div>
           <Button asChild variant="outline">
             <Link to={routes.properties.view(displayMatch.property.propertyDetails.id)}>
               View Property
@@ -289,6 +315,7 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({
             deliveries={deliveries}
             loading={loadingDeliveries}
             selectedYear={selectedYear}
+            onRefresh={refreshDeliveries}
           />
         </div>
       </div>
