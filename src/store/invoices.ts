@@ -260,6 +260,10 @@ export const sendInvoice = async (options: {
   year?: number;
   sendSms?: boolean;
   customMessage?: string;
+  /** Addresses for invoices being sent — scopes email subject/body */
+  propertyAddresses?: string[];
+  invoiceIds?: number[];
+  propertyIds?: number[];
 }): Promise<{ message: string; data: InvoiceSendResult }> => {
   const response = await authFetch(`${base()}/invoice/send`, {
     method: "POST",

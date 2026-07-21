@@ -210,11 +210,28 @@ const InvoiceDetails2025: React.FC<InvoiceDetails2025Props> = ({
       }
 
       const attachments = await elementsToPdfAttachments(captureElements);
+      const propertyAddresses = [
+        ...new Set(
+          propertiesWithInvoice
+            .map(({ property }) => property.propertyDetails.propertyAddress?.trim())
+            .filter((address): address is string => Boolean(address))
+        ),
+      ];
+      const propertyIds = propertiesWithInvoice.map(
+        ({ property }) => property.propertyDetails.id
+      );
+      const invoiceIds = propertiesWithInvoice
+        .map(({ yearInvoice }) => yearInvoice.id)
+        .filter((id): id is number => typeof id === "number" && !Number.isNaN(id));
+
       const result = await sendInvoice({
         clientId,
         year: selectedYear,
         sendSms,
         attachments,
+        propertyAddresses,
+        propertyIds,
+        invoiceIds: invoiceIds.length ? invoiceIds : undefined,
       });
 
       toast({
